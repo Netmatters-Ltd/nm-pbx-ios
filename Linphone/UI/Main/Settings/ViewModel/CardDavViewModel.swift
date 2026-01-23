@@ -27,7 +27,7 @@ class CardDavViewModel: ObservableObject {
 	
 	private var coreContext = CoreContext.shared
 	
-	let linphoneAddressBookFriendList = "Linphone address-book"
+	let linphoneAddressBookFriendList = "NMPBX address-book"
 	let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
 	@Published var isEdit: Bool = false

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
- * This file is part of Linphone
+ * This file is part of NMPBX
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ final class ContactsManager: ObservableObject {
 	private var coreContext = CoreContext.shared
 	
 	private let nativeAddressBookFriendList = "Native address-book"
-	let linphoneAddressBookFriendList = "Linphone address-book"
+	let linphoneAddressBookFriendList = "NMPBX address-book"
     let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
 	var friendList: FriendList?
@@ -339,7 +339,7 @@ final class ContactsManager: ObservableObject {
 				// Set photo
 				friend.photo = (friend.friendList?.type != .CardDAV && self.linphoneAddressBookFriendList == CorePreferences.friendListInWhichStoreNewlyCreatedFriends ? "file:/" : "") + result
 				
-				// Linphone subscription settings
+				// NMPBX subscription settings
 				try friend.setSubscribesenabled(newValue: false)
 				try friend.setIncsubscribepolicy(newValue: .SPDeny)
 				

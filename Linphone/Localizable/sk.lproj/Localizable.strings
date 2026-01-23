@@ -66,7 +66,7 @@
 "manage_account_delete" = "Odhlásiť sa";
 "manage_account_device_last_connection" = "Posledné pripojenie:";
 "manage_account_dialog_remove_account_title" = "Odhlásiť sa z Vášho účtu?";
-"manage_account_dialog_remove_account_message" = "Pokiaľ si želáte nenávratne zmazať svoj účet, navštívte: https://sip.linphone.org";
+"manage_account_dialog_remove_account_message" = "Pokiaľ si želáte nenávratne zmazať svoj účet, navštívte: https://www.netmatters.co.uk/contact-us";
 "history_list_empty_history" = "Momentálne žiadny hovor…";
 "manage_account_title" = "Spravovať účet";
 "manage_account_status_failed_summary" = "Pripojenie účtu zlyhalo, skontrolujte nastavenia.";
@@ -332,8 +332,8 @@
 "meeting_failed_to_send_part_of_invites_toast" = "Odoslanie pozvánok na schôdzku niektorým účastníkom zlyhalo!";
 "account_settings_dialog_invalid_password_message" = "Pripojenie sa nepodarilo, pretože chýba alebo je neplatné overenie účtu\n%@.\n\nPokúste sa znovu zadať heslo alebo skontrolovať konfiguráciu účtu v nastaveniach.";
 ": %@" = ": %@";
-"[https://sip.linphone.org](https://sip.linphone.org)" = "[https://sip.linphone.org](https://sip.linphone.org)";
-"[linphone.org/contact](https://linphone.org/contact)" = "[linphone.org/contact](https://linphone.org/contact)";
+"[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)" = "[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)";
+"[linphone.org/contact](https://www.netmatters.co.uk/contact-us)" = "[linphone.org/contact](https://www.netmatters.co.uk/contact-us)";
 "*" = "*";
 "assistant_dialog_general_terms_and_privacy_policy_message" = "Pokračovaním akceptujete naše %1$s a %2$s.";
 "assistant_third_party_sip_account_create_linphone_account" = "Preferujem vytvorenie účtu";
@@ -358,8 +358,8 @@
 "connection_error_for_non_default_account" = "Chyba pripojenia účtu(-ov)";
 "default_account_disabled" = "Zvolený účet je momentálne zakázaný";
 "generic_address_picker_suggestions_list_title" = "Návrhy";
-"help_about_title" = "O aplikácii Linphone";
-"help_about_contribute_translations_title" = "Prispieť do prekladu Linphone";
+"help_about_title" = "O aplikácii NMPBX";
+"help_about_contribute_translations_title" = "Prispieť do prekladu NMPBX";
 "help_about_open_source_licenses_subtitle" = "© Belledonne Communications 2010-2024";
 "help_about_open_source_licenses_title" = "GNU General Public License v3.0";
 "list_filter_no_result_found" = "Žiadne výsledky…";

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
- * This file is part of Linphone
+ * This file is part of NMPBX
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,136 +35,136 @@ let cssWeightToFontWeightName = [
 extension View {
 	
 	func default_text_style_300(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Light", size: styleSize))
+		self.font(Font.custom("Poppins-Light", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Regular", size: styleSize))
+		self.font(Font.custom("Poppins-Regular", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style_500(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Medium", size: styleSize))
+		self.font(Font.custom("Poppins-Medium", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style_600(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-SemiBold", size: styleSize))
+		self.font(Font.custom("Poppins-SemiBold", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style_700(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Bold", size: styleSize))
+		self.font(Font.custom("Poppins-Bold", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func default_text_style_white_300(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Light", size: styleSize))
+		self.font(Font.custom("Poppins-Light", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_white(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Regular", size: styleSize))
+		self.font(Font.custom("Poppins-Regular", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_white_500(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Medium", size: styleSize))
+		self.font(Font.custom("Poppins-Medium", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_white_600(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-SemiBold", size: styleSize))
+		self.font(Font.custom("Poppins-SemiBold", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_white_700(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Bold", size: styleSize))
+		self.font(Font.custom("Poppins-Bold", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_white_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func default_text_style_orange_300(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Light", size: styleSize))
+		self.font(Font.custom("Poppins-Light", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func default_text_style_orange(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Regular", size: styleSize))
+		self.font(Font.custom("Poppins-Regular", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func default_text_style_orange_500(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Medium", size: styleSize))
+		self.font(Font.custom("Poppins-Medium", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func default_text_style_orange_600(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-SemiBold", size: styleSize))
+		self.font(Font.custom("Poppins-SemiBold", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func default_text_style_orange_700(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Bold", size: styleSize))
+		self.font(Font.custom("Poppins-Bold", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func default_text_style_orange_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.orangeMain500)
 	}
 	
 	func welcome_text_style_white_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.white)
 	}
 	
 	func welcome_text_style_gray_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func welcome_text_style_gray(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Regular", size: styleSize))
+		self.font(Font.custom("Poppins-Regular", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
 	
 	func profile_mode_text_style_gray_800(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-ExtraBold", size: styleSize))
+		self.font(Font.custom("Poppins-ExtraBold", size: styleSize))
 			.foregroundStyle(Color.gray900)
 	}
 	
 	func profile_mode_text_style_gray(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Regular", size: styleSize))
+		self.font(Font.custom("Poppins-Regular", size: styleSize))
 			.foregroundStyle(Color.grayMain2c600)
 	}
     
     func contact_text_style_500(styleSize: CGFloat) -> some View {
-        self.font(Font.custom("NotoSans-Medium", size: styleSize))
+        self.font(Font.custom("Poppins-Medium", size: styleSize))
             .foregroundStyle(Color.grayMain2c400)
     }
 	
 	func default_text_style_grey_400(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans", size: styleSize))
+		self.font(Font.custom("Poppins", size: styleSize))
 			.foregroundStyle(Color.grayMain2c700)
 	}
 	
 	func default_text_style_uncolored(styleSize: CGFloat) -> some View {
-		self.font(Font.custom("NotoSans-Light", size: styleSize))
+		self.font(Font.custom("Poppins-Light", size: styleSize))
 	}
 	
 	func text_style(fontSize: CGFloat, fontWeight: Int, fontColor: Color) -> some View {
-		return self.font(Font.custom("NotoSans-"+cssWeightToFontWeightName[fontWeight]!, size: fontSize))
+		return self.font(Font.custom("Poppins-"+cssWeightToFontWeightName[fontWeight]!, size: fontSize))
 			.foregroundStyle(fontColor)
 	}
 }

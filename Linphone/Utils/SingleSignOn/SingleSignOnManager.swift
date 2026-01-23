@@ -26,9 +26,9 @@ class SingleSignOnManager {
 	static let shared = SingleSignOnManager()
 
 	private let TAG = "[SSO]"
-	private let clientId = "linphone"
+	private let clientId = "nmpbx"
 	private let userDefaultSSOKey = "sso-authstate"
-	let ssoRedirectUri = URL(string: "org.linphone:/openidcallback")!
+	let ssoRedirectUri = URL(string: "uk.co.netmatters.nmpbx:/openidcallback")!
 	private var singleSignOnUrl = ""
 	private var username: String = ""
 	private var authState: AuthState?

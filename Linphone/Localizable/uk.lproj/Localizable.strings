@@ -138,7 +138,7 @@
 "manage_account_device_last_connection" = "Останнє з'єднання:";
 "manage_account_device_remove" = "Видалити";
 "manage_account_devices_title" = "Пристрої";
-"manage_account_dialog_remove_account_message" = "Якщо ви хочете видалити свій обліковий запис назавжди, перейдіть за посиланням: https://sip.linphone.org";
+"manage_account_dialog_remove_account_message" = "Якщо ви хочете видалити свій обліковий запис назавжди, перейдіть за посиланням: https://www.netmatters.co.uk/contact-us";
 "manage_account_dialog_remove_account_title" = "Вийти з облікового запису?";
 "manage_account_edit_picture" = "Редагувати зображення";
 "manage_account_international_prefix" = "Міжнародний префікс";
@@ -272,7 +272,7 @@
 "settings_meetings_title" = "Наради";
 "settings_network_allow_ipv6" = "Дозволити IPv6";
 "settings_network_title" = "Мережа";
-"[linphone.org/contact](https://linphone.org/contact)" = "[linphone.org/contact](https://linphone.org/contact)";
+"[linphone.org/contact](https://www.netmatters.co.uk/contact-us)" = "[linphone.org/contact](https://www.netmatters.co.uk/contact-us)";
 "*" = "*";
 "**%@**" = "**%@**";
 "#" = "#";
@@ -341,7 +341,7 @@
 "assistant_scan_qr_code" = "Відскануйте QR-код";
 "assistant_sip_account_transport_protocol" = "Транспорт";
 "assistant_third_party_sip_account_create_linphone_account" = "Я надаю перевагу створенню облікового запису";
-"assistant_web_platform_link" = "subscribe.linphone.org";
+"assistant_web_platform_link" = "www.netmatters.co.uk/contact-us";
 "bottom_navigation_meetings_label" = "Наради";
 "call_action_attended_transfer" = "Перенаправлення із супроводом";
 "call_action_blind_transfer" = "Перенаправлення";
@@ -380,7 +380,7 @@
 "dialog_confirm" = "ОК";
 "welcome_page_title" = "Ласкаво просимо";
 ": %@" = ": %@";
-"[https://sip.linphone.org](https://sip.linphone.org)" = "[https://sip.linphone.org](https://sip.linphone.org)";
+"[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)" = "[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)";
 "bottom_navigation_calls_label" = "Дзвінки";
 "bottom_navigation_contacts_label" = "Контакти";
 "assistant_dialog_general_terms_and_privacy_policy_title" = "Загальні умови та політика конфіденційності";
@@ -411,8 +411,8 @@
 "settings_calls_calibrate_echo_canceller_done" = "%@ мс";
 "welcome_page_1_message" = "**Захищений**, **з відкритим вихідним кодом** та **французький** застосунок для спілкування.";
 "help_dialog_update_available_message" = "Доступна нова версія %@. Бажаєте оновити?";
-"website_user_guide_url" = "https://linphone.org/en/docs/";
-"website_privacy_policy_url" = "https://linphone.org/en/privacy-policy";
+"website_user_guide_url" = "https://www.netmatters.co.uk/";
+"website_privacy_policy_url" = "https://www.netmatters.co.uk/";
 "welcome_page_3_message" = "**Безкоштовний** застосунок з відкритим кодом з **2001 року**.";
 "welcome_page_subtitle" = "в %@";
 "Chiffrement de bout en bout de tous vos échanges, grâce au mode default vos communications sont à l’abri des regards." = "Наскрізне шифрування всіх ваших повідомлень, завдяки режиму за замовчуванням ваші повідомлення захищені від сторонніх очей.";
@@ -423,7 +423,7 @@
 "contacts_list_filter_popup_see_linphone_only" = "Переглянути контакти %@";
 "conversation_composing_label_multiple" = "%@ скомпоновано…";
 "conversation_composing_label_single" = "%@ скомпоновано…";
-"conversation_end_to_end_encrypted_bottom_sheet_link" = "https://linphone.org/en/features/#security";
+"conversation_end_to_end_encrypted_bottom_sheet_link" = "https://www.netmatters.co.uk/";
 "conversation_end_to_end_encrypted_event_title" = "Наскрізне шифрування розмови";
 "conversation_end_to_end_encrypted_event_subtitle" = "Повідомлення в цій розмові зашифровані за методом електронного шифрування (e2e). Розшифрувати їх може лише ваш співрозмовник.";
 "conversation_event_admin_set" = "%@ є адміном";
@@ -479,7 +479,7 @@
 "settings_contacts_ldap_search_filter_title" = "Фільтр";
 "settings_contacts_carddav_sync_successful_toast" = "Синхронізацію виконано";
 "sip_address" = "SIP-адреса";
-"sip.linphone.org" = "sip.linphone.org";
+"sip.netmatters.co.uk" = "sip.netmatters.co.uk";
 "SRTP" = "SRTP";
 "TCP" = "TCP";
 "Temp Help" = "Тимчасова допомога";
@@ -491,12 +491,12 @@
 "uri_handler_call_failed_toast" = "Зателефонувати не вдалося";
 "uri_handler_config_failed_toast" = "Помилка конфігурації";
 "username_error" = "Помилка в імені користувача";
-"web_platform_forgotten_password_url" = "https://subscribe.linphone.org/";
-"web_platform_register_email_url" = "https://subscribe.linphone.org/register/email";
-"website_contact_url" = "https://linphone.org/contact";
-"website_download_url" = "https://linphone.org/linphone-softphone";
-"website_open_source_licences_usage_url" = "https://wiki.linphone.org/xwiki/wiki/public/view/Linphone/Third%20party%20components%20/";
-"website_translate_weblate_url" = "https://weblate.linphone.org/";
+"web_platform_forgotten_password_url" = "https://www.netmatters.co.uk/contact-us";
+"web_platform_register_email_url" = "https://www.netmatters.co.uk/contact-usregister/email";
+"website_contact_url" = "https://www.netmatters.co.uk/contact-us";
+"website_download_url" = "https://www.netmatters.co.uk/";
+"website_open_source_licences_usage_url" = "https://www.netmatters.co.uk/";
+"website_translate_weblate_url" = "https://www.netmatters.co.uk/";
 "Default mode" = "Режим за замовчуванням";
 "dialog_close" = "Закрити";
 "drawer_menu_account_connection_status_refreshing" = "Оновлюється...";
@@ -510,7 +510,7 @@
 "history_title" = "Історія дзвінків";
 "IM_MSG" = "Ви отримали повідомлення";
 "Interoperable" = "Сумісний";
-"website_terms_and_conditions_url" = "https://www.linphone.org/en/terms-of-use";
+"website_terms_and_conditions_url" = "https://www.netmatters.co.uk/";
 "welcome_carousel_skip" = "Пропустити";
 "welcome_page_2_message" = "Ваше спілкування убезпечене завдяки нашому **наскрізному шифруванню**.";
 "You will change this mode later" = "Ви зміните цей режим пізніше";

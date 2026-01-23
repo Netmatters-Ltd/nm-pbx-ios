@@ -37,11 +37,11 @@ final class ThemeManager: ObservableObject {
 	static let shared = ThemeManager()
 	private let themeKey = "selectedTheme"
 	
-	@Published var currentTheme: Theme = ThemeManager.orange
-	
+	@Published var currentTheme: Theme = ThemeManager.nmpbx
+
 	private init() {
 		let storedName = UserDefaults.standard.string(forKey: themeKey)
-		currentTheme = themes[storedName ?? ""] ?? ThemeManager.orange
+		currentTheme = themes[storedName ?? ""] ?? ThemeManager.nmpbx
 	}
 	
 	func applyTheme(named name: String) {
@@ -55,6 +55,7 @@ final class ThemeManager: ObservableObject {
 	// MARK: - Theme Presets
 	
 	let themes: [String: Theme] = [
+		nmpbx.name: nmpbx,
 		orange.name: orange,
 		yellow.name: yellow,
 		green.name: green,
@@ -64,6 +65,15 @@ final class ThemeManager: ObservableObject {
 		purple.name: purple
 	]
 	
+	static let nmpbx = Theme(
+		name: "nmpbx",
+		main100: Color(hex: "#D4F5DD"),
+		main100Alpha50: Color(hex: "#80D4F5DD"),
+		main300: Color(hex: "#7AD295"),
+		main500: Color(hex: "#25AF4B"),
+		main700: Color(hex: "#1C8339")
+	)
+
 	static let orange = Theme(
 		name: "orange",
 		main100: Color(hex: "#FFEACB"),

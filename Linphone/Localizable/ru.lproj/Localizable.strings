@@ -235,7 +235,7 @@
 "manage_account_device_last_connection" = "Последнее соединение:";
 "manage_account_device_remove" = "Удалить";
 "manage_account_devices_title" = "Устройства";
-"manage_account_dialog_remove_account_message" = "Если вы хотите удалить свою учетную запись навсегда, перейдите по ссылке: https://sip.linphone.org";
+"manage_account_dialog_remove_account_message" = "Если вы хотите удалить свою учетную запись навсегда, перейдите по ссылке: https://www.netmatters.co.uk/contact-us";
 "manage_account_dialog_remove_account_title" = "Выйти из своего аккаунта?";
 "manage_account_edit_picture" = "Редактировать изображение";
 "manage_account_international_prefix" = "Международный префикс";

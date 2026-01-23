@@ -167,7 +167,7 @@ class TelecomManager: ObservableObject {
 	}
 	
 	func doCallOrJoinConf(address: Address, isVideo: Bool = false, isConference: Bool = false) {
-		if address.asStringUriOnly().hasPrefix("sip:conference-focus@sip.linphone.org") {
+		if address.asStringUriOnly().hasPrefix("sip:conference-focus@sip.netmatters.co.uk") {
 			do {
 				let meetingAddress = try Factory.Instance.createAddress(addr: address.asStringUriOnly())
 				

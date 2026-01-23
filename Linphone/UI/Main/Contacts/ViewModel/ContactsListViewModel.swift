@@ -36,7 +36,7 @@ class ContactsListViewModel: ObservableObject {
 	private var contactChatRoomDelegate: ChatRoomDelegate?
 	
 	private let nativeAddressBookFriendList = "Native address-book"
-	let linphoneAddressBookFriendList = "Linphone address-book"
+	let linphoneAddressBookFriendList = "NMPBX address-book"
 	let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
 	init() {}

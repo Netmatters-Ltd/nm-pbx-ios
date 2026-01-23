@@ -1,7 +1,7 @@
 /*
 * Copyright (c) 2010-2023 Belledonne Communications SARL.
 *
-* This file is part of linphone
+* This file is part of NMPBX
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ extension Config {
 		return hasEntry(section: section, key: key) == 1  ? getString(section: section, key: key, defaultString: "") : nil
 	}
 	
-	static let appGroupName = "group.org.linphone.phone.msgNotification"
+	static let appGroupName = "group.uk.co.netmatters.nmpbx.msgNotification"
 	// Needs to be the same name in App Group (capabilities in ALL targets - app & extensions - content + service), can't be stored in the Config itself the Config needs this value to get created
 	static let teamID = Config.get().getString(section: "app", key: "team_id", defaultString: "")
 	static let earlymediaContentExtCatIdentifier = Config.get().getString(section: "app", key: "extension_category", defaultString: "")

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
- * This file is part of Linphone
+ * This file is part of NMPBX
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,10 @@ extension Color {
 	static var orangeMain300: Color { theme.main300 }
 	static var orangeMain100: Color { theme.main100 }
 	static var orangeMain100Alpha50: Color { theme.main100Alpha50 }
+
+	// NMPBX brand colors
+	static let nmpbxSecondary = Color(hex: "#0E2826")
+	static let nmpbxGradientEnd = Color(hex: "#A4CD3A")
 	
 	static let grayMain2c800 = Color(hex: "#22334D")
 	static let grayMain2c800Alpha65 = Color(hex: "#A622334D")

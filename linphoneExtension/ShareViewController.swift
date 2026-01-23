@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010-2024 Belledonne Communications SARL.
  *
- * This file is part of linphone-iphone
+* This file is part of nmpbx-iphone
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ class ShareViewController: SLComposeServiceViewController {
 		let urlStrings = fileURLs.map { $0.path }
 		let joinedURLs = urlStrings.joined(separator: ",")
 
-		let urlScheme = "linphone-message://\(joinedURLs)"
+		let urlScheme = "nmpbx-message://\(joinedURLs)"
 		if let url = URL(string: urlScheme) {
 			var responder: UIResponder? = self
 			while responder != nil {
@@ -137,7 +137,7 @@ class ShareViewController: SLComposeServiceViewController {
 	
     func copyFileToSharedContainer(from url: URL) -> URL? {
         guard let sharedContainerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.org.linphone.phone.linphoneExtension"
+            forSecurityApplicationGroupIdentifier: "group.uk.co.netmatters.nmpbx.extension"
         ) else { return nil }
 		
         let destinationURL = sharedContainerURL.appendingPathComponent(url.lastPathComponent)

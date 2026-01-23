@@ -227,7 +227,7 @@
 "manage_account_details_title" = "详细";
 "manage_account_device_last_connection" = "上次连接：";
 "manage_account_device_remove" = "删除";
-"manage_account_dialog_remove_account_message" = "如果您想永久删除您的账户，请转到：https://sip.linphone.org";
+"manage_account_dialog_remove_account_message" = "如果您想永久删除您的账户，请转到：https://www.netmatters.co.uk/contact-us";
 "manage_account_dialog_remove_account_title" = "退出登录并注销您的账户（该账户信息会被清除）？";
 "manage_account_edit_picture" = "修改图像";
 "manage_account_international_prefix" = "国际前缀";

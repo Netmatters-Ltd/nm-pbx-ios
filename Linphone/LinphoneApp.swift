@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
- * This file is part of linphone-iphone
+ * This file is part of nmpbx-iphone
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -253,7 +253,7 @@ struct RootView: View {
 			}
 		}
 		.onOpenURL { url in
-			if SharedMainViewModel.shared.displayedConversation != nil && url.absoluteString.contains("linphone-message://") {
+			if SharedMainViewModel.shared.displayedConversation != nil && url.absoluteString.contains("nmpbx-message://") {
 				SharedMainViewModel.shared.displayedConversation = nil
 			}
 			if coreContext.coreIsStarted {

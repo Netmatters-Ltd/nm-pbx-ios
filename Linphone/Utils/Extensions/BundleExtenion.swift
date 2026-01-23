@@ -21,6 +21,6 @@ import Foundation
 
 extension Bundle {
 	var displayName: String {
-		return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "Linphone"
+		return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "NMPBX"
 	}
 }

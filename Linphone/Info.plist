@@ -8,37 +8,37 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>linphone-mention</string>
+				<string>nmpbx-mention</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>linphone-message</string>
+				<string>nmpbx-message</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>linphone-config</string>
+				<string>nmpbx-config</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>sip</string>
@@ -48,7 +48,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>sips</string>
@@ -58,47 +58,47 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>sip-linphone</string>
+				<string>sip-nmpbx</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>sips-linphone</string>
+				<string>sips-nmpbx</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>linphone-sip</string>
+				<string>nmpbx-sip</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>linphone-sips</string>
+				<string>nmpbx-sips</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>tel</string>
@@ -108,17 +108,17 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>org.linphone</string>
+				<string>uk.co.netmatters.nmpbx</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.linphone.phone</string>
+			<string>uk.co.netmatters.nmpbx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>callto</string>
@@ -129,12 +129,12 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>NotoSans-Light.ttf</string>
-		<string>NotoSans-Regular.ttf</string>
-		<string>NotoSans-Medium.ttf</string>
-		<string>NotoSans-SemiBold.ttf</string>
-		<string>NotoSans-Bold.ttf</string>
-		<string>NotoSans-ExtraBold.ttf</string>
+		<string>Poppins-Light.ttf</string>
+		<string>Poppins-Regular.ttf</string>
+		<string>Poppins-Medium.ttf</string>
+		<string>Poppins-SemiBold.ttf</string>
+		<string>Poppins-Bold.ttf</string>
+		<string>Poppins-ExtraBold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

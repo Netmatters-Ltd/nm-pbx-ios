@@ -240,7 +240,7 @@
 "manage_account_device_last_connection" = "Letzte Verbindung:";
 "manage_account_device_remove" = "Entfernen";
 "manage_account_devices_title" = "Geräte";
-"manage_account_dialog_remove_account_message" = "Wenn Sie Ihr Konto dauerhaft löschen möchten, gehen Sie zu: https://sip.linphone.org";
+"manage_account_dialog_remove_account_message" = "Wenn Sie Ihr Konto dauerhaft löschen möchten, gehen Sie zu: https://www.netmatters.co.uk/contact-us";
 "manage_account_dialog_remove_account_title" = "Von Ihrem Konto abmelden?";
 "manage_account_edit_picture" = "Bild bearbeiten";
 "manage_account_international_prefix" = "Internationale Vorwahl";
@@ -358,7 +358,7 @@
 "sip_address_display_name" = "Anzeigename";
 "sip_address_domain" = "Domäne";
 "start" = "Start";
-"web_platform_register_email_url" = "https://subscribe.linphone.org/register/email";
+"web_platform_register_email_url" = "https://www.netmatters.co.uk/contact-usregister/email";
 "welcome_page_3_title" = "Open source";
 "welcome_page_title" = "Willkommen";
 "conversation_end_to_end_encrypted_event_subtitle" = "Nachrichten in dieser Gespr sind Ende-zu-Ende verschlüsselt. Nur Ihr Gesprächspartner kann sie entschlüsseln.";
@@ -451,7 +451,7 @@
 "DTLS" = "DTLS";
 "GC_MSG" = "Sie wurden zu einem Chatroom hinzugefügt";
 "help_dialog_update_available_message" = "Eine neue Version %@ ist verfügbar. Möchten Sie aktualisieren?";
-"manage_account_dialog_international_prefix_help_message" = "Wählen Sie Ihr Land aus, um Linphone die Zuordnung Ihrer Kontakte zuzulassen.";
+"manage_account_dialog_international_prefix_help_message" = "Wählen Sie Ihr Land aus, um NMPBX die Zuordnung Ihrer Kontakte zuzulassen.";
 "meeting_call_remove_no_participants" = "Zur Zeit kein Teilnehmer…";
 "meeting_call_remove_participant_confirmation_message" = "Sind Sie sicher, dass Sie %@ entfernen möchten?";
 "meeting_call_remove_participant_confirmation_title" = "Einen Teilnehmer entfernen";
@@ -503,9 +503,9 @@
 "ZRTP" = "ZRTP";
 "welcome_page_1_message" = "Eine **sichere** **Open Source** Kommunikations-App aus Frankreich.";
 "welcome_page_3_message" = "Eine **kostenlose** Open-Source Anwendung seit **2001**.";
-"help_about_contribute_translations_title" = "Zur Übersetzung von Linphone beitragen";
-"help_about_privacy_policy_subtitle" = "Welche Informationen Linphone sammelt und nutzt";
-"help_about_title" = "Über Linphone";
-"help_about_user_guide_title" = "Linphone Benutzerhandbuch";
+"help_about_contribute_translations_title" = "Zur Übersetzung von NMPBX beitragen";
+"help_about_privacy_policy_subtitle" = "Welche Informationen NMPBX sammelt und nutzt";
+"help_about_title" = "Über NMPBX";
+"help_about_user_guide_title" = "NMPBX Benutzerhandbuch";
 "help_about_open_source_licenses_title" = "GNU General Public License v3.0";
 "help_about_open_source_licenses_subtitle" = "© Belledonne Communications 2010-2024";

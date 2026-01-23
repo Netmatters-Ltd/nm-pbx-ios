@@ -1,7 +1,7 @@
 "account_settings_audio_video_conference_factory_uri_title" = "Audio/video kokous, tehdas URI";
 "account_settings_dialog_invalid_password_title" = "Todennus tarvitaan";
 ": %@" = ": %@";
-"[linphone.org/contact](https://linphone.org/contact)" = "[linphone.org/contact](https://linphone.org/contact)";
+"[linphone.org/contact](https://www.netmatters.co.uk/contact-us)" = "[linphone.org/contact](https://www.netmatters.co.uk/contact-us)";
 "*" = "*";
 "**%@**" = "**%@**";
 "#" = "#";
@@ -28,4 +28,4 @@
 "9" = "9";
 "account_settings_avpf_title" = "AVPF";
 "ZRTP" = "ZRTP";
-"[https://sip.linphone.org](https://sip.linphone.org)" = "[https://sip.linphone.org](https://sip.linphone.org)";
+"[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)" = "[https://www.netmatters.co.uk/contact-us](https://www.netmatters.co.uk/contact-us)";

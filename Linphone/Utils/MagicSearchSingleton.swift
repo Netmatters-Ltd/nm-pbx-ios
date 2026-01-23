@@ -46,7 +46,7 @@ final class MagicSearchSingleton: ObservableObject {
     private var contactLoadedDebounceWorkItem: DispatchWorkItem?
     
     let nativeAddressBookFriendList = "Native address-book"
-    let linphoneAddressBookFriendList = "Linphone address-book"
+    let linphoneAddressBookFriendList = "NMPBX address-book"
     let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
 	@Published var isLoading = false
