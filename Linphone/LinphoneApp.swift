@@ -203,7 +203,7 @@ struct RootView: View {
 			if coreContext.coreHasStartedOnce {
 				if showWelcome {
 					ZStack {
-						WelcomeView()
+						PermissionsFragment()
 						ToastView().zIndex(3)
 					}
 					.onAppear {

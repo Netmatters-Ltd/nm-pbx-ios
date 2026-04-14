@@ -2189,14 +2189,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		C618BF542D75CA03005A00E0 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://gitlab.linphone.org/BC/public/linphone-sdk-swift-ios.git";
-			requirement = {
-				branch = stable;
-				kind = branch;
-			};
-		};
 		D73DD7FF2EE6FF6A00654313 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab.linphone.org/BC/public/linphone-sdk-swift-ios.git";
@@ -2234,12 +2226,12 @@
 /* Begin XCSwiftPackageProductDependency section */
 		C618BF552D75CA03005A00E0 /* linphonesw */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C618BF542D75CA03005A00E0 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */;
+			package = D73DD7FF2EE6FF6A00654313 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */;
 			productName = linphonesw;
 		};
 		C618BF572D75CA0D005A00E0 /* linphonesw */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C618BF542D75CA03005A00E0 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */;
+			package = D73DD7FF2EE6FF6A00654313 /* XCRemoteSwiftPackageReference "linphone-sdk-swift-ios" */;
 			productName = linphonesw;
 		};
 		D7D5AD7E2DD34F0E00016721 /* AppAuth */ = {
