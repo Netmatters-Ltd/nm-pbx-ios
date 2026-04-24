@@ -114,7 +114,7 @@ final class ContactsManager: ObservableObject {
                     }
                 }
 				
-				self.refreshCardDavContacts()
+				Task { await self.refreshCardDavContacts() }
 			}
 			
 			let store = CNContactStore()
@@ -719,12 +719,40 @@ final class ContactsManager: ObservableObject {
 		}
 	}
 	
-	func refreshCardDavContacts() {
-		self.coreContext.doOnCoreQueue { core in
-			core.friendsLists.forEach{ friendList in
-				if (friendList.type == .CardDAV) {
-					Log.info("\(ContactsManager.TAG) Found CardDAV friend list \(friendList.displayName), starting update")
-					friendList.synchronizeFriendsFromServer()
+	func refreshCardDavContacts() async {
+		await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+			self.coreContext.doOnCoreQueue { core in
+				let cardDavLists = core.friendsLists.filter { $0.type == .CardDAV }
+				guard !cardDavLists.isEmpty else {
+					continuation.resume()
+					return
+				}
+
+				var remaining = cardDavLists.count
+				var resumed = false
+
+				for list in cardDavLists {
+					Log.info("\(ContactsManager.TAG) Found CardDAV friend list \(list.displayName ?? ""), starting update")
+					var selfDelegate: FriendListDelegate?
+					let delegate = FriendListDelegateStub(
+						onSyncStatusChanged: { (fl: FriendList, status: FriendList.SyncStatus, _: String?) in
+							switch status {
+							case .Successful, .Failure:
+								if let d = selfDelegate {
+									fl.removeDelegate(delegate: d)
+									selfDelegate = nil
+								}
+								remaining -= 1
+								if remaining == 0 && !resumed {
+									resumed = true
+									continuation.resume()
+								}
+							default: break
+							}
+						})
+					selfDelegate = delegate
+					list.addDelegate(delegate: delegate)
+					list.synchronizeFriendsFromServer()
 				}
 			}
 		}

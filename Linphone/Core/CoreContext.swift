@@ -246,7 +246,9 @@ class CoreContext: ObservableObject {
 							account.params = newParams
 						}
 					}
-					
+
+					CardDavProvisioningManager.applyIfPresent(core: core)
+
 					self.actionsToPerformOnCoreQueueWhenCoreIsStarted.forEach {	$0(core) }
 					self.actionsToPerformOnCoreQueueWhenCoreIsStarted.removeAll()
 					
@@ -277,6 +279,8 @@ class CoreContext: ObservableObject {
 					}
 				}
 			}, onAuthenticationRequested: { (core: Core, authInfo: AuthInfo, method: AuthMethod) in
+				Log.info("[CoreContext] onAuthenticationRequested fired: method=\(method) realm=\(authInfo.realm ?? "<nil>") username=\(authInfo.username ?? "<nil>") domain=\(authInfo.domain ?? "<nil>")")
+
 				if method == .Bearer {
 					if let server = authInfo.authorizationServer, !server.isEmpty {
 						Log.info("Authentication requested method is Bearer, starting Single Sign On activity with server URL \(server) and username \(authInfo.username ?? "")")
@@ -312,6 +316,10 @@ class CoreContext: ObservableObject {
 					
 					self.digestAuthInfoPendingPasswordUpdate = authInfo
 				}
+
+				if method == .Basic {
+					CardDavProvisioningManager.fulfillHttpBasicChallenge(core: core, authInfo: authInfo)
+				}
 			}, onTransferStateChanged: { (_: Core, transferred: Call, callState: Call.State) in
 				Log.info("[CoreContext] Transferred call \(transferred.remoteAddress!.asStringUriOnly()) state changed \(callState)")
 				DispatchQueue.main.async {
@@ -327,6 +335,9 @@ class CoreContext: ObservableObject {
 				Log.info("New configuration state is \(status) = \(message)\n")
 				let themeMainColor = CorePreferences.themeMainColor
 				SharedMainViewModel.shared.updateConfigChanges()
+				if status == ConfiguringState.Successful {
+					CardDavProvisioningManager.applyIfPresent(core: self.mCore)
+				}
 				DispatchQueue.main.async {
 					if status == ConfiguringState.Successful {
 						var accountModels: [AccountModel] = []

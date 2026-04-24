@@ -85,7 +85,7 @@ struct ContactsInnerFragment: View {
 					.listStyle(.plain)
 					.if(sharedMainViewModel.cardDavFriendsListsCount > 0) { view in
 						view.refreshable {
-							contactsManager.refreshCardDavContacts()
+							await contactsManager.refreshCardDavContacts()
 						}
 					}
 					.overlay(

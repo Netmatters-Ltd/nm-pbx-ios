@@ -77,27 +77,47 @@ class CardDavViewModel: ObservableObject {
 				Log.error("\(CardDavViewModel.TAG) Failed to find friend list with display name \(name)!")
 				return
 			}
-			
+
 			self.friendList = found
-			
+
 			guard let friendList = self.friendList else {
 				return
 			}
-			
+
 			let isReadOnlyTmp = friendList.isReadOnly
 			let friendListInWhichStoreNewlyCreatedFriendsTmp = CorePreferences.friendListInWhichStoreNewlyCreatedFriends
 			let uriTmp = friendList.uri ?? ""
+
+			// Find the AuthInfo that was saved alongside this friend list. Both
+			// save paths (manual addAddressBook + provisioning) stamp
+			// authInfo.domain with the URL host, so we can match on that.
+			let host = CardDavViewModel.serverHost(fromServerUrl: uriTmp)
+			let matchingAuthInfo = host.flatMap { host in
+				core.authInfoList.first(where: { $0.domain == host })
+			}
+			let usernameTmp = matchingAuthInfo?.username ?? ""
+			let passwordTmp = matchingAuthInfo?.password ?? ""
+			let realmTmp = matchingAuthInfo?.realm ?? ""
+
 			DispatchQueue.main.async {
 				self.isEdit = true
 				self.isReadOnly = isReadOnlyTmp
-				
+
 				self.displayName = name
 				self.storeNewContactsInIt = name == friendListInWhichStoreNewlyCreatedFriendsTmp
-				
+
 				self.serverUrl = uriTmp
+				self.username = usernameTmp
+				self.password = passwordTmp
+				self.realm = realmTmp
 			}
-			Log.info("\(CardDavViewModel.TAG) Existing friend list CardDAV values loaded")
+			Log.info("\(CardDavViewModel.TAG) Existing friend list CardDAV values loaded (auth matched: \(matchingAuthInfo != nil))")
 		}
+	}
+
+	static func serverHost(fromServerUrl url: String) -> String? {
+		let normalised = (url.hasPrefix("http://") || url.hasPrefix("https://")) ? url : "https://\(url)"
+		return URL(string: normalised)?.host
 	}
 	
 	func delete() {
@@ -156,20 +176,24 @@ class CardDavViewModel: ObservableObject {
 			}
 			
 			if !user.isEmpty && !authRealm.isEmpty {
+				// Stamp the URL host onto authInfo.domain so loadcardDav can link
+				// this AuthInfo back to the FriendList on a later edit. Doesn't
+				// affect HTTP Basic auth matching (keyed on realm).
+				let authDomain = CardDavViewModel.serverHost(fromServerUrl: server)
 				let foundAuthInfo = core.findAuthInfo(realm: authRealm, username: user, sipDomain: nil)
 				if let foundAuthInfo = foundAuthInfo {
 					Log.warn("\(CardDavViewModel.TAG) Auth info with username \(user) already exists, removing it first")
 					core.removeAuthInfo(info: foundAuthInfo)
 				}
-				
-				Log.info("\(CardDavViewModel.TAG) Adding auth info with username \(user)")
+
+				Log.info("\(CardDavViewModel.TAG) Adding auth info with username \(user) domain=\(authDomain ?? "<nil>")")
 				if let authInfo = try? Factory.Instance.createAuthInfo(
 					username: user,
 					userid: nil,
 					passwd: pwd,
 					ha1: nil,
 					realm: authRealm,
-					domain: nil
+					domain: authDomain
 				) {
 					core.addAuthInfo(info: authInfo)
 				}
