@@ -212,7 +212,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 					} else if address.username != nil {
 						name = address.username!
 					} else {
-						name = String(address.asStringUriOnly().dropFirst(4))
+						name = address.asStringUriOnly().sipUsername
 					}
 					completion(ContactAvatarModel(friend: nil, name: name, address: address.asStringUriOnly(), withPresence: false))
 				}
@@ -223,7 +223,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 				} else if address.username != nil {
 					name = address.username!
 				} else {
-					name = String(address.asStringUriOnly().dropFirst(4))
+					name = address.asStringUriOnly().sipUsername
 				}
 				completion(ContactAvatarModel(friend: nil, name: name, address: address.asStringUriOnly(), withPresence: false))
 			}

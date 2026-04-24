@@ -50,7 +50,7 @@ class EventModel: ObservableObject {
 					} else if address!.username != nil {
 						name = address!.username!
 					} else {
-						name = String(address!.asStringUriOnly().dropFirst(4))
+						name = address!.asStringUriOnly().sipUsername
 					}
 				}
 				

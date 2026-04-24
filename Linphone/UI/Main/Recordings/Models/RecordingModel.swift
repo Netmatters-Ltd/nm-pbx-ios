@@ -58,7 +58,7 @@ class RecordingModel: ObservableObject {
 							} else if address.username != nil {
 								displayNameTmp = address.username!
 							} else {
-								displayNameTmp = String(address.asStringUriOnly().dropFirst(4))
+								displayNameTmp = address.asStringUriOnly().sipUsername
 							}
 						}
 					}
@@ -96,7 +96,7 @@ class RecordingModel: ObservableObject {
 							} else if address.username != nil {
 								displayNameTmp = address.username!
 							} else {
-								displayNameTmp = String(address.asStringUriOnly().dropFirst(4))
+								displayNameTmp = address.asStringUriOnly().sipUsername
 							}
 						}
 					}

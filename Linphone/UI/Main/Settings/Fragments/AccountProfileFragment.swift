@@ -275,15 +275,15 @@ struct AccountProfileFragment: View {
 															Text(String(localized: "sip_address") + ":")
 																.default_text_style_700(styleSize: 15)
 															
-															Text(accountModel.avatarModel!.address)
+															Text(accountModel.avatarModel!.address.sipUsername)
 																.foregroundStyle(Color.grayMain2c700)
 																.default_text_style(styleSize: 15)
 																.frame(maxWidth: .infinity, alignment: .leading)
 																.lineLimit(1)
-															
+
 															Button(action: {
 																UIPasteboard.general.setValue(
-																	accountModel.avatarModel!.address,
+																	accountModel.avatarModel!.address.sipUsername,
 																	forPasteboardType: UTType.plainText.identifier
 																)
 																

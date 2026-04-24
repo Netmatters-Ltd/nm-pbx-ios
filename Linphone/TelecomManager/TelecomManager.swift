@@ -370,7 +370,7 @@ class TelecomManager: ObservableObject {
 							} else if remoteAddress.username != nil {
 								completion(remoteAddress.username!)
 							} else {
-								completion(String(remoteAddress.asStringUriOnly().dropFirst(4)))
+								completion(remoteAddress.asStringUriOnly().sipUsername)
 							}
 						}
 					} else {
@@ -503,7 +503,7 @@ class TelecomManager: ObservableObject {
 			} else if let username = call.remoteAddress?.username {
 				displayName = username
 			} else if let uri = call.remoteAddress?.asStringUriOnly() {
-				displayName = String(uri.dropFirst(4))
+				displayName = uri.sipUsername
 			} else {
 				displayName = "Unknown"
 			}

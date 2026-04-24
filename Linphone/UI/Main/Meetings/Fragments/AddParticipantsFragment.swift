@@ -292,13 +292,13 @@ struct AddParticipantsFragment: View {
 						&& contactsManager.lastSearchSuggestions[index].address != nil {
 						if contactsManager.lastSearchSuggestions[index].address!.domain != CorePreferences.defaultDomain {
 							Image(uiImage: contactsManager.textToImage(
-								firstName: String(contactsManager.lastSearchSuggestions[index].address!.asStringUriOnly().dropFirst(4)),
+								firstName: contactsManager.lastSearchSuggestions[index].address!.username ?? contactsManager.lastSearchSuggestions[index].address!.asStringUriOnly().sipUsername,
 								lastName: ""))
 							.resizable()
 							.frame(width: 45, height: 45)
 							.clipShape(Circle())
-							
-							Text(String(contactsManager.lastSearchSuggestions[index].address!.asStringUriOnly().dropFirst(4)))
+
+							Text(contactsManager.lastSearchSuggestions[index].address!.username ?? contactsManager.lastSearchSuggestions[index].address!.asStringUriOnly().sipUsername)
 								.default_text_style(styleSize: 16)
 								.lineLimit(1)
 								.frame(maxWidth: .infinity, alignment: .leading)
@@ -307,7 +307,7 @@ struct AddParticipantsFragment: View {
 							if let address = contactsManager.lastSearchSuggestions[index].address {
 								let nameTmp = address.displayName
 								?? address.username
-								?? String(address.asStringUriOnly().dropFirst(4))
+								?? address.asStringUriOnly().sipUsername
 								
 								Image(uiImage: contactsManager.textToImage(
 									firstName: nameTmp,

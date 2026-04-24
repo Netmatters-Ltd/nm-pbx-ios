@@ -54,10 +54,8 @@ struct ContactListBottomSheet: View {
 			
 			Button {
 				UIPasteboard.general.setValue(
-					contactsListViewModel.stringToCopy.prefix(4) == "sip:"
-					? contactsListViewModel.stringToCopy.dropFirst(4)
-					: contactsListViewModel.stringToCopy,
-							forPasteboardType: UTType.plainText.identifier)
+					contactsListViewModel.stringToCopy.sipUsername,
+					forPasteboardType: UTType.plainText.identifier)
 				
 				if #available(iOS 16.0, *) {
 					showingSheet.toggle()
@@ -76,8 +74,7 @@ struct ContactListBottomSheet: View {
 						.foregroundStyle(Color.grayMain2c500)
 						.frame(width: 25, height: 25, alignment: .leading)
 						.padding(.all, 10)
-					Text(contactsListViewModel.stringToCopy.prefix(4) == "sip:"
-						 ? "menu_copy_sip_address" : "menu_copy_phone_number")
+					Text("menu_copy_sip_address")
 					.default_text_style(styleSize: 16)
 					Spacer()
 				}

@@ -84,7 +84,7 @@ class MeetingWaitingRoomViewModel: ObservableObject {
 							} else if core.defaultAccount!.params?.identityAddress!.username != nil {
 								userNameTmp = core.defaultAccount!.params!.identityAddress!.username!
 							} else {
-								userNameTmp = String(core.defaultAccount!.params!.identityAddress!.asStringUriOnly().dropFirst(4))
+								userNameTmp = core.defaultAccount!.params!.identityAddress!.asStringUriOnly().sipUsername
 							}
 						}
 					}

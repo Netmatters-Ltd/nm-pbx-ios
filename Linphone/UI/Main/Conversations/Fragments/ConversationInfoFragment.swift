@@ -377,7 +377,7 @@ struct ConversationInfoFragment: View {
 																			} else {
 																				withAnimation {
 																					isShowEditContactFragment.toggle()
-																					isShowEditContactFragmentAddress = String(participantConversationModel.address.dropFirst(4))
+																					isShowEditContactFragmentAddress = participantConversationModel.address.sipUsername
 																				}
 																			}
 																			
@@ -560,7 +560,7 @@ struct ConversationInfoFragment: View {
 																} else {
 																	withAnimation {
 																		isShowEditContactFragment.toggle()
-																		isShowEditContactFragmentAddress = String(participantConversationModel.address.dropFirst(4))
+																		isShowEditContactFragmentAddress = participantConversationModel.address.sipUsername
 																	}
 																}
 															}

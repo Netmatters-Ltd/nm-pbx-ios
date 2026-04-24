@@ -90,7 +90,7 @@ struct HistoryContactFragment: View {
 								} else {
 									withAnimation {
 										isShowEditContactFragment.toggle()
-										isShowEditContactFragmentAddress = String(historyModel.address.dropFirst(4))
+										isShowEditContactFragmentAddress = historyModel.address.sipUsername
 									}
 								}
 							} label: {
@@ -108,17 +108,10 @@ struct HistoryContactFragment: View {
 						Button {
 							isMenuOpen = false
 							
-							if historyModel.isOutgoing {
-								UIPasteboard.general.setValue(
-									historyModel.address.dropFirst(4),
-									forPasteboardType: UTType.plainText.identifier
-								)
-							} else {
-								UIPasteboard.general.setValue(
-									historyModel.address.dropFirst(4),
-									forPasteboardType: UTType.plainText.identifier
-								)
-							}
+							UIPasteboard.general.setValue(
+								historyModel.address.sipUsername,
+								forPasteboardType: UTType.plainText.identifier
+							)
 							
 							ToastViewModel.shared.show("Success_address_copied_into_clipboard")
 							
@@ -190,7 +183,7 @@ struct HistoryContactFragment: View {
 										.padding(.top, 10)
 									
 									if !CorePreferences.hideSipAddresses {
-										Text(historyModel.address)
+										Text(historyModel.address.sipUsername)
 											.foregroundStyle(Color.grayMain2c700)
 											.multilineTextAlignment(.center)
 											.default_text_style(styleSize: 14)

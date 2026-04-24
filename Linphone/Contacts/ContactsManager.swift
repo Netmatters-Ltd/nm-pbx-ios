@@ -318,9 +318,23 @@ final class ContactsManager: ObservableObject {
 				// Clear existing addresses and add new ones
 				friend.addresses.forEach { friend.removeAddress(address: $0) }
 				for sipAddress in contact.sipAddresses where !sipAddress.isEmpty {
-					if let address = core.interpretUrl(url: sipAddress, applyInternationalPrefix: LinphoneUtils.applyInternationalPrefix(core: core)),
-					   !friend.addresses.contains(where: { $0.asString() == address.asString() }) {
-						friend.addAddress(address: address)
+					// Build a canonical sip: URI without applying dial-plan transformations,
+					// so numbers are stored exactly as the user entered them.
+					let canonicalUri: String
+					if sipAddress.hasPrefix("sip:") || sipAddress.hasPrefix("sips:") {
+						canonicalUri = sipAddress
+					} else if sipAddress.contains("@") {
+						canonicalUri = "sip:" + sipAddress
+					} else {
+						canonicalUri = "sip:" + sipAddress + "@" + CorePreferences.defaultDomain
+					}
+					do {
+						let address = try Factory.Instance.createAddress(addr: canonicalUri)
+						if !friend.addresses.contains(where: { $0.asString() == address.asString() }) {
+							friend.addAddress(address: address)
+						}
+					} catch {
+						Log.error("[ContactsManager] Failed to create SIP address '\(canonicalUri)': \(error)")
 					}
 				}
 				

@@ -88,7 +88,7 @@ class ConversationModel: ObservableObject, Identifiable {
 				
 				subjectTmp = chatRoomParticipants.first!.address!.displayName != nil
 				? chatRoomParticipants.first!.address!.displayName!
-				: (chatRoomParticipants.first!.address!.username ?? String(chatRoomParticipants.first!.address!.asStringUriOnly().dropFirst(4)))
+				: (chatRoomParticipants.first!.address!.username ?? chatRoomParticipants.first!.address!.asStringUriOnly().sipUsername)
 				
 			}
 		}
@@ -292,7 +292,7 @@ class ConversationModel: ObservableObject, Identifiable {
 					} else if lastMessage!.fromAddress!.username != nil {
 						fromAddressFriend = lastMessage!.fromAddress!.username! + ": "
 					} else {
-						fromAddressFriend = String(lastMessage!.fromAddress!.asStringUriOnly().dropFirst(4)) + ": "
+						fromAddressFriend = lastMessage!.fromAddress!.asStringUriOnly().sipUsername + ": "
 					}
 				} else {
 					fromAddressFriend! += ": "

@@ -59,7 +59,7 @@ class ParticipantModel: ObservableObject {
 				} else if address.username != nil {
 					self.name = address.username!
 				} else {
-					self.name = String(address.asStringUriOnly().dropFirst(4))
+					self.name = address.asStringUriOnly().sipUsername
 				}
 			}
 		}

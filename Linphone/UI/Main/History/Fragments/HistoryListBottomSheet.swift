@@ -89,7 +89,7 @@ struct HistoryListBottomSheet: View {
 					} else if let selectedCall = historyListViewModel.selectedCall {
 						withAnimation {
 							isShowEditContactFragment.toggle()
-							isShowEditContactFragmentAddress = String(selectedCall.address.dropFirst(4))
+							isShowEditContactFragmentAddress = selectedCall.address.sipUsername
 						}
 					}
 				} label: {
@@ -128,17 +128,10 @@ struct HistoryListBottomSheet: View {
 			}
 			
 			Button {
-				if historyListViewModel.selectedCall != nil && historyListViewModel.selectedCall!.isOutgoing {
-					UIPasteboard.general.setValue(
-						historyListViewModel.selectedCall!.address.dropFirst(4),
-						forPasteboardType: UTType.plainText.identifier
-					)
-				} else {
-					UIPasteboard.general.setValue(
-						historyListViewModel.selectedCall!.address.dropFirst(4),
-						forPasteboardType: UTType.plainText.identifier
-					)
-				}
+				UIPasteboard.general.setValue(
+					historyListViewModel.selectedCall?.address.sipUsername ?? "",
+					forPasteboardType: UTType.plainText.identifier
+				)
 				
 				if #available(iOS 16.0, *) {
 					if idiom != .pad {

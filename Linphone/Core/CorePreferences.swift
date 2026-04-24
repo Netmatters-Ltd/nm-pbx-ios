@@ -198,11 +198,10 @@ class CorePreferences {
 	
 	static var themeMainColor: String {
 		get {
-			let raw = Config.get().getString(section: "ui", key: "theme_main_color", defaultString: "orange")
-			return safeString(raw, defaultValue: "orange")
+			return "nmpbx"
 		}
 		set {
-			Config.get().setString(section: "ui", key: "theme_main_color", value: newValue)
+			// Theme is locked to nmpbx brand; user overrides are not applied.
 		}
 	}
 	

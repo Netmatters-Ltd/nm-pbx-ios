@@ -75,7 +75,7 @@ struct ContactInnerActionsFragment: View {
 										Text(String(localized: "sip_address") + ":")
 											.default_text_style_700(styleSize: 14)
 											.frame(maxWidth: .infinity, alignment: .leading)
-										Text(contactAvatarModel.addresses[index].dropFirst(4))
+										Text(contactAvatarModel.addresses[index].sipUsername)
 											.default_text_style(styleSize: 14)
 											.frame(maxWidth: .infinity, alignment: .leading)
 											.lineLimit(1)

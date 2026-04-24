@@ -166,11 +166,11 @@ class CallViewModel: ObservableObject {
 				
 				let remoteAddressTmp = self.currentCall!.remoteAddress!.clone()
 				
-				let remoteAddressStringTmp = remoteAddressTmp != nil ? String(remoteAddressTmp!.asStringUriOnly().dropFirst(4)) : ""
-				
+				let remoteAddressStringTmp = remoteAddressTmp != nil ? (remoteAddressTmp!.username ?? remoteAddressTmp!.asStringUriOnly().sipUsername) : ""
+
 				remoteAddressTmp!.clean()
-				
-				let remoteAddressCleanedStringTmp = remoteAddressTmp != nil ? String(remoteAddressTmp!.asStringUriOnly().dropFirst(4)) : ""
+
+				let remoteAddressCleanedStringTmp = remoteAddressTmp != nil ? (remoteAddressTmp!.username ?? remoteAddressTmp!.asStringUriOnly().sipUsername) : ""
 				
 				if self.currentCall?.conference != nil {
 					displayNameTmp = self.currentCall?.conference?.subject ?? ""
@@ -186,7 +186,7 @@ class CallViewModel: ObservableObject {
 						} else if self.currentCall!.remoteAddress!.username != nil && displayNameTmp.isEmpty {
 							displayNameTmp = self.currentCall!.remoteAddress!.username!
 						} else if displayNameTmp.isEmpty {
-							displayNameTmp = String(self.currentCall!.remoteAddress!.asStringUriOnly().dropFirst(4))
+							displayNameTmp = self.currentCall!.remoteAddress!.username ?? self.currentCall!.remoteAddress!.asStringUriOnly().sipUsername
 						}
 					}
 					
@@ -377,7 +377,7 @@ class CallViewModel: ObservableObject {
 						} else if activeSpeakerParticipantTmp!.address.username != nil {
 							activeSpeakerNameTmp = activeSpeakerParticipantTmp!.address.username!
 						} else {
-							activeSpeakerNameTmp = String(activeSpeakerParticipantTmp!.address.asStringUriOnly().dropFirst(4))
+							activeSpeakerNameTmp = activeSpeakerParticipantTmp!.address.username ?? activeSpeakerParticipantTmp!.address.asStringUriOnly().sipUsername
 						}
 					}
 				}
@@ -495,7 +495,7 @@ class CallViewModel: ObservableObject {
 								} else if activeSpeakerParticipantTmp!.address.username != nil {
 									activeSpeakerNameTmp = activeSpeakerParticipantTmp!.address.username!
 								} else {
-									activeSpeakerNameTmp = String(activeSpeakerParticipantTmp!.address.asStringUriOnly().dropFirst(4))
+									activeSpeakerNameTmp = activeSpeakerParticipantTmp!.address.username ?? activeSpeakerParticipantTmp!.address.asStringUriOnly().sipUsername
 						  		}
 							}
 							DispatchQueue.main.async {
@@ -624,7 +624,7 @@ class CallViewModel: ObservableObject {
 						} else if activeSpeakerParticipantTmp.address.username != nil {
 							activeSpeakerNameTmp = activeSpeakerParticipantTmp.address.username!
 						} else {
-							activeSpeakerNameTmp = String(activeSpeakerParticipantTmp.address.asStringUriOnly().dropFirst(4))
+							activeSpeakerNameTmp = activeSpeakerParticipantTmp.address.username ?? activeSpeakerParticipantTmp.address.asStringUriOnly().sipUsername
 						}
 					}
 					

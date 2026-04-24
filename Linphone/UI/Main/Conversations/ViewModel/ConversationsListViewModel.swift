@@ -80,7 +80,7 @@ class ConversationsListViewModel: ObservableObject {
 											} else if let username = fromAddress.username {
 												fromAddressFriend = username + ": "
 											} else {
-												fromAddressFriend = String(fromAddress.asStringUriOnly().dropFirst(4)) + ": "
+												fromAddressFriend = fromAddress.asStringUriOnly().sipUsername + ": "
 											}
 										} else {
 											fromAddressFriend! += ": "
@@ -139,7 +139,7 @@ class ConversationsListViewModel: ObservableObject {
 										} else if let username = fromAddress.username {
 											fromAddressFriend = username + ": "
 										} else {
-											fromAddressFriend = String(fromAddress.asStringUriOnly().dropFirst(4)) + ": "
+											fromAddressFriend = fromAddress.asStringUriOnly().sipUsername + ": "
 										}
 									} else {
 										fromAddressFriend! += ": "
@@ -347,7 +347,7 @@ class ConversationsListViewModel: ObservableObject {
 					} else if message.fromAddress!.username != nil {
 						fromAddressFriend = message.fromAddress!.username! + ": "
 					} else {
-						fromAddressFriend = String(message.fromAddress!.asStringUriOnly().dropFirst(4)) + ": "
+						fromAddressFriend = message.fromAddress!.asStringUriOnly().sipUsername + ": "
 					}
 				} else {
 					fromAddressFriend! += ": "

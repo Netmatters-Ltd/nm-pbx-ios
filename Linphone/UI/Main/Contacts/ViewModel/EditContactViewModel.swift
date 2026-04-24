@@ -50,7 +50,7 @@ class EditContactViewModel: ObservableObject {
 			
 			if self.selectedEditFriend != nil {
 				self.selectedEditFriend?.addresses.forEach({ address in
-					sipAddressesTmp.append(String(address.dropFirst(4)))
+					sipAddressesTmp.append(address.sipUsername)
 				})
 				
 				self.selectedEditFriend?.phoneNumbersWithLabel.forEach({ phoneNumber in
