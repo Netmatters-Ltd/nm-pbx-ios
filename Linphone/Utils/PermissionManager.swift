@@ -18,7 +18,7 @@
  */
 
 import Foundation
-import Photos
+import AVFoundation
 import Contacts
 import UserNotifications
 import SwiftUI
@@ -29,7 +29,6 @@ class PermissionManager: ObservableObject {
 	static let shared = PermissionManager()
 	
 	@Published var pushPermissionGranted = false
-	@Published var photoLibraryPermissionGranted = false
 	@Published var cameraPermissionGranted = false
 	@Published var contactsPermissionGranted = false
 	@Published var microphonePermissionGranted = false
@@ -43,7 +42,6 @@ class PermissionManager: ObservableObject {
 			
 			dispatchGroup.enter()
 			self.microphoneRequestPermission()
-			self.photoLibraryRequestPermission()
 			self.cameraRequestPermission()
 			self.contactsRequestPermission(group: dispatchGroup)
 			
@@ -71,14 +69,6 @@ class PermissionManager: ObservableObject {
 		AVAudioSession.sharedInstance().requestRecordPermission({ granted in
 			DispatchQueue.main.async {
 				self.microphonePermissionGranted = granted
-			}
-		})
-	}
-	
-	func photoLibraryRequestPermission() {
-		PHPhotoLibrary.requestAuthorization(for: .readWrite, handler: {status in
-			DispatchQueue.main.async {
-				self.photoLibraryPermissionGranted = (status == .authorized || status == .limited || status == .restricted)
 			}
 		})
 	}
@@ -130,22 +120,20 @@ class PermissionManager: ObservableObject {
 	func havePermissionsAlreadyBeenRequested() {
 		let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
 		let micStatus = AVAudioSession.sharedInstance().recordPermission
-		let photoStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
 		let contactsStatus = CNContactStore.authorizationStatus(for: .contacts)
-		
+
 		let notifGroup = DispatchGroup()
 		var notifStatus: UNAuthorizationStatus = .notDetermined
-		
+
 		notifGroup.enter()
 		UNUserNotificationCenter.current().getNotificationSettings { settings in
 			notifStatus = settings.authorizationStatus
 			notifGroup.leave()
 		}
-		
+
 		notifGroup.notify(queue: .main) {
 			let allAlreadyRequested = cameraStatus != .notDetermined &&
 									  micStatus != .undetermined &&
-									  photoStatus != .notDetermined &&
 									  contactsStatus != .notDetermined &&
 									  notifStatus != .notDetermined
 			

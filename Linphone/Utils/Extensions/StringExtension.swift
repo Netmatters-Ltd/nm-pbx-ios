@@ -23,6 +23,13 @@ extension String {
 	func localized(comment: String? = nil) -> String {
 		return NSLocalizedString(self, comment: comment != nil ? comment! : self)
 	}
+
+	/// Extracts just the username/number from a SIP address string.
+	/// Handles inputs like "sip:130@sip.example.com", "130@sip.example.com", or plain "130".
+	var sipUsername: String {
+		let withoutPrefix = self.hasPrefix("sip:") ? String(self.dropFirst(4)) : self
+		return withoutPrefix.components(separatedBy: "@").first ?? withoutPrefix
+	}
 }
 
 extension String {

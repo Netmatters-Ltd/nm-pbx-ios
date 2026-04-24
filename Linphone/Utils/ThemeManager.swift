@@ -40,16 +40,14 @@ final class ThemeManager: ObservableObject {
 	@Published var currentTheme: Theme = ThemeManager.nmpbx
 
 	private init() {
-		let storedName = UserDefaults.standard.string(forKey: themeKey)
-		currentTheme = themes[storedName ?? ""] ?? ThemeManager.nmpbx
+		currentTheme = ThemeManager.nmpbx
 	}
-	
+
 	func applyTheme(named name: String) {
-		guard let theme = themes[name] else { return }
+		guard name == "nmpbx", let theme = themes[name] else { return }
 		withAnimation(.easeInOut(duration: 0.3)) {
 			self.currentTheme = theme
 		}
-		UserDefaults.standard.setValue(name, forKey: themeKey)
 	}
 	
 	// MARK: - Theme Presets

@@ -137,6 +137,7 @@
 		D762102C2E97FDFD002E7999 /* CardDavAddressBookConfigurationFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D762102B2E97FDF8002E7999 /* CardDavAddressBookConfigurationFragment.swift */; };
 		D7702EF22AC7205000557C00 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7702EF12AC7205000557C00 /* WelcomeView.swift */; };
 		D777DBB32AE12C5900565A99 /* ContactsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D777DBB22AE12C5900565A99 /* ContactsManager.swift */; };
+		D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */; };
 		D77A080E2CB6BCAF0095D589 /* MessageConferenceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A080D2CB6BCA10095D589 /* MessageConferenceInfo.swift */; };
 		D78290B82ADD3910004AA85C /* ContactsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78290B72ADD3910004AA85C /* ContactsFragment.swift */; };
 		D78290BB2ADD40B2004AA85C /* ContactsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78290BA2ADD40B2004AA85C /* ContactsListViewModel.swift */; };
@@ -309,8 +310,6 @@
 		D70A26ED2B7CF60B006CC8FC /* ConversationsListBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsListBottomSheet.swift; sourceTree = "<group>"; };
 		D70A26EF2B7D02E6006CC8FC /* ConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationViewModel.swift; sourceTree = "<group>"; };
 		D70A26F12B7F5D95006CC8FC /* ConversationFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationFragment.swift; sourceTree = "<group>"; };
-		D70C3B5D2E0ABAB600F3F938 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = Localizable/cs.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D70C3B5E2E0ABAB900F3F938 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = Localizable/uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D70C82A42C85EDC90087F43F /* ConversationForwardMessageFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationForwardMessageFragment.swift; sourceTree = "<group>"; };
 		D70C82A62C85F5910087F43F /* ConversationForwardMessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationForwardMessageViewModel.swift; sourceTree = "<group>"; };
 		D711B12F2E8FCED900DF8C71 /* CardDavViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavViewModel.swift; sourceTree = "<group>"; };
@@ -337,7 +336,6 @@
 		D719ABCE2ABC779A00B41C10 /* AccountLoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountLoginViewModel.swift; sourceTree = "<group>"; };
 		D719EF882EDF4AFA00509AAB /* GeneratedGit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratedGit.swift; sourceTree = "<group>"; };
 		D71A0E182B485ADF0002C6CD /* ViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtension.swift; sourceTree = "<group>"; };
-		D71C266F2E819A0D001A7F92 /* sk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sk; path = Localizable/sk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D71FCA802AE14CFC00D2E43E /* ContactsListFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsListFragment.swift; sourceTree = "<group>"; };
 		D71FCA822AE14D6E00D2E43E /* ContactFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactFragment.swift; sourceTree = "<group>"; };
 		D720E6AC2BAD822000DDFD87 /* ParticipantModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantModel.swift; sourceTree = "<group>"; };
@@ -364,18 +362,8 @@
 		D73449982BC6932A00778C56 /* MeetingWaitingRoomFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingWaitingRoomFragment.swift; sourceTree = "<group>"; };
 		D734499A2BC694C900778C56 /* MeetingWaitingRoomViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingWaitingRoomViewModel.swift; sourceTree = "<group>"; };
 		D737AEEE2DA011F2005C1280 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable/en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D737AEF02DA01203005C1280 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable/fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D738ACED2E857BEF0039F7D1 /* KeyboardResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardResponder.swift; sourceTree = "<group>"; };
 		D73DD7CF2EE184A500654313 /* RecordingsListBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingsListBottomSheet.swift; sourceTree = "<group>"; };
-		D73DD7EC2EE6DAE100654313 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = Localizable/eu.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7EE2EE6DBA900654313 /* ca */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ca; path = Localizable/ca.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7F02EE6DC4000654313 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = Localizable/fi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7F22EE6DCC600654313 /* mk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = mk; path = Localizable/mk.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7F42EE6DD2A00654313 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = Localizable/pt.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7F62EE6DD5600654313 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Localizable/es.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7F82EE6DDE200654313 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = Localizable/nl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7FA2EE6DF0500654313 /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = Localizable/hu.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D73DD7FC2EE6DF4F00654313 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "Localizable/pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		D7458F2F2E0BDCF4000C957A /* linphoneExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = linphoneExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D748BF2B2ACD82D2004844EB /* ThirdPartySipAccountLoginFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdPartySipAccountLoginFragment.swift; sourceTree = "<group>"; };
 		D748BF2D2ACD82E7004844EB /* ThirdPartySipAccountWarningFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdPartySipAccountWarningFragment.swift; sourceTree = "<group>"; };
@@ -395,6 +383,7 @@
 		D762102B2E97FDF8002E7999 /* CardDavAddressBookConfigurationFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavAddressBookConfigurationFragment.swift; sourceTree = "<group>"; };
 		D7702EF12AC7205000557C00 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		D777DBB22AE12C5900565A99 /* ContactsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsManager.swift; sourceTree = "<group>"; };
+		D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavProvisioningManager.swift; sourceTree = "<group>"; };
 		D77A080D2CB6BCA10095D589 /* MessageConferenceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageConferenceInfo.swift; sourceTree = "<group>"; };
 		D78290B72ADD3910004AA85C /* ContactsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsFragment.swift; sourceTree = "<group>"; };
 		D78290BA2ADD40B2004AA85C /* ContactsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsListViewModel.swift; sourceTree = "<group>"; };
@@ -464,9 +453,6 @@
 		D7EAACCE2AD6ED8000AA6A8A /* PermissionsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsFragment.swift; sourceTree = "<group>"; };
 		D7EFD1E32CD11F53005E67CD /* EphemeralFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EphemeralFragment.swift; sourceTree = "<group>"; };
 		D7F01ADD2E1D0D92006942C0 /* PopupUpdatePassword.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupUpdatePassword.swift; sourceTree = "<group>"; };
-		D7F372C22E65C5190008B863 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = Localizable/de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D7F372C32E65C51B0008B863 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = Localizable/ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D7F372C42E65C51E0008B863 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "Localizable/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		D7F4D9CA2B5FD27200CDCD76 /* CallsListFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsListFragment.swift; sourceTree = "<group>"; };
 		D7F5F6402C359F3B007FCF2F /* SipAddressesPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SipAddressesPopup.swift; sourceTree = "<group>"; };
 		D7FB55102AD447FD00A5AB15 /* RegisterFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterFragment.swift; sourceTree = "<group>"; };
@@ -919,6 +905,7 @@
 			isa = PBXGroup;
 			children = (
 				D777DBB22AE12C5900565A99 /* ContactsManager.swift */,
+				D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */,
 			);
 			path = Contacts;
 			sourceTree = "<group>";
@@ -1291,22 +1278,6 @@
 			knownRegions = (
 				en,
 				Base,
-				fr,
-				cs,
-				uk,
-				de,
-				ru,
-				"zh-Hans",
-				sk,
-				eu,
-				ca,
-				fi,
-				mk,
-				pt,
-				es,
-				nl,
-				hu,
-				"pt-BR",
 			);
 			mainGroup = D719ABAA2ABC67BF00B41C10;
 			packageReferences = (
@@ -1469,6 +1440,7 @@
 				D7EAACCF2AD6ED8000AA6A8A /* PermissionsFragment.swift in Sources */,
 				D759CB662C3FBE1D00AC35E8 /* StartConversationViewModel.swift in Sources */,
 				D777DBB32AE12C5900565A99 /* ContactsManager.swift in Sources */,
+				D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */,
 				D720E6AD2BAD822000DDFD87 /* ParticipantModel.swift in Sources */,
 				D796F2002B0BB61A0041115F /* ToastViewModel.swift in Sources */,
 				D7C3650A2AF001C300FE6142 /* EditContactFragment.swift in Sources */,
@@ -1646,22 +1618,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				D737AEEE2DA011F2005C1280 /* en */,
-				D737AEF02DA01203005C1280 /* fr */,
-				D70C3B5D2E0ABAB600F3F938 /* cs */,
-				D70C3B5E2E0ABAB900F3F938 /* uk */,
-				D7F372C22E65C5190008B863 /* de */,
-				D7F372C32E65C51B0008B863 /* ru */,
-				D7F372C42E65C51E0008B863 /* zh-Hans */,
-				D71C266F2E819A0D001A7F92 /* sk */,
-				D73DD7EC2EE6DAE100654313 /* eu */,
-				D73DD7EE2EE6DBA900654313 /* ca */,
-				D73DD7F02EE6DC4000654313 /* fi */,
-				D73DD7F22EE6DCC600654313 /* mk */,
-				D73DD7F42EE6DD2A00654313 /* pt */,
-				D73DD7F62EE6DD5600654313 /* es */,
-				D73DD7F82EE6DDE200654313 /* nl */,
-				D73DD7FA2EE6DF0500654313 /* hu */,
-				D73DD7FC2EE6DF4F00654313 /* pt-BR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1898,10 +1854,10 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = YES;
 				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "b5cb085f-772a-4a4f-8c77-5d1332b1f93f";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Deprecated - Prior to iOS 17 full calendar access is required";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Camera usage is required to scan the QR code to provision this app";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Make calls to contacts already on your iPhone";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "NMPBX requires access to the local network to establish VoIP connections";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone usage is required for VOIP calls";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Used during initial setup to scan the QR code.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "NMPBX needs access to your contacts if you want to access contacts that are already on your iPhone.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Used to connect to NMPBX to make and receive calls.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used when making calls through NMPBX.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -1960,10 +1916,10 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = YES;
 				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "b5cb085f-772a-4a4f-8c77-5d1332b1f93f";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Deprecated - Prior to iOS 17 full calendar access is required";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Camera usage is required to scan the QR code to provision this app";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Make calls to contacts already on your iPhone";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "NMPBX requires access to the local network to establish VoIP connections";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone usage is required for VOIP calls";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Used during initial setup to scan the QR code.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "NMPBX needs access to your contacts if you want to access contacts that are already on your iPhone.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Used to connect to NMPBX to make and receive calls.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used when making calls through NMPBX.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

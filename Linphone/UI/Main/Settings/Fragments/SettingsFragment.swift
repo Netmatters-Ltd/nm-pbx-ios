@@ -166,9 +166,7 @@ struct SettingsFragment: View {
 									VStack(spacing: 30) {
 										Toggle("settings_calls_adaptive_rate_control_title", isOn: $settingsViewModel.adaptiveRateControl)
 											.default_text_style_700(styleSize: 15)
-										
-										Toggle("settings_calls_enable_video_title", isOn: $settingsViewModel.enableVideo)
-											.default_text_style_700(styleSize: 15)
+                                
 										
 										/*
 										Toggle("settings_calls_vibrate_while_ringing_title", isOn: $isOn)
@@ -203,45 +201,6 @@ struct SettingsFragment: View {
 								.cornerRadius(15)
 								.padding(.horizontal)
 								.zIndex(-2)
-								.transition(.move(edge: .top))
-							}
-							
-							HStack(alignment: .center) {
-								Text("settings_conversations_title")
-									.default_text_style_800(styleSize: 18)
-									.frame(maxWidth: .infinity, alignment: .leading)
-								
-								Spacer()
-								
-								Image(conversationsIsOpen ? "caret-up" : "caret-down")
-									.renderingMode(.template)
-									.resizable()
-									.foregroundStyle(Color.grayMain2c600)
-									.frame(width: 25, height: 25, alignment: .leading)
-									.padding(.all, 10)
-							}
-							.padding(.vertical, 10)
-							.padding(.horizontal, 20)
-							.background(Color.gray100)
-							.onTapGesture {
-								withAnimation {
-									conversationsIsOpen.toggle()
-								}
-							}
-							
-							if conversationsIsOpen {
-								VStack(spacing: 0) {
-									VStack(spacing: 30) {
-										Toggle("settings_conversations_auto_download_title", isOn: $settingsViewModel.autoDownload)
-											.default_text_style_700(styleSize: 15)
-									}
-									.padding(.vertical, 30)
-									.padding(.horizontal, 20)
-								}
-								.background(.white)
-								.cornerRadius(15)
-								.padding(.horizontal)
-								.zIndex(-3)
 								.transition(.move(edge: .top))
 							}
 							
@@ -372,71 +331,6 @@ struct SettingsFragment: View {
 								.cornerRadius(15)
 								.padding(.horizontal)
 								.zIndex(-4)
-								.transition(.move(edge: .top))
-							}
-							
-							HStack(alignment: .center) {
-								Text("settings_meetings_title")
-									.default_text_style_800(styleSize: 18)
-									.frame(maxWidth: .infinity, alignment: .leading)
-								
-								Spacer()
-								
-								Image(meetingsIsOpen ? "caret-up" : "caret-down")
-									.renderingMode(.template)
-									.resizable()
-									.foregroundStyle(Color.grayMain2c600)
-									.frame(width: 25, height: 25, alignment: .leading)
-									.padding(.all, 10)
-							}
-							.padding(.vertical, 10)
-							.padding(.horizontal, 20)
-							.background(Color.gray100)
-							.onTapGesture {
-								withAnimation {
-									meetingsIsOpen.toggle()
-								}
-							}
-							
-							if meetingsIsOpen {
-								VStack(spacing: 0) {
-									VStack(spacing: 30) {
-										VStack(alignment: .leading) {
-											Text("settings_meetings_default_layout_title")
-												.default_text_style_700(styleSize: 15)
-												.padding(.bottom, -5)
-											
-											Menu {
-												Button("settings_meetings_layout_active_speaker_label") { settingsViewModel.defaultLayout = String(localized: "settings_meetings_layout_active_speaker_label") }
-												Button("settings_meetings_layout_mosaic_label") { settingsViewModel.defaultLayout = String(localized: "settings_meetings_layout_mosaic_label") }
-											} label: {
-												Text(settingsViewModel.defaultLayout)
-													.default_text_style(styleSize: 15)
-													.frame(maxWidth: .infinity, alignment: .leading)
-												Image("caret-down")
-													.renderingMode(.template)
-													.resizable()
-													.foregroundStyle(Color.grayMain2c500)
-													.frame(width: 20, height: 20)
-											}
-											.frame(height: 25)
-											.padding(.horizontal, 20)
-											.padding(.vertical, 15)
-											.cornerRadius(60)
-											.overlay(
-												RoundedRectangle(cornerRadius: 60)
-													.inset(by: 0.5)
-													.stroke(Color.gray200, lineWidth: 1)
-											)
-										}
-									}
-									.padding(.vertical, 30)
-									.padding(.horizontal, 20)
-								}
-								.background(.white)
-								.cornerRadius(15)
-								.padding(.horizontal)
-								.zIndex(-5)
 								.transition(.move(edge: .top))
 							}
 							

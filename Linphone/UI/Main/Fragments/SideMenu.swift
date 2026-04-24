@@ -147,16 +147,6 @@ struct SideMenu: View {
 								isShowRecordingsListFragment = true
 							}
 						}
-						
-						SideMenuEntry(
-							iconName: "question",
-							title: "help_title"
-						).onTapGesture {
-							self.menuClose()
-							withAnimation {
-								isShowHelpFragment = true
-							}
-						}
 					}
 					.padding(.bottom, safeAreaInsets.bottom + 13)
 					.padding(.top, 13)

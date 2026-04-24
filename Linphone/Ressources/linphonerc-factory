@@ -25,7 +25,7 @@ update_presence_model_timestamp_before_publish_expires_refresh=1
 
 [sound]
 #remove this property for any application that is not Linphone public version itself
-ec_calibrator_cool_tones=1
+# ec_calibrator_cool_tones=1
 disable_ringing=0
 
 [audio]
@@ -44,9 +44,12 @@ store_friends=0
 [app]
 record_aware=1
 
+[ui]
+theme_main_color=nmpbx
+
 [account_creator]
-url=https://subscribe.linphone.org/api/
-backend=1
+# url=https://subscribe.linphone.org/api/
+# backend=1
 
 [lime]
 lime_update_threshold=86400

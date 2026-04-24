@@ -435,7 +435,7 @@ struct ContentView: View {
 							
 							VStack(spacing: 0) {
 								Rectangle()
-									.foregroundColor(Color.orangeMain500)
+									.foregroundColor(Color.nmpbxSecondary)
 									.edgesIgnoringSafeArea(.top)
 									.frame(height: 1)
 								
@@ -447,7 +447,7 @@ struct ContentView: View {
 												 || orientation == .landscapeRight
 												 || UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height)
 												? Color.white
-												: Color.orangeMain500
+												: Color.nmpbxSecondary
 											)
 											.frame(height: 100)
 										
@@ -638,7 +638,7 @@ struct ContentView: View {
 											.padding(.leading)
 											.padding(.top, 2.5)
 											.padding(.bottom, 2.5)
-											.background(Color.orangeMain500)
+											.background(Color.nmpbxSecondary)
 											.roundedCorner(10, corners: [.bottomRight, .bottomLeft])
 										} else {
 											HStack {
@@ -767,7 +767,7 @@ struct ContentView: View {
 											.frame(height: 50)
 											.padding(.horizontal)
 											.padding(.bottom, 5)
-											.background(Color.orangeMain500)
+											.background(Color.nmpbxSecondary)
 											.roundedCorner(10, corners: [.bottomRight, .bottomLeft])
 										}
 										

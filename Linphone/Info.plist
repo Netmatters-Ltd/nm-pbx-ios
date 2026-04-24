@@ -142,14 +142,6 @@
 		<string>voip</string>
 		<string>audio</string>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>NMPBX needs access to your photo library if you wish to use saved photos for contacts.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>NMPBX needs access to your camera so you can scan the QR code for getting set up.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>NMPBX needs access to your microphone to make calls.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>NMPBX needs access to your contacts if you want to access contacts that are already on your iPhone.</string>
 	<key>UILaunchScreen</key>
 	<false/>
 </dict>

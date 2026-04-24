@@ -71,9 +71,6 @@ struct SettingsAdvancedFragment: View {
 				ScrollView {
 					VStack(spacing: 0) {
 						VStack(spacing: 30) {
-							Toggle("settings_calls_enable_fec_title", isOn: $settingsViewModel.enableFec)
-								.default_text_style_700(styleSize: 15)
-							
 							VStack(alignment: .leading) {
 								Text("call_stats_media_encryption_title")
 									.default_text_style_700(styleSize: 15)
@@ -143,25 +140,6 @@ struct SettingsAdvancedFragment: View {
 											.stroke(isDeviceIdFocused ? Color.orangeMain500 : Color.gray200, lineWidth: 1)
 									)
 									.focused($isDeviceIdFocused)
-							}
-							
-							VStack(alignment: .leading) {
-								Text("settings_advanced_upload_server_url")
-									.default_text_style_700(styleSize: 15)
-									.padding(.bottom, -5)
-								
-								TextField("settings_advanced_upload_server_url", text: $settingsViewModel.uploadServerUrl)
-									.default_text_style(styleSize: 15)
-									.frame(height: 25)
-									.padding(.horizontal, 20)
-									.padding(.vertical, 15)
-									.cornerRadius(60)
-									.overlay(
-										RoundedRectangle(cornerRadius: 60)
-											.inset(by: 0.5)
-											.stroke(isUploadServerUrlFocused ? Color.orangeMain500 : Color.gray200, lineWidth: 1)
-									)
-									.focused($isUploadServerUrlFocused)
 							}
 							
 							VStack(alignment: .leading) {
@@ -355,51 +333,6 @@ struct SettingsAdvancedFragment: View {
 							.cornerRadius(15)
 							.padding(.horizontal)
 							.zIndex(-2)
-							.transition(.move(edge: .top))
-						}
-						
-						HStack(alignment: .center) {
-							Text("settings_advanced_video_codecs_title")
-								.default_text_style_800(styleSize: 18)
-								.frame(maxWidth: .infinity, alignment: .leading)
-							
-							Spacer()
-							
-							Image(videoCodecsIsOpen ? "caret-up" : "caret-down")
-								.renderingMode(.template)
-								.resizable()
-								.foregroundStyle(Color.grayMain2c600)
-								.frame(width: 25, height: 25, alignment: .leading)
-								.padding(.all, 10)
-						}
-						.padding(.vertical, 10)
-						.padding(.horizontal, 20)
-						.background(Color.gray100)
-						.onTapGesture {
-							withAnimation {
-								videoCodecsIsOpen.toggle()
-							}
-						}
-						
-						if videoCodecsIsOpen {
-							VStack(spacing: 0) {
-								VStack(spacing: 30) {
-									ForEach(settingsViewModel.videoCodecs) { videoCodec in
-										SettingsToggleWidget(title: videoCodec.mimeType, subtitle: videoCodec.subtitle, isOn: Binding(
-											get: { videoCodec.isEnabled },
-											set: { newValue in
-												videoCodec.toggleEnabled()
-											}
-										))
-									}
-								}
-								.padding(.vertical, 30)
-								.padding(.horizontal, 20)
-							}
-							.background(.white)
-							.cornerRadius(15)
-							.padding(.horizontal)
-							.zIndex(-3)
 							.transition(.move(edge: .top))
 						}
 					}

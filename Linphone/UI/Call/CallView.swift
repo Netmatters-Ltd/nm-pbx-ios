@@ -306,19 +306,6 @@ struct CallView: View {
 										.padding(.all, 10)
 								}
 							} else {
-								if callViewModel.videoDisplayed {
-									Button {
-										callViewModel.switchCamera()
-									} label: {
-										Image("camera-rotate")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(.white)
-											.frame(width: 30, height: 30)
-											.padding(.horizontal)
-									}
-								}
-								
 								Button {
 									callStatisticsSheet = true
 								} label: {
@@ -336,120 +323,6 @@ struct CallView: View {
                         .padding(.trailing, geometry.safeAreaInsets.trailing)
 						.zIndex(1)
 						
-						if !telecomManager.outgoingCallStarted && telecomManager.callInProgress {
-							if callViewModel.isMediaEncrypted && callViewModel.isRemoteDeviceTrusted && callViewModel.isZrtp {
-								HStack {
-									Image("lock-key")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.blueInfo500)
-										.frame(width: 15, height: 15, alignment: .leading)
-										.padding(.leading, 50)
-										.padding(.top, 35)
-									
-									Text(callViewModel.isConference ? "call_srtp_point_to_point_encrypted" : "call_zrtp_end_to_end_encrypted")
-										.foregroundStyle(Color.blueInfo500)
-										.default_text_style_white(styleSize: 12)
-										.padding(.top, 35)
-									
-									Spacer()
-								}
-								.onTapGesture {
-									mediaEncryptedSheet = true
-								}
-								.frame(height: topBarHeight)
-								.padding(.leading, geometry.safeAreaInsets.leading)
-								.zIndex(1)
-							} else if callViewModel.isMediaEncrypted && !callViewModel.isZrtp {
-								HStack {
-									Image("lock_simple")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.blueInfo500)
-										.frame(width: 15, height: 15, alignment: .leading)
-										.padding(.leading, 50)
-										.padding(.top, 35)
-									
-									Text("call_srtp_point_to_point_encrypted")
-										.foregroundStyle(Color.blueInfo500)
-										.default_text_style_white(styleSize: 12)
-										.padding(.top, 35)
-									
-									Spacer()
-								}
-								.onTapGesture {
-									mediaEncryptedSheet = true
-								}
-								.frame(height: topBarHeight)
-								.padding(.leading, geometry.safeAreaInsets.leading)
-								.zIndex(1)
-							} else if callViewModel.isMediaEncrypted && (!callViewModel.isRemoteDeviceTrusted && callViewModel.isZrtp) || callViewModel.cacheMismatch {
-								HStack {
-									Image("warning-circle")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.orangeWarning600)
-										.frame(width: 15, height: 15, alignment: .leading)
-										.padding(.leading, 50)
-										.padding(.top, 35)
-									
-									Text("call_zrtp_sas_validation_required")
-										.foregroundStyle(Color.orangeWarning600)
-										.default_text_style_white(styleSize: 12)
-										.padding(.top, 35)
-									
-									Spacer()
-								}
-								.onTapGesture {
-									mediaEncryptedSheet = true
-								}
-								.frame(height: topBarHeight)
-								.padding(.leading, geometry.safeAreaInsets.leading)
-								.zIndex(1)
-							} else if callViewModel.isNotEncrypted {
-								HStack {
-									Image("lock_simple")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(.white)
-										.frame(width: 15, height: 15, alignment: .leading)
-										.padding(.leading, 50)
-										.padding(.top, 35)
-									
-									Text("call_not_encrypted")
-										.foregroundStyle(.white)
-										.default_text_style_white(styleSize: 12)
-										.padding(.top, 35)
-									
-									Spacer()
-								}
-								.onTapGesture {
-									mediaEncryptedSheet = true
-								}
-								.frame(height: topBarHeight)
-								.padding(.leading, geometry.safeAreaInsets.leading)
-								.zIndex(1)
-							} else {
-								HStack {
-									ProgressView()
-										.controlSize(.mini)
-										.progressViewStyle(CircularProgressViewStyle(tint: .white))
-										.frame(width: 15, height: 15, alignment: .leading)
-										.padding(.leading, 50)
-										.padding(.top, 35)
-									
-									Text("call_waiting_for_encryption_info")
-										.foregroundStyle(.white)
-										.default_text_style_white(styleSize: 12)
-										.padding(.top, 35)
-									
-									Spacer()
-								}
-								.frame(height: topBarHeight)
-								.padding(.leading, geometry.safeAreaInsets.leading)
-								.zIndex(1)
-							}
-						}
 					}
                     .frame(height: topBarHeight)
 				}
@@ -1954,39 +1827,6 @@ struct CallView: View {
                 .cornerRadius(40)
                 
                 Spacer()
-				
-				if !SharedMainViewModel.shared.disableVideoCall {
-					ZStack {
-						Button {
-							if optionsChangeLayout == 3 {
-								optionsChangeLayout = 2
-								callViewModel.toggleVideoMode(isAudioOnlyMode: false)
-							} else {
-								callViewModel.displayMyVideo()
-							}
-						} label: {
-							HStack {
-								Image(callViewModel.videoDisplayed ? "video-camera" : "video-camera-slash")
-									.renderingMode(.template)
-									.resizable()
-									.foregroundStyle(.white)
-									.frame(width: 32, height: 32)
-							}
-						}
-						.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-						.frame(width: buttonSize, height: buttonSize)
-						.background(Color.gray500)
-						.cornerRadius(40)
-						.disabled(callViewModel.isPaused || telecomManager.isPausedByRemote || telecomManager.outgoingCallStarted || optionsChangeLayout == 3)
-						
-						if callViewModel.isPaused || telecomManager.isPausedByRemote || telecomManager.outgoingCallStarted || optionsChangeLayout == 3 {
-							Color.gray600.opacity(0.8)
-								.cornerRadius(40)
-								.allowsHitTesting(false)
-						}
-					}
-					.frame(width: buttonSize, height: buttonSize)
-				}
 				
                 Button {
                     callViewModel.toggleMuteMicrophone()
