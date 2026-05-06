@@ -217,6 +217,9 @@
 		D7F5F6412C359F3B007FCF2F /* SipAddressesPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5F6402C359F3B007FCF2F /* SipAddressesPopup.swift */; };
 		D7FB55112AD447FD00A5AB15 /* RegisterFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FB55102AD447FD00A5AB15 /* RegisterFragment.swift */; };
 		D7FC8E4A2EBA12F90080C09D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D7FC8E492EBA12F90080C09D /* Launch Screen.storyboard */; };
+		D3D2BB2872477A97D70414E0 /* UserPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13C679DF82AA9FCABD42BBC /* UserPresence.swift */; };
+		1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */; };
+		FC5F6CA106CBA23F016B91A1 /* PresencePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -457,6 +460,9 @@
 		D7F5F6402C359F3B007FCF2F /* SipAddressesPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SipAddressesPopup.swift; sourceTree = "<group>"; };
 		D7FB55102AD447FD00A5AB15 /* RegisterFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterFragment.swift; sourceTree = "<group>"; };
 		D7FC8E492EBA12F90080C09D /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		E13C679DF82AA9FCABD42BBC /* UserPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPresence.swift; sourceTree = "<group>"; };
+		EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceViewModel.swift; sourceTree = "<group>"; };
+		9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresencePickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -738,6 +744,7 @@
 				D795F57A2EC5F89B0022C17D /* Recordings */,
 				D7DC096A2CFA192200A6D47C /* Settings */,
 				D7A2EDD42AC180FE005D90FC /* Viewmodel */,
+				1ED2B1E9B6118F6FFD552D32 /* Presence */,
 				D719ABB82ABC67BF00B41C10 /* ContentView.swift */,
 			);
 			path = Main;
@@ -1159,6 +1166,16 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		1ED2B1E9B6118F6FFD552D32 /* Presence */ = {
+			isa = PBXGroup;
+			children = (
+					E13C679DF82AA9FCABD42BBC /* UserPresence.swift */,
+					EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */,
+					9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */,
+			);
+			path = Presence;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1553,6 +1570,9 @@
 				D74DA0122C047F0700A8561D /* HistoryModel.swift in Sources */,
 				66D382052CEB7E0A0063E1C5 /* ShortcutModel.swift in Sources */,
 				D72250692ADFBF2D008FB426 /* SideMenu.swift in Sources */,
+				D3D2BB2872477A97D70414E0 /* UserPresence.swift in Sources */,
+				1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */,
+				FC5F6CA106CBA23F016B91A1 /* PresencePickerView.swift in Sources */,
 				D703F7082DC8C605005B8F75 /* FilePicker.swift in Sources */,
 				C6DC4E3F2C19C289009096FD /* SideMenuEntry.swift in Sources */,
 				D714DE622C1C4636006C1F1D /* RegisterCodeConfirmationFragment.swift in Sources */,

@@ -126,13 +126,29 @@ struct ContactInnerFragment: View {
 											.frame(maxWidth: .infinity)
 											.padding(.top, 10)
 										
-										Text(contactAvatarModel.lastPresenceInfo)
-											.foregroundStyle(contactAvatarModel.lastPresenceInfo == "Online"
-															 ? Color.greenSuccess500
-															 : Color.orangeWarning600)
-											.multilineTextAlignment(.center)
-											.default_text_style_300(styleSize: 12)
-											.frame(maxWidth: .infinity)
+										let status = contactAvatarModel.presenceUserStatus
+										if status != .offline {
+											Text(status.label)
+												.foregroundStyle(status.badgeColor)
+												.multilineTextAlignment(.center)
+												.default_text_style_300(styleSize: 12)
+												.frame(maxWidth: .infinity)
+
+											if !contactAvatarModel.presenceNote.isEmpty {
+												Text(contactAvatarModel.presenceNote)
+													.foregroundStyle(Color.grayMain2c500)
+													.multilineTextAlignment(.center)
+													.default_text_style_300(styleSize: 12)
+													.frame(maxWidth: .infinity)
+													.padding(.top, 2)
+											}
+										} else if !contactAvatarModel.lastPresenceInfo.isEmpty {
+											Text(contactAvatarModel.lastPresenceInfo)
+												.foregroundStyle(Color.grayMain2c400)
+												.multilineTextAlignment(.center)
+												.default_text_style_300(styleSize: 12)
+												.frame(maxWidth: .infinity)
+										}
 									}
 								}
 								.frame(minHeight: 150)

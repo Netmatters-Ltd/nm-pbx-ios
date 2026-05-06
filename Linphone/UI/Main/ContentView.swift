@@ -44,6 +44,7 @@ struct ContentView: View {
 	
 	@State private var orientation = UIDevice.current.orientation
 	@State var sideMenuIsOpen: Bool = false
+	@State private var showPresencePicker = false
 	
 	@State private var searchIsActive = false
 	@State private var text = ""
@@ -513,7 +514,7 @@ struct ContentView: View {
                                                         }
                                                         .id(imagePath)
                                                         .onTapGesture {
-                                                            openMenu()
+                                                            showPresencePicker = true
                                                         }
                                                         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImageChanged"))) { _ in
                                                             imageTmp = nil
@@ -526,7 +527,7 @@ struct ContentView: View {
 														.frame(width: avatarSize, height: avatarSize)
 														.clipShape(Circle())
 														.onTapGesture {
-															openMenu()
+															showPresencePicker = true
 														}
                                                 } else {
                                                     ProgressView()
@@ -632,6 +633,9 @@ struct ContentView: View {
 														isMenuOpen = true
 													}
 												}
+											}
+											.popover(isPresented: $showPresencePicker) {
+												PresencePickerView()
 											}
 											.frame(maxWidth: .infinity)
 											.frame(height: 50)

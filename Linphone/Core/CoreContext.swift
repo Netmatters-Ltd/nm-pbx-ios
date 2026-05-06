@@ -376,9 +376,7 @@ class CoreContext: ObservableObject {
 						self.mCore.defaultAccount?.params = clonedParams
 					}
 					
-					if self.mCore.consolidatedPresence !=  ConsolidatedPresence.Online {
-						self.updatePresence(core: self.mCore, presence: ConsolidatedPresence.Online)
-					}
+					PresenceViewModel.shared.restoreOrGoOnline()
 				case .Cleared:
 					Log.info("[CoreContext][onAccountRegistrationStateChanged] Account \(account.displayName()) registration was cleared.")
 				case .Failed:
@@ -469,8 +467,9 @@ class CoreContext: ObservableObject {
 			self.mCore.addDelegate(delegate: self.mCoreDelegate)
 			
 			self.mCore.autoIterateEnabled = true
-			
+
 			try? self.mCore.start()
+			self.loadSavedPresence()
 		}
 	}
 	
@@ -478,6 +477,10 @@ class CoreContext: ObservableObject {
 		if core.config!.getBool(section: "app", key: "publish_presence", defaultValue: true) {
 			core.consolidatedPresence = presence
 		}
+	}
+
+	func loadSavedPresence() {
+		PresenceViewModel.shared.loadSavedPresence()
 	}
 	
 	func onEnterForeground() {
@@ -490,11 +493,10 @@ class CoreContext: ObservableObject {
 
 	func onEnterBackground() {
 		coreQueue.async {
-			Log.info("[onEnterForegroundOrBackground] Entering background, un-PUBLISHING presence info")
-			
-			self.updatePresence(core: self.mCore, presence: .Offline)
+			Log.info("[onEnterForegroundOrBackground] Entering background")
+
 			self.mCore.iterate()
-			
+
 			if self.mCore.currentCall == nil && self.mCore.globalState == .On {
 				Log.info("[onEnterForegroundOrBackground] Stopping core because no active calls")
 				self.mCore.stop()

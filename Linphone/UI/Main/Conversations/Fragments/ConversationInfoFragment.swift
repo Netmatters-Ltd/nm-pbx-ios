@@ -113,21 +113,33 @@ struct ConversationInfoFragment: View {
 													.padding(.top, 5)
 											}
 											
-											if !SharedMainViewModel.shared.displayedConversation!.avatarModel.lastPresenceInfo.isEmpty {
-												Text(SharedMainViewModel.shared.displayedConversation!.avatarModel.lastPresenceInfo)
-													.foregroundStyle(SharedMainViewModel.shared.displayedConversation!.avatarModel.lastPresenceInfo == "Online"
-																	 ? Color.greenSuccess500
-																	 : Color.orangeWarning600)
+											let avatarModel = SharedMainViewModel.shared.displayedConversation!.avatarModel
+											let status = avatarModel.presenceUserStatus
+											if status != .offline {
+												VStack(spacing: 2) {
+													Text(status.label)
+														.foregroundStyle(status.badgeColor)
+														.multilineTextAlignment(.center)
+														.default_text_style_300(styleSize: 12)
+														.frame(maxWidth: .infinity)
+													if !avatarModel.presenceNote.isEmpty {
+														Text(avatarModel.presenceNote)
+															.foregroundStyle(Color.grayMain2c500)
+															.multilineTextAlignment(.center)
+															.default_text_style_300(styleSize: 12)
+															.frame(maxWidth: .infinity)
+													}
+												}
+												.padding(.top, 5)
+											} else if !avatarModel.lastPresenceInfo.isEmpty {
+												Text(avatarModel.lastPresenceInfo)
+													.foregroundStyle(Color.grayMain2c400)
 													.multilineTextAlignment(.center)
 													.default_text_style_300(styleSize: 12)
 													.frame(maxWidth: .infinity)
-													.frame(height: 20)
 													.padding(.top, 5)
 											} else {
 												Text("")
-													.multilineTextAlignment(.center)
-													.default_text_style_300(styleSize: 12)
-													.frame(maxWidth: .infinity)
 													.frame(height: 20)
 											}
 										} else {

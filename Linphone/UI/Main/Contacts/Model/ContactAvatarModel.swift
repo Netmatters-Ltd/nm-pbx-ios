@@ -45,6 +45,24 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	@Published var photo: String = ""
 	@Published var lastPresenceInfo: String = ""
 	@Published var presenceStatus: ConsolidatedPresence = .Offline
+	@Published var presenceActivity: PresenceActivity.Kind? = nil
+	@Published var presenceNote: String = ""
+
+	var presenceUserStatus: UserPresence {
+		switch presenceStatus {
+		case .Online:
+			return .online
+		case .Busy:
+			switch presenceActivity {
+			case .Away: return .away
+			case .Busy: return .busy
+			case .Other: return .doNotDisturb
+			default: return .busy
+			}
+		default:
+			return .offline
+		}
+	}
 	
 	private var friendDelegate: FriendDelegate?
 	
@@ -88,13 +106,17 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			
 			var lastPresenceInfoTmp = ""
 			var presenceStatusTmp: ConsolidatedPresence = .Offline
-			
+			var presenceActivityTmp: PresenceActivity.Kind? = nil
+			var presenceNoteTmp = ""
+
 			if let friend = friend, withPresence == true {
-                
+
 				lastPresenceInfoTmp = ""
-				
+
 				presenceStatusTmp = friend.consolidatedPresence
-                
+				presenceActivityTmp = friend.presenceModel?.activity?.type
+				presenceNoteTmp = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
+
 				if friend.consolidatedPresence == .Online || friend.consolidatedPresence == .Busy {
 					if friend.consolidatedPresence == .Online || friend.presenceModel?.latestActivityTimestamp != -1 {
 						lastPresenceInfoTmp = (friend.consolidatedPresence == .Online) ?
@@ -128,6 +150,8 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 				self.photo = photoTmp
 				self.lastPresenceInfo = lastPresenceInfoTmp
 				self.presenceStatus = presenceStatusTmp
+				self.presenceActivity = presenceActivityTmp
+				self.presenceNote = presenceNoteTmp
 			}
 		}
 	}
@@ -136,8 +160,12 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 		friendDelegate = FriendDelegateStub(onPresenceReceived: { (friend: Friend) in
 			let latestActivityTimestamp = friend.presenceModel?.latestActivityTimestamp ?? -1
 			let consolidatedPresenceTmp = friend.consolidatedPresence
+			let presenceActivityTmp = friend.presenceModel?.activity?.type
+			let presenceNoteTmp = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
 			DispatchQueue.main.async {
 				self.presenceStatus = consolidatedPresenceTmp
+				self.presenceActivity = presenceActivityTmp
+				self.presenceNote = presenceNoteTmp
 				if consolidatedPresenceTmp == .Online || consolidatedPresenceTmp == .Busy {
 					if consolidatedPresenceTmp == .Online || latestActivityTimestamp != -1 {
 						self.lastPresenceInfo = consolidatedPresenceTmp == .Online ?

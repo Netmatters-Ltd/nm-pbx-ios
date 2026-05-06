@@ -52,13 +52,28 @@ struct FavoriteContactRow: View {
 	
 	var body: some View {
 		if contactAvatarModel.starred == true {
-			VStack {
-				VStack {
-					Avatar(contactAvatarModel: contactAvatarModel, avatarSize: 50)
-					
-					Text(contactAvatarModel.name)
-						.default_text_style(styleSize: 16)
-						.frame( maxWidth: .infinity, alignment: .center)
+			VStack(spacing: 4) {
+				Avatar(contactAvatarModel: contactAvatarModel, avatarSize: 50)
+
+				Text(contactAvatarModel.name)
+					.default_text_style(styleSize: 14)
+					.multilineTextAlignment(.center)
+					.lineLimit(1)
+
+				let status = contactAvatarModel.presenceUserStatus
+				if status != .offline {
+					VStack(spacing: 0) {
+						Text(status.label)
+							.font(Font.custom("Poppins-Regular", size: 10))
+							.foregroundStyle(status.badgeColor)
+
+						if !contactAvatarModel.presenceNote.isEmpty {
+							Text(contactAvatarModel.presenceNote)
+								.font(Font.custom("Poppins-Regular", size: 10))
+								.foregroundStyle(Color.grayMain2c500)
+								.lineLimit(1)
+						}
+					}
 				}
 			}
 			.background(.white)

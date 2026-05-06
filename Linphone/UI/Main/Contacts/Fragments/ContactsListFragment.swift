@@ -81,14 +81,31 @@ struct ContactRow: View {
 				}
 				
 				Avatar(contactAvatarModel: contactAvatarModel, avatarSize: 50)
-				
-				Text(contactAvatarModel.name)
-					.default_text_style(styleSize: 16)
-					.frame(maxWidth: .infinity, alignment: .leading)
-					.foregroundStyle(Color.orangeMain500)
+
+				VStack(alignment: .leading, spacing: 1) {
+					Text(contactAvatarModel.name)
+						.default_text_style(styleSize: 16)
+						.frame(maxWidth: .infinity, alignment: .leading)
+						.foregroundStyle(Color.orangeMain500)
+
+					let status = contactAvatarModel.presenceUserStatus
+					if status != .offline {
+						HStack(spacing: 4) {
+							Text(status.label)
+								.font(Font.custom("Poppins-Regular", size: 11))
+								.foregroundStyle(status.badgeColor)
+
+							if !contactAvatarModel.presenceNote.isEmpty {
+								Text("· \(contactAvatarModel.presenceNote)")
+									.font(Font.custom("Poppins-Regular", size: 11))
+									.foregroundStyle(Color.grayMain2c500)
+									.lineLimit(1)
+							}
+						}
+					}
+				}
 			}
 		}
-		.frame(height: 50)
 		.buttonStyle(.borderless)
 		.listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
 		.listRowSeparator(.hidden)

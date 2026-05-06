@@ -56,9 +56,10 @@ struct Avatar: View {
 							Spacer()
 							VStack {
 								Spacer()
-								if !hidePresence && (contactAvatarModel.presenceStatus == .Online || contactAvatarModel.presenceStatus == .Busy) {
-									Image(contactAvatarModel.presenceStatus == .Online ? "presence-online" : "presence-busy")
-										.resizable()
+								if !hidePresence && contactAvatarModel.presenceUserStatus != .offline {
+									Circle()
+										.fill(contactAvatarModel.presenceUserStatus.badgeColor)
+										.overlay(Circle().stroke(Color.white, lineWidth: 1.5))
 										.frame(width: avatarSize/4, height: avatarSize/4)
 										.padding(.trailing, avatarSize == 50 || avatarSize == 35 ? 1 : 3)
 										.padding(.bottom, avatarSize == 50 || avatarSize == 35 ? 1 : 3)
@@ -91,9 +92,10 @@ struct Avatar: View {
 					Spacer()
 					VStack {
 						Spacer()
-						if !hidePresence && (contactAvatarModel.presenceStatus == .Online || contactAvatarModel.presenceStatus == .Busy) {
-							Image(contactAvatarModel.presenceStatus == .Online ? "presence-online" : "presence-busy")
-								.resizable()
+						if !hidePresence && contactAvatarModel.presenceUserStatus != .offline {
+							Circle()
+								.fill(contactAvatarModel.presenceUserStatus.badgeColor)
+								.overlay(Circle().stroke(Color.white, lineWidth: 1.5))
 								.frame(width: avatarSize/4, height: avatarSize/4)
 								.padding(.trailing, avatarSize == 50 || avatarSize == 35 ? 1 : 3)
 								.padding(.bottom, avatarSize == 50 || avatarSize == 35 ? 1 : 3)
