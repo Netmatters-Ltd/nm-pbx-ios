@@ -17,8 +17,9 @@ class PresenceViewModel: ObservableObject {
 	private var selfFriendDelegate: FriendDelegate?
 	private var didSyncFromServer = false
 
-	// Called on startup — just warms the UI state, does not publish.
-	// Actual publishing is deferred to restoreOrGoOnline() after registration.
+	// Called on startup — warms the UI state and pre-sets core.presenceModel from saved
+	// config so that when publishEnabled triggers the SDK's auto-publish on registration,
+	// it sends the correct saved status rather than the SDK default (Online).
 	func loadSavedPresence() {
 		CoreContext.shared.doOnCoreQueue { core in
 			let savedStatus = core.config?.getString(section: self.configSection, key: self.configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
@@ -28,6 +29,7 @@ class PresenceViewModel: ObservableObject {
 				self.currentPresence = presence
 				self.customStatusNote = savedNote
 			}
+			self.publish(presence: presence, note: savedNote, core: core)
 		}
 	}
 
