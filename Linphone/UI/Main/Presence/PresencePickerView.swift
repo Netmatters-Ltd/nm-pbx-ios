@@ -15,7 +15,7 @@ struct PresencePickerView: View {
 				.padding(.top, 16)
 				.padding(.bottom, 8)
 
-			ForEach(UserPresence.allCases, id: \.self) { presence in
+			ForEach(UserPresence.allCases.filter { $0 != .offline }, id: \.self) { presence in
 				Button {
 					presenceVM.setPresence(presence, note: presenceVM.customStatusNote)
 					dismiss()

@@ -99,6 +99,14 @@ class PresenceViewModel: ObservableObject {
 	// Reads the server's current presence for our own identity and publishes the same
 	// status so the aggregated state seen by other extensions is unchanged.
 	private func applyServerPresence(from friend: Friend, core: Core) {
+		// Check consolidatedPresence first: basic=closed produces no activity, so
+		// activity?.type is nil and UserPresence.from(nil) would wrongly return .online.
+		// consolidatedPresence == .Offline catches both basic=closed and permanent-absence.
+		guard friend.consolidatedPresence != .Offline else {
+			publishLocalConfig(core: core)
+			return
+		}
+
 		let activityKind = friend.presenceModel?.activity?.type
 		let presence = UserPresence.from(
 			activityKind: activityKind,
@@ -144,7 +152,14 @@ class PresenceViewModel: ObservableObject {
 
 		do {
 			let model: PresenceModel
-			if let kind = presence.activityKind {
+			if presence == .offline {
+				// basic=closed is the RFC 3863 way to say "not available for calls".
+				// permanent-absence (the RPID activity we used before) means "permanently
+				// gone from the system" — wrong semantics — and combining it with
+				// basic=open is self-contradictory. No note: offline means invisible.
+				model = try core.createPresenceModel()
+				try model.setBasicstatus(newValue: .Closed)
+			} else if let kind = presence.activityKind {
 				if !note.isEmpty {
 					model = try core.createPresenceModelWithActivityAndNote(
 						acttype: kind,
@@ -159,10 +174,32 @@ class PresenceViewModel: ObservableObject {
 					)
 				}
 			} else {
-				// Online: plain open presence, no activity
-				model = try core.createPresenceModel()
+				// "Available": no RPID busy/away activity.
+				// createPresenceModel() alone creates an empty model (no service tuple), so
+				// subscribers see consolidatedPresence == .Offline — hence no green circle.
+				// For notes, addNote() writes at the PIDF document level; getNote() on the
+				// subscriber reads from the RPID person level, so the note is invisible.
+				// createPresenceModelWithActivityAndNote(.Unknown) fixes both: it creates
+				// an open service tuple (consolidatedPresence → .Online) and stores the
+				// note at the person level where getNote() finds it. Without a note,
+				// setBasicstatus(.Open) forces an open tuple onto the empty model.
 				if !note.isEmpty {
-					try model.addNote(noteContent: note, lang: Locale.current.languageCode)
+					// createPresenceModelWithActivityAndNote puts the note at the tuple
+					// level (inside <tuple>) where getNote() finds it on the subscriber.
+					// addNote() alone puts it at document level which getNote() misses.
+					// We then clear the activity so no <rpid:unknown/> is published —
+					// the .Unknown activity makes consolidatedPresence == .Busy on the
+					// subscriber, and "Available" should have no RPID activity at all.
+					model = try core.createPresenceModelWithActivityAndNote(
+						acttype: .Unknown,
+						description: nil,
+						note: note,
+						lang: Locale.current.languageCode
+					)
+					try model.clearActivities()
+				} else {
+					model = try core.createPresenceModel()
+					try model.setBasicstatus(newValue: .Open)
 				}
 			}
 
