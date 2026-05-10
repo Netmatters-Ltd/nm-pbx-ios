@@ -499,6 +499,15 @@ class CoreContext: ObservableObject {
 
 			if self.mCore.currentCall == nil && self.mCore.globalState == .On {
 				Log.info("[onEnterForegroundOrBackground] Stopping core because no active calls")
+				// De-publish presence before stopping so the server removes our tuple
+				// immediately rather than holding it open until it naturally expires.
+				// Without this, the server accumulates stale open tuples across app re-opens,
+				// causing presence to appear stuck.
+				if let params = self.mCore.defaultAccount?.params?.clone() {
+					params.publishEnabled = false
+					self.mCore.defaultAccount?.params = params
+				}
+				self.mCore.iterate()
 				self.mCore.stop()
 			} else {
 				Log.info("[onEnterForegroundOrBackground] Skipped stop: core not fully On or active call in progress")

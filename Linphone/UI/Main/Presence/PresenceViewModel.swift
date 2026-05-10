@@ -100,7 +100,6 @@ class PresenceViewModel: ObservableObject {
 	// status so the aggregated state seen by other extensions is unchanged.
 	private func applyServerPresence(from friend: Friend, core: Core) {
 		let activityKind = friend.presenceModel?.activity?.type
-		let note = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
 		let presence = UserPresence.from(
 			activityKind: activityKind,
 			description: activityKind == .Other ? UserPresence.dndDescription : nil
@@ -108,6 +107,14 @@ class PresenceViewModel: ObservableObject {
 
 		if presence != .offline {
 			// Server has an active published status — mirror it.
+			// For plain "available" presence (no RPID activity), getNote() looks at the
+			// RPID person-level note and may return nil even when a note was published via
+			// addNote(), because that places the note at the PIDF document/tuple level
+			// instead. Fall back to the saved config note to avoid silently erasing it.
+			let serverNote = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
+			let savedNote = core.config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
+			let note = serverNote.isEmpty ? savedNote : serverNote
+
 			core.config?.setString(section: configSection, key: configKeyStatus, value: presence.rawValue)
 			core.config?.setString(section: configSection, key: configKeyNote, value: note)
 			DispatchQueue.main.async {
