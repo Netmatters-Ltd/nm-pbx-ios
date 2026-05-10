@@ -33,6 +33,7 @@ struct ContentView: View {
 	
 	@ObservedObject private var contactsManager = ContactsManager.shared
 	@ObservedObject private var magicSearch = MagicSearchSingleton.shared
+	@ObservedObject private var presenceViewModel = PresenceViewModel.shared
 	
 	@StateObject private var callViewModel = CallViewModel()
 	@StateObject private var accountProfileViewModel = AccountProfileViewModel()
@@ -43,7 +44,6 @@ struct ContentView: View {
 	@State private var meetingsListViewModel: MeetingsListViewModel?
 	
 	@State private var orientation = UIDevice.current.orientation
-	@State var sideMenuIsOpen: Bool = false
 	@State private var showPresencePicker = false
 	
 	@State private var searchIsActive = false
@@ -459,9 +459,11 @@ struct ContentView: View {
 										if searchIsActive == false {
 											HStack {
 												Button {
-													openMenu()
+													withAnimation {
+														isShowSettingsFragment = true
+													}
 												} label: {
-													Image("list")
+													Image("gear")
 														.renderingMode(.template)
 														.resizable()
 														.foregroundStyle(.white)
@@ -476,50 +478,82 @@ struct ContentView: View {
                                                     let imagePath = account.getImagePath()
                                                     let finalUrl = imagePath.appendingQueryItem("v", value: UUID().uuidString)
 
-                                                    AsyncImage(url: finalUrl)
-                                                        { image in
-                                                            switch image {
-                                                            case .empty:
-                                                                ProgressView()
-                                                                    .frame(width: avatarSize, height: avatarSize)
-                                                            case .success(let image):
-                                                                image
-                                                                    .resizable()
-                                                                    .aspectRatio(contentMode: .fill)
-                                                                    .frame(width: avatarSize, height: avatarSize)
-                                                                    .clipShape(Circle())
-                                                                    .onAppear {
-                                                                        imageTmp = image
-                                                                    }
-                                                            case .failure:
-                                                                if let avatar = account.avatarModel {
-                                                                    let tmpImage = contactsManager.textToImage(firstName: avatar.name, lastName: "")
-                                                                    Image(uiImage: tmpImage)
-                                                                        .resizable()
+                                                    ZStack(alignment: .bottomTrailing) {
+                                                        AsyncImage(url: finalUrl)
+                                                            { image in
+                                                                switch image {
+                                                                case .empty:
+                                                                    ProgressView()
                                                                         .frame(width: avatarSize, height: avatarSize)
-                                                                        .clipShape(Circle())
-                                                                } else if let cachedImage = imageTmp {
-                                                                    cachedImage
+                                                                case .success(let image):
+                                                                    image
                                                                         .resizable()
                                                                         .aspectRatio(contentMode: .fill)
                                                                         .frame(width: avatarSize, height: avatarSize)
                                                                         .clipShape(Circle())
-                                                                } else {
-                                                                    ProgressView()
-                                                                        .frame(width: avatarSize, height: avatarSize)
+                                                                        .onAppear {
+                                                                            imageTmp = image
+                                                                        }
+                                                                case .failure:
+                                                                    if let avatar = account.avatarModel {
+                                                                        let tmpImage = contactsManager.textToImage(firstName: avatar.name, lastName: "")
+                                                                        Image(uiImage: tmpImage)
+                                                                            .resizable()
+                                                                            .frame(width: avatarSize, height: avatarSize)
+                                                                            .clipShape(Circle())
+                                                                    } else if let cachedImage = imageTmp {
+                                                                        cachedImage
+                                                                            .resizable()
+                                                                            .aspectRatio(contentMode: .fill)
+                                                                            .frame(width: avatarSize, height: avatarSize)
+                                                                            .clipShape(Circle())
+                                                                    } else {
+                                                                        ProgressView()
+                                                                            .frame(width: avatarSize, height: avatarSize)
+                                                                    }
+                                                                @unknown default:
+                                                                    EmptyView()
                                                                 }
-                                                            @unknown default:
-                                                                EmptyView()
+                                                            }
+                                                            .id(imagePath)
+                                                            .onTapGesture {
+                                                                showPresencePicker = true
+                                                            }
+                                                            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImageChanged"))) { _ in
+                                                                imageTmp = nil
+                                                            }
+
+                                                        if presenceViewModel.currentPresence != .offline {
+                                                            Circle()
+                                                                .fill(presenceViewModel.currentPresence.badgeColor)
+                                                                .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
+                                                                .frame(width: avatarSize / 4, height: avatarSize / 4)
+                                                                .padding(.trailing, 1)
+                                                                .padding(.bottom, 1)
+                                                        }
+                                                    }
+
+                                                    VStack(alignment: .leading, spacing: 1) {
+                                                        Text(account.displayName)
+                                                            .font(Font.custom("Poppins-Regular", size: 16))
+                                                            .foregroundStyle(Color.white)
+
+                                                        if presenceViewModel.currentPresence != .offline {
+                                                            HStack(spacing: 4) {
+                                                                Text(presenceViewModel.currentPresence.label)
+                                                                    .font(Font.custom("Poppins-Regular", size: 11))
+                                                                    .foregroundStyle(Color.white)
+
+                                                                if !presenceViewModel.customStatusNote.isEmpty {
+                                                                    Text("· \(presenceViewModel.customStatusNote)")
+                                                                        .font(Font.custom("Poppins-Regular", size: 11))
+                                                                        .foregroundStyle(Color.white)
+                                                                        .lineLimit(1)
+                                                                }
                                                             }
                                                         }
-                                                        .id(imagePath)
-                                                        .onTapGesture {
-                                                            showPresencePicker = true
-                                                        }
-                                                        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImageChanged"))) { _ in
-                                                            imageTmp = nil
-                                                        }
-                                                    
+                                                    }
+
                                                 } else if let cachedImage = imageTmp {
                                                     cachedImage
                                                         .resizable()
@@ -533,11 +567,6 @@ struct ContentView: View {
                                                     ProgressView()
                                                         .frame(width: avatarSize, height: avatarSize)
                                                 }
-
-												
-												Text(String(localized: sharedMainViewModel.indexView == 0 ? "bottom_navigation_contacts_label" : (sharedMainViewModel.indexView == 1 ? "bottom_navigation_calls_label" : (sharedMainViewModel.indexView == 2 ? "bottom_navigation_conversations_label" : "bottom_navigation_meetings_label"))))
-													.default_text_style_white_800(styleSize: 20)
-													.padding(.leading, 2)
 												
 												Spacer()
 												
@@ -1088,20 +1117,6 @@ struct ContentView: View {
 						.zIndex(1)
 					}
 					
-					SideMenu(
-						width: geometry.size.width / 5 * 4,
-						isOpen: $sideMenuIsOpen,
-						menuClose: self.openMenu,
-						safeAreaInsets: geometry.safeAreaInsets,
-						isShowLoginFragment: $isShowLoginFragment,
-						isShowAccountProfileFragment: $isShowAccountProfileFragment,
-						isShowSettingsFragment: $isShowSettingsFragment,
-						isShowRecordingsListFragment: $isShowRecordingsListFragment,
-						isShowHelpFragment: $isShowHelpFragment
-					)
-					.environmentObject(accountProfileViewModel)
-					.ignoresSafeArea(.all)
-					.zIndex(2)
 					
 					if isShowLoginFragment {
 						LoginFragment(
@@ -1536,11 +1551,6 @@ struct ContentView: View {
 					$0.registrationState == .Failed
 				}
 				
-                withAnimation {
-                    if self.sideMenuIsOpen {
-                        self.sideMenuIsOpen = false
-                    }
-                }
                 
                 if self.isShowLoginFragment {
                     self.isShowLoginFragment = false
@@ -1592,11 +1602,6 @@ struct ContentView: View {
 		.id(coreContext.reloadID)
 	}
 	
-	func openMenu() {
-		withAnimation {
-			self.sideMenuIsOpen.toggle()
-		}
-	}
 }
 
 struct ContactsContainer: View {
