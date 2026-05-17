@@ -72,62 +72,10 @@ struct SettingsAdvancedFragment: View {
 					VStack(spacing: 0) {
 						VStack(spacing: 30) {
 							VStack(alignment: .leading) {
-								Text("call_stats_media_encryption_title")
-									.default_text_style_700(styleSize: 15)
-									.padding(.bottom, -5)
-								
-								Menu {
-									Button("None") {
-										settingsViewModel.mediaEncryption = "None"
-										settingsViewModel.mediaEncryptionMandatory = false
-									}
-									Button("SRTP") {
-										settingsViewModel.mediaEncryption = "SRTP"
-										settingsViewModel.mediaEncryptionMandatory = true
-									}
-									Button("ZRTP") {
-										settingsViewModel.mediaEncryption = "ZRTP"
-										settingsViewModel.mediaEncryptionMandatory = true
-									}
-									Button("DTLS") {
-										settingsViewModel.mediaEncryption = "DTLS"
-										settingsViewModel.mediaEncryptionMandatory = true
-									}
-								} label: {
-									Text(settingsViewModel.mediaEncryption)
-										.default_text_style(styleSize: 15)
-										.frame(maxWidth: .infinity, alignment: .leading)
-									Image("caret-down")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.grayMain2c500)
-										.frame(width: 20, height: 20)
-								}
-								.frame(height: 25)
-								.padding(.horizontal, 20)
-								.padding(.vertical, 15)
-								.cornerRadius(60)
-								.overlay(
-									RoundedRectangle(cornerRadius: 60)
-										.inset(by: 0.5)
-										.stroke(Color.gray200, lineWidth: 1)
-								)
-							}
-							
-							Toggle("settings_advanced_media_encryption_mandatory_title", isOn: $settingsViewModel.mediaEncryptionMandatory)
-								.default_text_style_700(styleSize: 15)
-							
-							Toggle("settings_advanced_accept_early_media_title", isOn: $settingsViewModel.acceptEarlyMedia)
-								.default_text_style_700(styleSize: 15)
-							
-							Toggle("settings_advanced_allow_outgoing_early_media_title", isOn: $settingsViewModel.allowOutgoingEarlyMedia)
-								.default_text_style_700(styleSize: 15)
-							
-							VStack(alignment: .leading) {
 								Text("settings_advanced_device_id")
 									.default_text_style_700(styleSize: 15)
 									.padding(.bottom, -5)
-								
+
 								TextField("settings_advanced_device_id_hint", text: $settingsViewModel.deviceId)
 									.default_text_style(styleSize: 15)
 									.frame(height: 25)
@@ -140,43 +88,6 @@ struct SettingsAdvancedFragment: View {
 											.stroke(isDeviceIdFocused ? Color.orangeMain500 : Color.gray200, lineWidth: 1)
 									)
 									.focused($isDeviceIdFocused)
-							}
-							
-							VStack(alignment: .leading) {
-								Text("settings_advanced_remote_provisioning_url")
-									.default_text_style_700(styleSize: 15)
-									.padding(.bottom, -5)
-								
-								TextField("settings_advanced_remote_provisioning_url", text: $settingsViewModel.remoteProvisioningUrl)
-									.default_text_style(styleSize: 15)
-									.frame(height: 25)
-									.padding(.horizontal, 20)
-									.padding(.vertical, 15)
-									.cornerRadius(60)
-									.overlay(
-										RoundedRectangle(cornerRadius: 60)
-											.inset(by: 0.5)
-											.stroke(isRemoteProvisioningUrlFocused ? Color.orangeMain500 : Color.gray200, lineWidth: 1)
-									)
-									.focused($isRemoteProvisioningUrlFocused)
-							}
-							
-							HStack {
-								Spacer()
-								
-								Button(
-									action: {
-										settingsViewModel.downloadAndApplyRemoteProvisioning()
-									}, label: {
-										Text("settings_advanced_download_apply_remote_provisioning")
-											.default_text_style_white_600(styleSize: 15)
-									}
-								)
-								.padding(.horizontal, 20)
-								.padding(.vertical, 10)
-								.background(settingsViewModel.remoteProvisioningUrl.isEmpty ? Color.orangeMain100 : Color.orangeMain500)
-								.cornerRadius(60)
-								.disabled(settingsViewModel.remoteProvisioningUrl.isEmpty)
 							}
 						}
 						.padding(.vertical, 30)

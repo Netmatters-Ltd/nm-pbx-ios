@@ -173,9 +173,6 @@ struct SettingsFragment: View {
 											.default_text_style_700(styleSize: 15)
 										*/
 										
-										Toggle("settings_calls_auto_record_title", isOn: $settingsViewModel.autoRecord)
-											.default_text_style_700(styleSize: 15)
-										
 										/*
 										Button {
 										} label: {

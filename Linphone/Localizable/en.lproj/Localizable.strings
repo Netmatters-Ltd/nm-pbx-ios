@@ -466,7 +466,7 @@
 "settings_advanced_title" = "Advanced settings";
 "settings_advanced_upload_server_url" = "File sharing server URL";
 "settings_advanced_video_codecs_title" = "Video codecs";
-"settings_calls_adaptive_rate_control_title" = "Adaptive rate control";
+"settings_calls_adaptive_rate_control_title" = "Adaptive bitrate";
 "settings_calls_auto_record_title" = "Automatically start recording calls";
 "settings_calls_calibrate_echo_canceller_done" = "%@ ms";
 "settings_calls_calibrate_echo_canceller_done_no_echo" = "no echo";
