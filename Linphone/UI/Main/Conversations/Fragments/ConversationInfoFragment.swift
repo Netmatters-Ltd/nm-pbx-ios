@@ -245,7 +245,7 @@ struct ConversationInfoFragment: View {
 													isShowScheduleMeetingFragmentParticipants = conversationViewModel.participants
 													
 													SharedMainViewModel.shared.displayedConversation = nil
-													SharedMainViewModel.shared.changeIndexView(indexViewInt: 3)
+													SharedMainViewModel.shared.changeIndexView(indexViewInt: 4)
 													withAnimation {
 														isShowScheduleMeetingFragment = true
 													}
@@ -380,7 +380,7 @@ struct ConversationInfoFragment: View {
 																			let friendIndex = contactsManager.avatarListModel.first(
 																				where: {$0.addresses.contains(where: {$0 == addressConv})})
 																			
-																			SharedMainViewModel.shared.changeIndexView(indexViewInt: 0)
+																			SharedMainViewModel.shared.changeIndexView(indexViewInt: 1)
 																			
 																			if friendIndex != nil {
 																				withAnimation {
@@ -563,7 +563,7 @@ struct ConversationInfoFragment: View {
 																	where: {$0.addresses.contains(where: {$0 == addressConv})})
 																
 																SharedMainViewModel.shared.displayedCall = nil
-																SharedMainViewModel.shared.changeIndexView(indexViewInt: 0)
+																SharedMainViewModel.shared.changeIndexView(indexViewInt: 1)
 																
 																if friendIndex != nil {
 																	withAnimation {

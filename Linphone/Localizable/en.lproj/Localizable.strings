@@ -99,6 +99,7 @@
 "bottom_navigation_calls_label" = "Calls";
 "bottom_navigation_contacts_label" = "Contacts";
 "bottom_navigation_conversations_label" = "Conversations";
+"bottom_navigation_extensions_label" = "Extensions";
 "bottom_navigation_meetings_label" = "Meetings";
 "call_action_attended_transfer" = "Attended transfer";
 "call_action_blind_transfer" = "Transfer";

@@ -21,17 +21,16 @@ import SwiftUI
 import linphonesw
 
 struct FavoriteContactsListFragment: View {
-	
-	@ObservedObject var contactsManager = ContactsManager.shared
-	
+
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-    
+
     @Binding var showingSheet: Bool
-    
+	var displayedContacts: [ContactAvatarModel]
+
     var body: some View {
         ScrollView(.horizontal) {
             HStack {
-				ForEach(contactsManager.avatarListModel) { contactAvatarModel in
+				ForEach(displayedContacts) { contactAvatarModel in
 					FavoriteContactRow(contactAvatarModel: contactAvatarModel, showingSheet: $showingSheet)
                 }
             }
@@ -92,6 +91,5 @@ struct FavoriteContactRow: View {
 }
 
 #Preview {
-    FavoriteContactsListFragment(
-        showingSheet: .constant(false))
+    FavoriteContactsListFragment(showingSheet: .constant(false), displayedContacts: [])
 }

@@ -35,6 +35,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	var editable: Bool = true
 	var isReadOnly: Bool = false
 	var withPresence: Bool?
+	var isInternal: Bool = false
 	
 	@Published var starred: Bool = false
 	
@@ -73,7 +74,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	}
 	
 	func resetContactAvatarModel(friend: Friend?, name: String, address: String, withPresence: Bool?) {
-		CoreContext.shared.doOnCoreQueue { _ in
+		CoreContext.shared.doOnCoreQueue { core in
 			self.friend = friend
 			let nameTmp = name
 			let addressTmp = address
@@ -93,6 +94,8 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			let editableTmp = friend?.friendList?.type == .CardDAV || nativeUriTmp.isEmpty
 			let isReadOnlyTmp = (friend?.isReadOnly == true) || (friend?.inList() == false)
 			let withPresenceTmp = withPresence
+			let domain = core.defaultAccount?.params?.domain ?? ""
+			let isInternalTmp = !domain.isEmpty && (friend?.addresses.contains { $0.domain == domain } ?? false)
 			let starredTmp = friend?.starred ?? false
 			let vcardTmp = friend?.vcard ?? nil
 			let organizationTmp = friend?.organization ?? ""
@@ -143,6 +146,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 				self.editable = editableTmp
 				self.isReadOnly = isReadOnlyTmp
 				self.withPresence = withPresenceTmp
+				self.isInternal = isInternalTmp
 				self.starred = starredTmp
 				self.vcard = vcardTmp
 				self.organization = organizationTmp

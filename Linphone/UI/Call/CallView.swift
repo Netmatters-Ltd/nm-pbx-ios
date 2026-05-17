@@ -2140,7 +2140,7 @@ struct CallView: View {
                                             .frame(width: 32, height: 32, alignment: .center)
                                             .onDisappear {
                                                 if SharedMainViewModel.shared.displayedConversation != nil {
-                                                    SharedMainViewModel.shared.changeIndexView(indexViewInt: 2)
+                                                    SharedMainViewModel.shared.changeIndexView(indexViewInt: 3)
                                                     callViewModel.changeDisplayedChatRoom(conversationModel: SharedMainViewModel.shared.displayedConversation!)
                                                     SharedMainViewModel.shared.displayedConversation = nil
                                                     withAnimation {
@@ -2566,7 +2566,7 @@ struct CallView: View {
                                             .frame(width: 32, height: 32, alignment: .center)
                                             .onDisappear {
                                                 if SharedMainViewModel.shared.displayedConversation != nil {
-                                                    SharedMainViewModel.shared.changeIndexView(indexViewInt: 2)
+                                                    SharedMainViewModel.shared.changeIndexView(indexViewInt: 3)
                                                     callViewModel.changeDisplayedChatRoom(conversationModel: SharedMainViewModel.shared.displayedConversation!)
                                                     SharedMainViewModel.shared.displayedConversation = nil
                                                     withAnimation {

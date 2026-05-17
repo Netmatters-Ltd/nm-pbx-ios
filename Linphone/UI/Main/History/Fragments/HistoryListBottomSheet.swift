@@ -77,7 +77,7 @@ struct HistoryListBottomSheet: View {
 						dismiss()
 					}
 					
-					sharedMainViewModel.changeIndexView(indexViewInt: 0)
+					sharedMainViewModel.changeIndexView(indexViewInt: 1)
 					
 					if let selectedCall = historyListViewModel.selectedCall, selectedCall.isFriend {
 						let friendIndex = contactsManager.avatarListModel.first(where: {$0.addresses.contains(where: {$0 == selectedCall.address})})

@@ -22,6 +22,8 @@
 import SwiftUI
 import linphonesw
 
+enum ContactsFilterMode { case extensions, contacts }
+
 struct ContentView: View {
 	
 	@Environment(\.scenePhase) var scenePhase
@@ -275,9 +277,33 @@ struct ContentView: View {
 								VStack(spacing: 0) {
 									Group {
 										Spacer()
-										
+
 										Button(action: {
 											sharedMainViewModel.changeIndexView(indexViewInt: 0)
+											sharedMainViewModel.displayedCall = nil
+											sharedMainViewModel.displayedConversation = nil
+											sharedMainViewModel.displayedMeeting = nil
+										}, label: {
+											VStack {
+												Image("phone-list")
+													.renderingMode(.template)
+													.resizable()
+													.foregroundStyle(sharedMainViewModel.indexView == 0 ? Color.orangeMain500 : Color.grayMain2c600)
+													.frame(width: 25, height: 25)
+												if sharedMainViewModel.indexView == 0 {
+													Text("bottom_navigation_extensions_label")
+														.default_text_style_700(styleSize: 10)
+												} else {
+													Text("bottom_navigation_extensions_label")
+														.default_text_style(styleSize: 10)
+												}
+											}
+										})
+										.padding(.top)
+										.frame(height: geometry.size.height/5)
+
+										Button(action: {
+											sharedMainViewModel.changeIndexView(indexViewInt: 1)
 											sharedMainViewModel.displayedCall = nil
 											sharedMainViewModel.displayedConversation = nil
 											sharedMainViewModel.displayedMeeting = nil
@@ -286,9 +312,9 @@ struct ContentView: View {
 												Image("address-book")
 													.renderingMode(.template)
 													.resizable()
-													.foregroundStyle(sharedMainViewModel.indexView == 0 ? Color.orangeMain500 : Color.grayMain2c600)
+													.foregroundStyle(sharedMainViewModel.indexView == 1 ? Color.orangeMain500 : Color.grayMain2c600)
 													.frame(width: 25, height: 25)
-												if sharedMainViewModel.indexView == 0 {
+												if sharedMainViewModel.indexView == 1 {
 													Text("bottom_navigation_contacts_label")
 														.default_text_style_700(styleSize: 10)
 												} else {
@@ -298,14 +324,14 @@ struct ContentView: View {
 											}
 										})
 										.padding(.top)
-										.frame(height: geometry.size.height/4)
-										
+										.frame(height: geometry.size.height/5)
+
 										ZStack {
 											if SharedMainViewModel.shared.missedCallsCount > 0 {
 												VStack {
 													HStack {
 														Text(
-                                                            SharedMainViewModel.shared.missedCallsCount < 99
+															SharedMainViewModel.shared.missedCallsCount < 99
 															? String(SharedMainViewModel.shared.missedCallsCount)
 															: "99+"
 														)
@@ -320,23 +346,23 @@ struct ContentView: View {
 												.padding(.bottom, 30)
 												.padding(.leading, 30)
 											}
-											
+
 											Button(action: {
-												sharedMainViewModel.changeIndexView(indexViewInt: 1)
+												sharedMainViewModel.changeIndexView(indexViewInt: 2)
 												sharedMainViewModel.displayedFriend = nil
 												sharedMainViewModel.displayedConversation = nil
 												sharedMainViewModel.displayedMeeting = nil
 												if SharedMainViewModel.shared.missedCallsCount > 0 {
-                                                    SharedMainViewModel.shared.resetMissedCallsCount()
+													SharedMainViewModel.shared.resetMissedCallsCount()
 												}
 											}, label: {
 												VStack {
 													Image("phone")
 														.renderingMode(.template)
 														.resizable()
-														.foregroundStyle(sharedMainViewModel.indexView == 1 ? Color.orangeMain500 : Color.grayMain2c600)
+														.foregroundStyle(sharedMainViewModel.indexView == 2 ? Color.orangeMain500 : Color.grayMain2c600)
 														.frame(width: 25, height: 25)
-													if sharedMainViewModel.indexView == 1 {
+													if sharedMainViewModel.indexView == 2 {
 														Text("bottom_navigation_calls_label")
 															.default_text_style_700(styleSize: 10)
 													} else {
@@ -347,8 +373,8 @@ struct ContentView: View {
 											})
 											.padding(.top)
 										}
-										.frame(height: geometry.size.height/4)
-										
+										.frame(height: geometry.size.height/5)
+
                                         if !sharedMainViewModel.disableChatFeature {
                                             ZStack {
                                                 if SharedMainViewModel.shared.unreadMessages > 0 {
@@ -370,9 +396,9 @@ struct ContentView: View {
                                                     .padding(.bottom, 30)
                                                     .padding(.leading, 30)
                                                 }
-                                                
+
                                                 Button(action: {
-                                                    sharedMainViewModel.changeIndexView(indexViewInt: 2)
+                                                    sharedMainViewModel.changeIndexView(indexViewInt: 3)
                                                     sharedMainViewModel.displayedFriend = nil
                                                     sharedMainViewModel.displayedCall = nil
                                                     sharedMainViewModel.displayedMeeting = nil
@@ -381,10 +407,10 @@ struct ContentView: View {
                                                         Image("chat-teardrop-text")
                                                             .renderingMode(.template)
                                                             .resizable()
-                                                            .foregroundStyle(sharedMainViewModel.indexView == 2 ? Color.orangeMain500 : Color.grayMain2c600)
+                                                            .foregroundStyle(sharedMainViewModel.indexView == 3 ? Color.orangeMain500 : Color.grayMain2c600)
                                                             .frame(width: 25, height: 25)
-                                                        
-                                                        if sharedMainViewModel.indexView == 2 {
+
+                                                        if sharedMainViewModel.indexView == 3 {
                                                             Text("bottom_navigation_conversations_label")
                                                                 .default_text_style_700(styleSize: 10)
                                                         } else {
@@ -395,12 +421,12 @@ struct ContentView: View {
                                                 })
                                                 .padding(.top)
                                             }
-                                            .frame(height: geometry.size.height/4)
+                                            .frame(height: geometry.size.height/5)
                                         }
-										
+
 										if !sharedMainViewModel.disableMeetingFeature {
 											Button(action: {
-												sharedMainViewModel.changeIndexView(indexViewInt: 3)
+												sharedMainViewModel.changeIndexView(indexViewInt: 4)
 												sharedMainViewModel.displayedFriend = nil
 												sharedMainViewModel.displayedCall = nil
 												sharedMainViewModel.displayedConversation = nil
@@ -409,9 +435,9 @@ struct ContentView: View {
 													Image("video-conference")
 														.renderingMode(.template)
 														.resizable()
-														.foregroundStyle(sharedMainViewModel.indexView == 3 ? Color.orangeMain500 : Color.grayMain2c600)
+														.foregroundStyle(sharedMainViewModel.indexView == 4 ? Color.orangeMain500 : Color.grayMain2c600)
 														.frame(width: 25, height: 25)
-													if sharedMainViewModel.indexView == 0 {
+													if sharedMainViewModel.indexView == 4 {
 														Text("bottom_navigation_meetings_label")
 															.default_text_style_700(styleSize: 10)
 													} else {
@@ -421,8 +447,8 @@ struct ContentView: View {
 												}
 											})
 											.padding(.top)
-											.frame(height: geometry.size.height/4)
-											
+											.frame(height: geometry.size.height/5)
+
 											Spacer()
 										}
 									}
@@ -582,9 +608,9 @@ struct ContentView: View {
 														.frame(width: 25, height: 25, alignment: .leading)
 														.padding(.all, 10)
 												}
-												.padding(.trailing, sharedMainViewModel.indexView == 2 ? 10 : 0)
-												
-												if sharedMainViewModel.indexView == 3 {
+												.padding(.trailing, sharedMainViewModel.indexView == 3 ? 10 : 0)
+
+												if sharedMainViewModel.indexView == 4 {
 													Button {
 														NotificationCenter.default.post(name: MeetingsListViewModel.ScrollToTodayNotification, object: nil)
 													} label: {
@@ -596,9 +622,9 @@ struct ContentView: View {
 															.padding(.all, 10)
 													}
 													.padding(.trailing, 10)
-												} else if sharedMainViewModel.indexView != 2 {
+												} else if sharedMainViewModel.indexView != 3 {
 													Menu {
-														if sharedMainViewModel.indexView == 0 {
+														if sharedMainViewModel.indexView <= 1 {
 															Button {
 																sharedMainViewModel.displayedFriend = nil
 																isMenuOpen = false
@@ -616,7 +642,7 @@ struct ContentView: View {
 																	}
 																}
 															}
-															
+
 															Button {
 																sharedMainViewModel.displayedFriend = nil
 																isMenuOpen = false
@@ -634,7 +660,7 @@ struct ContentView: View {
 																	}
 																}
 															}
-														} else {
+														} else if sharedMainViewModel.indexView == 2 {
 															Button(role: .destructive) {
 																isMenuOpen = false
 																isShowDeleteAllHistoryPopup.toggle()
@@ -650,7 +676,7 @@ struct ContentView: View {
 															}
 														}
 													} label: {
-														Image(sharedMainViewModel.indexView == 0 ? "funnel" : "dots-three-vertical")
+														Image(sharedMainViewModel.indexView <= 1 ? "funnel" : "dots-three-vertical")
 															.renderingMode(.template)
 															.resizable()
 															.foregroundStyle(.white)
@@ -683,14 +709,14 @@ struct ContentView: View {
 													
 													text = ""
 													
-													if sharedMainViewModel.indexView == 0 {
+													if sharedMainViewModel.indexView <= 1 {
 														magicSearch.currentFilter = ""
 														magicSearch.searchForContacts()
-													} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 1 {
+													} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 														historyListVM.resetFilterCallLogs()
-													} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 2 {
+													} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 3 {
 														conversationsListVM.resetFilterConversations()
-													} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 3 {
+													} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 4 {
 														meetingsListVM.currentFilter = ""
 														meetingsListVM.computeMeetingsList()
 													}
@@ -728,22 +754,22 @@ struct ContentView: View {
 														self.focusedField = true
 													}
 													.onChange(of: text) { newValue in
-														if sharedMainViewModel.indexView == 0 {
+														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
 															magicSearch.searchForContacts()
-														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 1 {
+														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															if text.isEmpty {
 																historyListVM.resetFilterCallLogs()
 															} else {
 																historyListVM.filterCallLogs(filter: text)
 															}
-														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 2 {
+														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 3 {
 															if text.isEmpty {
 																conversationsListVM.resetFilterConversations()
 															} else {
 																conversationsListVM.filterConversations(filter: text)
 															}
-														} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 3 {
+														} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 4 {
 															meetingsListVM.currentFilter = text
 															meetingsListVM.computeMeetingsList()
 														}
@@ -770,14 +796,14 @@ struct ContentView: View {
 														self.focusedField = true
 													}
 													.onChange(of: text) { newValue in
-														if sharedMainViewModel.indexView == 0 {
+														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
 															magicSearch.searchForContacts()
-														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 1 {
+														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															historyListVM.filterCallLogs(filter: text)
-														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 2 {
+														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 3 {
 															conversationsListVM.filterConversations(filter: text)
-														} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 3 {
+														} else if let meetingsListVM = meetingsListViewModel, sharedMainViewModel.indexView == 4 {
 															meetingsListVM.currentFilter = text
 															meetingsListVM.computeMeetingsList()
 														}
@@ -810,9 +836,19 @@ struct ContentView: View {
 												isShowEditContactFragment: $isShowEditContactFragment,
 												isShowDeleteContactPopup: $isShowDeleteContactPopup,
 												text: $text,
-												orientation: orientation
+												orientation: orientation,
+												mode: .extensions
 											)
 										} else if sharedMainViewModel.indexView == 1 {
+											ContactsContainer(
+												contactsListViewModel: $contactsListViewModel,
+												isShowEditContactFragment: $isShowEditContactFragment,
+												isShowDeleteContactPopup: $isShowDeleteContactPopup,
+												text: $text,
+												orientation: orientation,
+												mode: .contacts
+											)
+										} else if sharedMainViewModel.indexView == 2 {
 											HistoryContainer(
 												historyListViewModel: $historyListViewModel,
 												isShowStartCallFragment: $isShowStartCallFragment,
@@ -821,14 +857,14 @@ struct ContentView: View {
 												isShowEditContactFragmentAddress: $isShowEditContactFragmentAddress,
 												orientation: orientation
 											)
-										} else if sharedMainViewModel.indexView == 2 {
+										} else if sharedMainViewModel.indexView == 3 {
 											ConversationsContainer(
 												conversationsListViewModel: $conversationsListViewModel,
 												isShowStartConversationFragment: $isShowStartConversationFragment,
 												text: $text,
 												orientation: orientation
 											)
-										} else if sharedMainViewModel.indexView == 3 {
+										} else if sharedMainViewModel.indexView == 4 {
 											MeetingsContainer(
 												meetingsListViewModel: $meetingsListViewModel,
 												isShowScheduleMeetingFragment: $isShowScheduleMeetingFragment,
@@ -873,12 +909,38 @@ struct ContentView: View {
 										sharedMainViewModel.displayedMeeting = nil
 									}, label: {
 										VStack {
-											Image("address-book")
+											Image("phone-list")
 												.renderingMode(.template)
 												.resizable()
 												.foregroundStyle(sharedMainViewModel.indexView == 0 ? Color.orangeMain500 : Color.grayMain2c600)
 												.frame(width: 25, height: 25)
 											if sharedMainViewModel.indexView == 0 {
+												Text("bottom_navigation_extensions_label")
+													.default_text_style_700(styleSize: 10)
+											} else {
+												Text("bottom_navigation_extensions_label")
+													.default_text_style(styleSize: 10)
+											}
+										}
+									})
+									.padding(.top)
+									.frame(width: 66)
+
+									Spacer()
+
+									Button(action: {
+										sharedMainViewModel.changeIndexView(indexViewInt: 1)
+										sharedMainViewModel.displayedCall = nil
+										sharedMainViewModel.displayedConversation = nil
+										sharedMainViewModel.displayedMeeting = nil
+									}, label: {
+										VStack {
+											Image("address-book")
+												.renderingMode(.template)
+												.resizable()
+												.foregroundStyle(sharedMainViewModel.indexView == 1 ? Color.orangeMain500 : Color.grayMain2c600)
+												.frame(width: 25, height: 25)
+											if sharedMainViewModel.indexView == 1 {
 												Text("bottom_navigation_contacts_label")
 													.default_text_style_700(styleSize: 10)
 											} else {
@@ -889,15 +951,15 @@ struct ContentView: View {
 									})
 									.padding(.top)
 									.frame(width: 66)
-									
+
 									Spacer()
-									
+
 									ZStack {
 										if SharedMainViewModel.shared.missedCallsCount > 0 {
 											VStack {
 												HStack {
 													Text(
-                                                        SharedMainViewModel.shared.missedCallsCount < 99
+														SharedMainViewModel.shared.missedCallsCount < 99
 														? String(SharedMainViewModel.shared.missedCallsCount)
 														: "99+"
 													)
@@ -912,23 +974,23 @@ struct ContentView: View {
 											.padding(.bottom, 30)
 											.padding(.leading, 30)
 										}
-										
+
 										Button(action: {
-											sharedMainViewModel.changeIndexView(indexViewInt: 1)
+											sharedMainViewModel.changeIndexView(indexViewInt: 2)
 											sharedMainViewModel.displayedFriend = nil
 											sharedMainViewModel.displayedConversation = nil
 											sharedMainViewModel.displayedMeeting = nil
 											if SharedMainViewModel.shared.missedCallsCount > 0 {
-                                                SharedMainViewModel.shared.resetMissedCallsCount()
+												SharedMainViewModel.shared.resetMissedCallsCount()
 											}
 										}, label: {
 											VStack {
 												Image("phone")
 													.renderingMode(.template)
 													.resizable()
-													.foregroundStyle(sharedMainViewModel.indexView == 1 ? Color.orangeMain500 : Color.grayMain2c600)
+													.foregroundStyle(sharedMainViewModel.indexView == 2 ? Color.orangeMain500 : Color.grayMain2c600)
 													.frame(width: 25, height: 25)
-												if sharedMainViewModel.indexView == 1 {
+												if sharedMainViewModel.indexView == 2 {
 													Text("bottom_navigation_calls_label")
 														.default_text_style_700(styleSize: 9)
 												} else {
@@ -940,10 +1002,10 @@ struct ContentView: View {
 										.padding(.top)
 										.frame(width: 66)
 									}
-                                    
+
                                     if !sharedMainViewModel.disableChatFeature {
                                         Spacer()
-                                    
+
                                         ZStack {
                                             if SharedMainViewModel.shared.unreadMessages > 0 {
                                                 VStack {
@@ -964,9 +1026,9 @@ struct ContentView: View {
                                                 .padding(.bottom, 30)
                                                 .padding(.leading, 30)
                                             }
-                                            
+
                                             Button(action: {
-                                                sharedMainViewModel.changeIndexView(indexViewInt: 2)
+                                                sharedMainViewModel.changeIndexView(indexViewInt: 3)
                                                 sharedMainViewModel.displayedFriend = nil
                                                 sharedMainViewModel.displayedCall = nil
                                                 sharedMainViewModel.displayedMeeting = nil
@@ -975,10 +1037,10 @@ struct ContentView: View {
                                                     Image("chat-teardrop-text")
                                                         .renderingMode(.template)
                                                         .resizable()
-                                                        .foregroundStyle(sharedMainViewModel.indexView == 2 ? Color.orangeMain500 : Color.grayMain2c600)
+                                                        .foregroundStyle(sharedMainViewModel.indexView == 3 ? Color.orangeMain500 : Color.grayMain2c600)
                                                         .frame(width: 25, height: 25)
-                                                    
-                                                    if sharedMainViewModel.indexView == 2 {
+
+                                                    if sharedMainViewModel.indexView == 3 {
                                                         Text("bottom_navigation_conversations_label")
                                                             .default_text_style_700(styleSize: 9)
                                                     } else {
@@ -991,11 +1053,11 @@ struct ContentView: View {
                                             .frame(width: 66)
                                         }
                                     }
-									
+
 									if !sharedMainViewModel.disableMeetingFeature {
 										Spacer()
 										Button(action: {
-											sharedMainViewModel.changeIndexView(indexViewInt: 3)
+											sharedMainViewModel.changeIndexView(indexViewInt: 4)
 											sharedMainViewModel.displayedFriend = nil
 											sharedMainViewModel.displayedCall = nil
 											sharedMainViewModel.displayedConversation = nil
@@ -1004,9 +1066,9 @@ struct ContentView: View {
 												Image("video-conference")
 													.renderingMode(.template)
 													.resizable()
-													.foregroundStyle(sharedMainViewModel.indexView == 3 ? Color.orangeMain500 : Color.grayMain2c600)
+													.foregroundStyle(sharedMainViewModel.indexView == 4 ? Color.orangeMain500 : Color.grayMain2c600)
 													.frame(width: 25, height: 25)
-												if sharedMainViewModel.indexView == 3 {
+												if sharedMainViewModel.indexView == 4 {
 													Text("bottom_navigation_meetings_label")
 														.default_text_style_700(styleSize: 9)
 												} else {
@@ -1042,7 +1104,7 @@ struct ContentView: View {
 									   ? (geometry.size.width/100*40) + 75
 									   : 0
 								)
-							if let contactsListVM = contactsListViewModel, let displayedFriend = sharedMainViewModel.displayedFriend, sharedMainViewModel.indexView == 0 {
+							if let contactsListVM = contactsListViewModel, let displayedFriend = sharedMainViewModel.displayedFriend, sharedMainViewModel.indexView <= 1 {
 								ContactFragment(
 									isShowDeletePopup: $isShowDeleteContactPopup,
 									isShowDismissPopup: $isShowDismissPopup,
@@ -1055,7 +1117,7 @@ struct ContentView: View {
 								.frame(maxWidth: .infinity)
 								.background(Color.gray100)
 								.ignoresSafeArea(.keyboard)
-							} else if let historyListVM = historyListViewModel, let displayedCall = sharedMainViewModel.displayedCall, sharedMainViewModel.indexView == 1 {
+							} else if let historyListVM = historyListViewModel, let displayedCall = sharedMainViewModel.displayedCall, sharedMainViewModel.indexView == 2 {
 								HistoryContactFragment(
 									isShowDeleteAllHistoryPopup: $isShowDeleteAllHistoryPopup,
 									isShowEditContactFragment: $isShowEditContactFragment,
@@ -1066,7 +1128,7 @@ struct ContentView: View {
 								.frame(maxWidth: .infinity)
 								.background(Color.gray100)
 								.ignoresSafeArea(.keyboard)
-							} else if let conversationsListVM = conversationsListViewModel, let displayedConversation = sharedMainViewModel.displayedConversation, sharedMainViewModel.indexView == 2 {
+							} else if let conversationsListVM = conversationsListViewModel, let displayedConversation = sharedMainViewModel.displayedConversation, sharedMainViewModel.indexView == 3 {
 								ConversationFragment(
 									isShowConversationFragment: $isShowConversationFragment,
 									isShowStartCallGroupPopup: $isShowStartCallGroupPopup,
@@ -1084,7 +1146,7 @@ struct ContentView: View {
 								.frame(maxWidth: .infinity)
 								.background(Color.gray100)
 								.ignoresSafeArea(.keyboard)
-							} else if let meetingsListVM = meetingsListViewModel, let displayedMeeting = sharedMainViewModel.displayedMeeting, sharedMainViewModel.indexView == 3 {
+							} else if let meetingsListVM = meetingsListViewModel, let displayedMeeting = sharedMainViewModel.displayedMeeting, sharedMainViewModel.indexView == 4 {
 								MeetingFragment(isShowScheduleMeetingFragment: $isShowScheduleMeetingFragment, isShowSendCancelMeetingNotificationPopup: $isShowSendCancelMeetingNotificationPopup)
 									.environmentObject(meetingsListVM)
 									.frame(maxWidth: .infinity)
@@ -1614,6 +1676,7 @@ struct ContactsContainer: View {
 	@Binding var isShowDeleteContactPopup: Bool
 	@Binding var text: String
 	var orientation: UIDeviceOrientation
+	var mode: ContactsFilterMode
 
 	var body: some View {
 		Group {
@@ -1621,7 +1684,8 @@ struct ContactsContainer: View {
 				ContactsView(
 					isShowEditContactFragment: $isShowEditContactFragment,
 					isShowDeletePopup: $isShowDeleteContactPopup,
-					text: $text
+					text: $text,
+					mode: mode
 				)
 				.environmentObject(contactsListVM)
 				.roundedCorner(25, corners: [.topRight, .topLeft])

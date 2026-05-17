@@ -78,7 +78,7 @@ struct HistoryContactFragment: View {
 								isMenuOpen = false
 								
 								SharedMainViewModel.shared.displayedCall = nil
-								SharedMainViewModel.shared.changeIndexView(indexViewInt: 0)
+								SharedMainViewModel.shared.changeIndexView(indexViewInt: 1)
 								
 								if historyModel.isFriend {
 									let friendIndex = contactsManager.avatarListModel.first(where: {$0.addresses.contains(where: {$0 == historyModel.address})})

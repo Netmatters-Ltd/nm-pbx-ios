@@ -248,8 +248,7 @@ struct StartCallFragment: View {
 								.padding(.horizontal, 16)
 							}
 							
-							ContactsListFragment(showingSheet: .constant(false)
-												 , startCallFunc: { addr in
+							ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.avatarListModel, startCallFunc: { addr in
 								if callViewModel.isTransferInsteadCall {
 									showingDialer = false
 									

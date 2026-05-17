@@ -21,44 +21,47 @@ import SwiftUI
 import linphonesw
 
 struct ContactsListFragment: View {
-	
-	@ObservedObject var contactsManager = ContactsManager.shared
-	
+
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-	
+
 	@Binding var showingSheet: Bool
-	
+
+	var displayedContacts: [ContactAvatarModel]
     var startCallFunc: (_ addr: Address) -> Void
-	
+
 	var body: some View {
-		ForEach(Array(contactsManager.avatarListModel.enumerated()), id: \.element.id) { index, contactAvatarModel in
-			ContactRow(contactAvatarModel: contactAvatarModel, index: index, showingSheet: $showingSheet, startCallFunc: startCallFunc)
+		ForEach(Array(displayedContacts.enumerated()), id: \.element.id) { index, contactAvatarModel in
+			ContactRow(
+				contactAvatarModel: contactAvatarModel,
+				allContacts: displayedContacts,
+				index: index,
+				showingSheet: $showingSheet,
+				startCallFunc: startCallFunc
+			)
 		}
 	}
 }
 
 struct ContactRow: View {
-	@ObservedObject var contactsManager = ContactsManager.shared
-	
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-	
+
 	@ObservedObject var contactAvatarModel: ContactAvatarModel
-	
+	var allContacts: [ContactAvatarModel]
 	let index: Int
-	
+
 	@Binding var showingSheet: Bool
-	
+
 	var startCallFunc: (_ addr: Address) -> Void
-	
+
 	var body: some View {
 		HStack {
 			HStack {
 				if index <= 0
-					|| (index < contactsManager.avatarListModel.count && contactAvatarModel.name.lowercased().folding(
+					|| (index < allContacts.count && contactAvatarModel.name.lowercased().folding(
 						options: .diacriticInsensitive,
 						locale: .current
 					).first
-					!= contactsManager.avatarListModel[index-1].name.lowercased().folding(
+					!= allContacts[index-1].name.lowercased().folding(
 						options: .diacriticInsensitive,
 						locale: .current
 					).first) {
@@ -111,26 +114,26 @@ struct ContactRow: View {
 		.listRowSeparator(.hidden)
 		.background(.white)
 		.onTapGesture {
-            if SharedMainViewModel.shared.indexView == 0 {
-                withAnimation {
-                    SharedMainViewModel.shared.displayedFriend = contactAvatarModel
-                }
-            }
-            
+			if SharedMainViewModel.shared.indexView <= 1 {
+				withAnimation {
+					SharedMainViewModel.shared.displayedFriend = contactAvatarModel
+				}
+			}
+
 			if contactAvatarModel.friend != nil
 				&& contactAvatarModel.friend!.address != nil {
 				startCallFunc(contactAvatarModel.friend!.address!)
 			}
 		}
 		.onLongPressGesture(minimumDuration: 0.2) {
-            if SharedMainViewModel.shared.indexView == 0 {
-                contactsListViewModel.selectedFriend = contactAvatarModel
-                showingSheet.toggle()
-            }
+			if SharedMainViewModel.shared.indexView <= 1 {
+				contactsListViewModel.selectedFriend = contactAvatarModel
+				showingSheet.toggle()
+			}
 		}
 	}
 }
 
 #Preview {
-    ContactsListFragment(showingSheet: .constant(false), startCallFunc: {_ in })
+    ContactsListFragment(showingSheet: .constant(false), displayedContacts: [], startCallFunc: {_ in })
 }

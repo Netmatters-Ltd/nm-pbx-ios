@@ -21,22 +21,27 @@ import SwiftUI
 import linphonesw
 
 struct ContactsInnerFragment: View {
-	
+
 	@ObservedObject var sharedMainViewModel = SharedMainViewModel.shared
 	@ObservedObject var contactsManager = ContactsManager.shared
 	@ObservedObject var magicSearch = MagicSearchSingleton.shared
-	
+
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-	
+
 	@State private var isFavoriteOpen = true
-	
+
 	@Binding var showingSheet: Bool
 	@Binding var text: String
-	
+	var mode: ContactsFilterMode
+
+	var filteredContacts: [ContactAvatarModel] {
+		contactsManager.avatarListModel.filter { mode == .extensions ? $0.isInternal : !$0.isInternal }
+	}
+
 	var body: some View {
 		ZStack {
 			VStack(alignment: .leading) {
-				if contactsManager.avatarListModel.contains(where: { $0.starred }) {
+				if filteredContacts.contains(where: { $0.starred }) {
 					HStack(alignment: .center) {
 						Text("contacts_list_favourites_title")
 							.default_text_style_800(styleSize: 16)
@@ -60,7 +65,7 @@ struct ContactsInnerFragment: View {
 					}
 					
 					if isFavoriteOpen {
-						FavoriteContactsListFragment(showingSheet: $showingSheet)
+						FavoriteContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts)
 							.zIndex(-1)
 							.transition(.move(edge: .top))
 					}
@@ -77,7 +82,7 @@ struct ContactsInnerFragment: View {
 				
 				VStack {
 					List {
-						ContactsListFragment(showingSheet: $showingSheet, startCallFunc: {_ in })}
+						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in })}
 					.safeAreaInset(edge: .top, content: {
 						Spacer()
 							.frame(height: 12)
@@ -90,7 +95,7 @@ struct ContactsInnerFragment: View {
 					}
 					.overlay(
 						VStack {
-							if contactsManager.avatarListModel.isEmpty {
+							if filteredContacts.isEmpty {
 								Spacer()
 								Image("illus-belledonne")
 									.resizable()
@@ -119,5 +124,5 @@ struct ContactsInnerFragment: View {
 }
 
 #Preview {
-	ContactsInnerFragment(showingSheet: .constant(false), text: .constant(""))
+	ContactsInnerFragment(showingSheet: .constant(false), text: .constant(""), mode: .contacts)
 }

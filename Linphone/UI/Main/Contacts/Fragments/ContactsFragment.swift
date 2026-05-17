@@ -20,21 +20,22 @@
 import SwiftUI
 
 struct ContactsFragment: View {
-	
+
 	private var idiom: UIUserInterfaceIdiom { UIDevice.current.userInterfaceIdiom }
-	
+
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-	
+
 	@Binding var isShowDeletePopup: Bool
-	
+
 	@State private var showingSheet = false
 	@State private var showShareSheet = false
 	@Binding var text: String
-	
+	var mode: ContactsFilterMode
+
 	var body: some View {
 		ZStack {
 			if #available(iOS 16.0, *), idiom != .pad {
-				ContactsInnerFragment(showingSheet: $showingSheet, text: $text)
+				ContactsInnerFragment(showingSheet: $showingSheet, text: $text, mode: mode)
 					.sheet(isPresented: $showingSheet) {
 						ContactsListBottomSheet(
 							isShowDeletePopup: $isShowDeletePopup,
@@ -49,7 +50,7 @@ struct ContactsFragment: View {
 							.edgesIgnoringSafeArea(.bottom)
 					}
 			} else {
-				ContactsInnerFragment(showingSheet: $showingSheet, text: $text)
+				ContactsInnerFragment(showingSheet: $showingSheet, text: $text, mode: mode)
 					.halfSheet(showSheet: $showingSheet) {
 						ContactsListBottomSheet(
 							isShowDeletePopup: $isShowDeletePopup,
@@ -68,5 +69,5 @@ struct ContactsFragment: View {
 }
 
 #Preview {
-	ContactsFragment(isShowDeletePopup: .constant(false), text: .constant(""))
+	ContactsFragment(isShowDeletePopup: .constant(false), text: .constant(""), mode: .contacts)
 }

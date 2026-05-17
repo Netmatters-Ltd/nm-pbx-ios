@@ -20,42 +20,17 @@
 import SwiftUI
 
 struct ContactsView: View {
-	
+
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
-	
+
 	@Binding var isShowEditContactFragment: Bool
 	@Binding var isShowDeletePopup: Bool
 	@Binding var text: String
-	
+	var mode: ContactsFilterMode
+
 	var body: some View {
 		NavigationView {
-			ZStack(alignment: .bottomTrailing) {
-				ContactsFragment(isShowDeletePopup: $isShowDeletePopup, text: $text)
-				
-				if !CorePreferences.disableAddContact {
-					Button {
-						withAnimation {
-							contactsListViewModel.selectedEditFriend = nil
-							isShowEditContactFragment.toggle()
-						}
-					} label: {
-						Image("user-plus")
-							.renderingMode(.template)
-							.foregroundStyle(.white)
-							.padding()
-							.background(Color.orangeMain500)
-							.clipShape(Circle())
-							.shadow(color: .black.opacity(0.2), radius: 4)
-						
-					}
-					.padding()
-				}
-				
-				// For testing crashlytics
-				/*Button(action: CoreContext.shared.crashForCrashlytics, label: {
-					Text("CRASH ME")
-				})*/
-			}
+			ContactsFragment(isShowDeletePopup: $isShowDeletePopup, text: $text, mode: mode)
 		}
 		.navigationViewStyle(.stack)
 	}
@@ -65,6 +40,7 @@ struct ContactsView: View {
 	ContactsView(
 		isShowEditContactFragment: .constant(false),
 		isShowDeletePopup: .constant(false),
-		text: .constant("")
+		text: .constant(""),
+		mode: .contacts
 	)
 }

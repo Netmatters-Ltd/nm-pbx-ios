@@ -132,9 +132,9 @@ class URIHandler {
 			SharedMainViewModel.shared.fileUrlsToShare.append(urlFile)
 		}
 		
-		SharedMainViewModel.shared.changeIndexView(indexViewInt: 2)
+		SharedMainViewModel.shared.changeIndexView(indexViewInt: 3)
 	}
-	
+
 	private static func openContact(url: URL) {
 		Log.info("[URIHandler] open contact from URL: \(url.resourceSpecifier)")
 		
@@ -150,7 +150,7 @@ class URIHandler {
 		
 		if friendIndex != nil {
 			SharedMainViewModel.shared.displayedConversation = nil
-			SharedMainViewModel.shared.changeIndexView(indexViewInt: 0)
+			SharedMainViewModel.shared.changeIndexView(indexViewInt: 1)
 			withAnimation {
 				SharedMainViewModel.shared.displayedFriend = friendIndex
 			}
