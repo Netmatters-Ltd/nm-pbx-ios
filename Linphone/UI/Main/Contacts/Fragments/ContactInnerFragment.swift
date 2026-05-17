@@ -71,40 +71,6 @@ struct ContactInnerFragment: View {
 						}
 						
 						Spacer()
-						
-						if !contactAvatarModel.isReadOnly {
-							if !contactAvatarModel.editable {
-								Button(action: {
-									editNativeContact()
-								}, label: {
-									Image("pencil-simple")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.orangeMain500)
-										.frame(width: 25, height: 25, alignment: .leading)
-										.padding(.all, 10)
-										.padding(.top, 2)
-								})
-							} else {
-								NavigationLink(destination: EditContactFragment(
-									contactAvatarModel: contactAvatarModel,
-									isShowEditContactFragment: $isShowEditContactFragmentInContactDetails,
-									isShowDismissPopup: $isShowDismissPopup)) {
-										Image("pencil-simple")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(Color.orangeMain500)
-											.frame(width: 25, height: 25, alignment: .leading)
-											.padding(.all, 10)
-											.padding(.top, 2)
-									}
-									.simultaneousGesture(
-										TapGesture().onEnded {
-											isShowEditContactFragmentInContactDetails = true
-										}
-									)
-							}
-						}
 					}
 					.frame(maxWidth: .infinity)
 					.frame(height: 50)

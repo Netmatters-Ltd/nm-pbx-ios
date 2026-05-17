@@ -229,63 +229,6 @@ struct ContactInnerActionsFragment: View {
 		
 		VStack(spacing: 0) {
 			if !contactAvatarModel.isReadOnly {
-				if !contactAvatarModel.editable {
-					Button {
-						actionEditButton()
-					} label: {
-						HStack {
-							Image("pencil-simple")
-								.renderingMode(.template)
-								.resizable()
-								.foregroundStyle(Color.grayMain2c600)
-								.frame(width: 25, height: 25)
-								.padding(.all, 10)
-							
-							Text("contact_details_edit")
-								.default_text_style(styleSize: 14)
-								.frame(maxWidth: .infinity, alignment: .leading)
-								.lineLimit(1)
-								.fixedSize(horizontal: false, vertical: true)
-							Spacer()
-						}
-						.padding(.vertical, 15)
-						.padding(.horizontal, 20)
-					}
-				} else {
-					NavigationLink(destination: EditContactFragment(
-						contactAvatarModel: contactAvatarModel,
-						isShowEditContactFragment: $isShowEditContactFragmentInContactDetails,
-						isShowDismissPopup: $isShowDismissPopup)) {
-							HStack {
-								Image("pencil-simple")
-									.renderingMode(.template)
-									.resizable()
-									.foregroundStyle(Color.grayMain2c600)
-									.frame(width: 25, height: 25)
-									.padding(.all, 10)
-								
-								Text("contact_details_edit")
-									.default_text_style(styleSize: 14)
-									.frame(maxWidth: .infinity, alignment: .leading)
-									.lineLimit(1)
-									.fixedSize(horizontal: false, vertical: true)
-								Spacer()
-							}
-							.padding(.vertical, 15)
-							.padding(.horizontal, 20)
-						}
-						.simultaneousGesture(
-							TapGesture().onEnded {
-								isShowEditContactFragmentInContactDetails = true
-							}
-						)
-				}
-				
-				VStack {
-					Divider()
-				}
-				.padding(.horizontal)
-				
 				Button {
 					contactsListViewModel.toggleStarredSelectedFriend()
 				} label: {
@@ -308,13 +251,13 @@ struct ContactInnerActionsFragment: View {
 					.padding(.vertical, 15)
 					.padding(.horizontal, 20)
 				}
-				
+
 				VStack {
 					Divider()
 				}
 				.padding(.horizontal)
 			}
-			
+
 			Button {
 				showShareSheet.toggle()
 			} label: {
@@ -337,35 +280,6 @@ struct ContactInnerActionsFragment: View {
 				.padding(.horizontal, 20)
 			}
 			
-			if !contactAvatarModel.isReadOnly {
-				VStack {
-					Divider()
-				}
-				.padding(.horizontal)
-				
-				Button {
-					isShowDeletePopup.toggle()
-				} label: {
-					HStack {
-						Image("trash-simple")
-							.renderingMode(.template)
-							.resizable()
-							.foregroundStyle(Color.redDanger500)
-							.frame(width: 25, height: 25)
-							.padding(.all, 10)
-						
-						Text("contact_details_delete")
-							.foregroundStyle(Color.redDanger500)
-							.default_text_style(styleSize: 14)
-							.frame(maxWidth: .infinity, alignment: .leading)
-							.lineLimit(1)
-							.fixedSize(horizontal: false, vertical: true)
-						Spacer()
-					}
-					.padding(.vertical, 15)
-					.padding(.horizontal, 20)
-				}
-			}
 		}
 		.background(.white)
 		.cornerRadius(15)
