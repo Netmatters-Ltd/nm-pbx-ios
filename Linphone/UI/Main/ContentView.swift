@@ -1592,7 +1592,11 @@ struct ContentView: View {
 			orientation = newOrientation
 		}
 		.onChange(of: scenePhase) { newPhase in
-			orientation = UIDevice.current.orientation
+			let newOrientation = UIDevice.current.orientation
+			if UIDevice.current.userInterfaceIdiom == .pad
+				|| (newOrientation != .landscapeLeft && newOrientation != .landscapeRight) {
+				orientation = newOrientation
+			}
 			if newPhase == .active {
 				if let conversationsListVM = conversationsListViewModel {
 					conversationsListVM.computeChatRoomsList()

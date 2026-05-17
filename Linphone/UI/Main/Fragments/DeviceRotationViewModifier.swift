@@ -29,11 +29,11 @@ struct DeviceRotationViewModifier: ViewModifier {
 		content
 			.onAppear()
 			.onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-				if UIDevice.current.orientation == .landscapeLeft
-					|| UIDevice.current.orientation == .landscapeRight
-					|| UIDevice.current.orientation == .portrait
-					|| (UIDevice.current.orientation == .portraitUpsideDown && idiom == .pad) {
-					action(UIDevice.current.orientation)
+				let current = UIDevice.current.orientation
+				if current == .portrait
+					|| (current == .portraitUpsideDown && idiom == .pad)
+					|| ((current == .landscapeLeft || current == .landscapeRight) && idiom == .pad) {
+					action(current)
 				}
 			}
 	}
