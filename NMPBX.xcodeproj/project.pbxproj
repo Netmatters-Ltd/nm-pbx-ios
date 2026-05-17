@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */; };
 		660AAF7F2B839272004C0FA6 /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		660D8A712B517D260092694D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 660D8A702B517D260092694D /* GoogleService-Info.plist */; };
 		6613A0AE2BAEB7DF008923A4 /* MeetingFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6613A0AD2BAEB7DF008923A4 /* MeetingFragment.swift */; };
@@ -59,6 +60,7 @@
 		C6A5A9482C10B6A30070FEA4 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6A5A9472C10B6A30070FEA4 /* AuthState.swift */; };
 		C6DC4E3D2C199C4E009096FD /* BundleExtenion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6DC4E3C2C199C4E009096FD /* BundleExtenion.swift */; };
 		C6DC4E3F2C19C289009096FD /* SideMenuEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6DC4E3E2C19C289009096FD /* SideMenuEntry.swift */; };
+		D3D2BB2872477A97D70414E0 /* UserPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13C679DF82AA9FCABD42BBC /* UserPresence.swift */; };
 		D703F7082DC8C605005B8F75 /* FilePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D703F7072DC8C5FF005B8F75 /* FilePicker.swift */; };
 		D706BA822ADD72D100278F45 /* DeviceRotationViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D706BA812ADD72D100278F45 /* DeviceRotationViewModifier.swift */; };
 		D70959F12B8DF3EC0014AC0B /* ConversationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70959F02B8DF3EC0014AC0B /* ConversationModel.swift */; };
@@ -137,7 +139,6 @@
 		D762102C2E97FDFD002E7999 /* CardDavAddressBookConfigurationFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D762102B2E97FDF8002E7999 /* CardDavAddressBookConfigurationFragment.swift */; };
 		D7702EF22AC7205000557C00 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7702EF12AC7205000557C00 /* WelcomeView.swift */; };
 		D777DBB32AE12C5900565A99 /* ContactsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D777DBB22AE12C5900565A99 /* ContactsManager.swift */; };
-		D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */; };
 		D77A080E2CB6BCAF0095D589 /* MessageConferenceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A080D2CB6BCA10095D589 /* MessageConferenceInfo.swift */; };
 		D78290B82ADD3910004AA85C /* ContactsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78290B72ADD3910004AA85C /* ContactsFragment.swift */; };
 		D78290BB2ADD40B2004AA85C /* ContactsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78290BA2ADD40B2004AA85C /* ContactsListViewModel.swift */; };
@@ -178,6 +179,7 @@
 		D7C48DF62AFCDF4700D938CB /* ContactInnerActionsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C48DF52AFCDF4700D938CB /* ContactInnerActionsFragment.swift */; };
 		D7C500402D27F16C00DD53EC /* AccountSettingsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C5003F2D27F16900DD53EC /* AccountSettingsFragment.swift */; };
 		D7C500422D2BE98100DD53EC /* AccountSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */; };
+		D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */; };
 		D7CEE0352B7A210300FD79B7 /* ConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */; };
 		D7CEE0382B7A214F00FD79B7 /* ConversationsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */; };
 		D7CEE03B2B7A234200FD79B7 /* ConversationsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */; };
@@ -217,8 +219,6 @@
 		D7F5F6412C359F3B007FCF2F /* SipAddressesPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5F6402C359F3B007FCF2F /* SipAddressesPopup.swift */; };
 		D7FB55112AD447FD00A5AB15 /* RegisterFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FB55102AD447FD00A5AB15 /* RegisterFragment.swift */; };
 		D7FC8E4A2EBA12F90080C09D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D7FC8E492EBA12F90080C09D /* Launch Screen.storyboard */; };
-		D3D2BB2872477A97D70414E0 /* UserPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13C679DF82AA9FCABD42BBC /* UserPresence.swift */; };
-		1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */; };
 		FC5F6CA106CBA23F016B91A1 /* PresencePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */; };
 /* End PBXBuildFile section */
 
@@ -291,6 +291,7 @@
 		66F08C882C2AFEF700D9AE2F /* MeetingsListBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingsListBottomSheet.swift; sourceTree = "<group>"; };
 		66F626B12BCEBB86003E2DEC /* AddParticipantsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddParticipantsFragment.swift; sourceTree = "<group>"; };
 		66FDB7802C7C689A00561566 /* EventEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEditViewController.swift; sourceTree = "<group>"; };
+		9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresencePickerView.swift; sourceTree = "<group>"; };
 		C60E8F182C0F649200A06DB8 /* UIApplicationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIApplicationExtension.swift; sourceTree = "<group>"; };
 		C62817272C1B389700DBA646 /* SideMenuAccountRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuAccountRow.swift; sourceTree = "<group>"; };
 		C628172D2C1C3A3600DBA646 /* AccountExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountExtension.swift; sourceTree = "<group>"; };
@@ -328,7 +329,7 @@
 		D717630C2BD7BD0E00464097 /* ParticipantsListFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListFragment.swift; sourceTree = "<group>"; };
 		D717A10D2CEB770D00849D92 /* ShareSheetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheetController.swift; sourceTree = "<group>"; };
 		D71968912B86369D00DF4459 /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
-		D719ABB32ABC67BF00B41C10 /* LinphoneApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LinphoneApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D719ABB32ABC67BF00B41C10 /* NMPBX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NMPBX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D719ABB62ABC67BF00B41C10 /* LinphoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinphoneApp.swift; sourceTree = "<group>"; };
 		D719ABB82ABC67BF00B41C10 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D719ABBA2ABC67BF00B41C10 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -386,7 +387,6 @@
 		D762102B2E97FDF8002E7999 /* CardDavAddressBookConfigurationFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavAddressBookConfigurationFragment.swift; sourceTree = "<group>"; };
 		D7702EF12AC7205000557C00 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		D777DBB22AE12C5900565A99 /* ContactsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsManager.swift; sourceTree = "<group>"; };
-		D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavProvisioningManager.swift; sourceTree = "<group>"; };
 		D77A080D2CB6BCA10095D589 /* MessageConferenceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageConferenceInfo.swift; sourceTree = "<group>"; };
 		D78290B72ADD3910004AA85C /* ContactsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsFragment.swift; sourceTree = "<group>"; };
 		D78290BA2ADD40B2004AA85C /* ContactsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsListViewModel.swift; sourceTree = "<group>"; };
@@ -428,6 +428,7 @@
 		D7C48DF52AFCDF4700D938CB /* ContactInnerActionsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactInnerActionsFragment.swift; sourceTree = "<group>"; };
 		D7C5003F2D27F16900DD53EC /* AccountSettingsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsFragment.swift; sourceTree = "<group>"; };
 		D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsViewModel.swift; sourceTree = "<group>"; };
+		D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavProvisioningManager.swift; sourceTree = "<group>"; };
 		D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsView.swift; sourceTree = "<group>"; };
 		D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsListViewModel.swift; sourceTree = "<group>"; };
 		D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsFragment.swift; sourceTree = "<group>"; };
@@ -462,7 +463,6 @@
 		D7FC8E492EBA12F90080C09D /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		E13C679DF82AA9FCABD42BBC /* UserPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPresence.swift; sourceTree = "<group>"; };
 		EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceViewModel.swift; sourceTree = "<group>"; };
-		9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresencePickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -528,6 +528,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1ED2B1E9B6118F6FFD552D32 /* Presence */ = {
+			isa = PBXGroup;
+			children = (
+				E13C679DF82AA9FCABD42BBC /* UserPresence.swift */,
+				EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */,
+				9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */,
+			);
+			path = Presence;
+			sourceTree = "<group>";
+		};
 		660AAF7C2B839272004C0FA6 /* msgNotificationService */ = {
 			isa = PBXGroup;
 			children = (
@@ -681,7 +691,7 @@
 		D719ABB42ABC67BF00B41C10 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D719ABB32ABC67BF00B41C10 /* LinphoneApp.app */,
+				D719ABB32ABC67BF00B41C10 /* NMPBX.app */,
 				660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */,
 				D7458F2F2E0BDCF4000C957A /* linphoneExtension.appex */,
 				D792F1582F02BCC2002E3225 /* intentsExtension.appex */,
@@ -1166,16 +1176,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		1ED2B1E9B6118F6FFD552D32 /* Presence */ = {
-			isa = PBXGroup;
-			children = (
-					E13C679DF82AA9FCABD42BBC /* UserPresence.swift */,
-					EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */,
-					9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */,
-			);
-			path = Presence;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1196,9 +1196,9 @@
 			productReference = 660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		D719ABB22ABC67BF00B41C10 /* LinphoneApp */ = {
+		D719ABB22ABC67BF00B41C10 /* NMPBX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D719ABC22ABC67BF00B41C10 /* Build configuration list for PBXNativeTarget "LinphoneApp" */;
+			buildConfigurationList = D719ABC22ABC67BF00B41C10 /* Build configuration list for PBXNativeTarget "NMPBX" */;
 			buildPhases = (
 				D719ABAF2ABC67BF00B41C10 /* Sources */,
 				D719ABB02ABC67BF00B41C10 /* Frameworks */,
@@ -1214,9 +1214,9 @@
 				D7458F382E0BDCF4000C957A /* PBXTargetDependency */,
 				D792F1602F02BCC2002E3225 /* PBXTargetDependency */,
 			);
-			name = LinphoneApp;
+			name = NMPBX;
 			productName = Linphone;
-			productReference = D719ABB32ABC67BF00B41C10 /* LinphoneApp.app */;
+			productReference = D719ABB32ABC67BF00B41C10 /* NMPBX.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D7458F2E2E0BDCF4000C957A /* linphoneExtension */ = {
@@ -1288,7 +1288,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D719ABAE2ABC67BF00B41C10 /* Build configuration list for PBXProject "LinphoneApp" */;
+			buildConfigurationList = D719ABAE2ABC67BF00B41C10 /* Build configuration list for PBXProject "NMPBX" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1307,7 +1307,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D719ABB22ABC67BF00B41C10 /* LinphoneApp */,
+				D719ABB22ABC67BF00B41C10 /* NMPBX */,
 				660AAF7A2B839271004C0FA6 /* msgNotificationService */,
 				D7458F2E2E0BDCF4000C957A /* linphoneExtension */,
 				D792F1572F02BCC2002E3225 /* intentsExtension */,
@@ -1660,7 +1660,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
-					"USE_CRASHLYTICS=1",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = msgNotificationService/Info.plist;
@@ -1674,7 +1673,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 6.1.0;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DUSE_CRASHLYTICS";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.msgnotification";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1700,10 +1699,7 @@
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"USE_CRASHLYTICS=1",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = msgNotificationService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = msgNotificationService;
@@ -1716,7 +1712,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 6.1.0;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DUSE_CRASHLYTICS";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.msgnotification";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1856,7 +1852,7 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
@@ -1866,13 +1862,13 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
-					"USE_CRASHLYTICS=1",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Linphone/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NMPBX;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = YES;
-				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "b5cb085f-772a-4a4f-8c77-5d1332b1f93f";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Deprecated - Prior to iOS 17 full calendar access is required";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Used during initial setup to scan the QR code.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "NMPBX needs access to your contacts if you want to access contacts that are already on your iPhone.";
@@ -1898,7 +1894,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 6.1.0;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DUSE_CRASHLYTICS";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1920,21 +1916,19 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"USE_CRASHLYTICS=1",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Linphone/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NMPBX;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = YES;
-				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "b5cb085f-772a-4a4f-8c77-5d1332b1f93f";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_ITSEncryptionExportComplianceCode = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Deprecated - Prior to iOS 17 full calendar access is required";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Used during initial setup to scan the QR code.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "NMPBX needs access to your contacts if you want to access contacts that are already on your iPhone.";
@@ -1960,7 +1954,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 6.1.0;
-				OTHER_SWIFT_FLAGS = "$(inherited) -DUSE_CRASHLYTICS";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2126,7 +2120,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D719ABAE2ABC67BF00B41C10 /* Build configuration list for PBXProject "LinphoneApp" */ = {
+		D719ABAE2ABC67BF00B41C10 /* Build configuration list for PBXProject "NMPBX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D719ABC02ABC67BF00B41C10 /* Debug */,
@@ -2135,7 +2129,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D719ABC22ABC67BF00B41C10 /* Build configuration list for PBXNativeTarget "LinphoneApp" */ = {
+		D719ABC22ABC67BF00B41C10 /* Build configuration list for PBXNativeTarget "NMPBX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D719ABC32ABC67BF00B41C10 /* Debug */,

@@ -60,49 +60,6 @@ struct LoginFragment: View {
 						}
 					}
 					
-					if self.isShowPopup {
-						let generalTerms = String(format: "[%@](%@)", String(localized: "assistant_dialog_general_terms_label"), "https://www.linphone.org/en/terms-of-use/")
-						let privacyPolicy = String(format: "[%@](%@)", String(localized: "assistant_dialog_privacy_policy_label"), "https://linphone.org/en/privacy-policy")
-						let splitMsg = String(localized: "assistant_dialog_general_terms_and_privacy_policy_message").components(separatedBy: "%@")
-						if splitMsg.count == 3 { // We expect form of  STRING %A STRING %@ STRING
-							let contentPopup1 = Text(.init(splitMsg[0]))
-							let contentPopup2 = Text(.init(generalTerms)).underline()
-							let contentPopup3 = Text(.init(splitMsg[1]))
-							let contentPopup4 = Text(.init(privacyPolicy)).underline()
-							let contentPopup5 = Text(.init(splitMsg[2]))
-							PopupView(
-								isShowPopup: $isShowPopup,
-								title: Text("assistant_dialog_general_terms_and_privacy_policy_title"),
-								content: contentPopup1 + contentPopup2 + contentPopup3 + contentPopup4 + contentPopup5,
-								titleFirstButton: nil,
-								actionFirstButton: {},
-								titleSecondButton: Text("dialog_accept"),
-								actionSecondButton: { acceptGeneralTerms() },
-								titleThirdButton: Text("dialog_deny"),
-								actionThirdButton: { self.isShowPopup.toggle() }
-							)
-							.background(.black.opacity(0.65))
-							.onTapGesture {
-								self.isShowPopup.toggle()
-							}
-						} else {  // backup just in case
-							PopupView(
-								isShowPopup: $isShowPopup,
-								title: Text("assistant_dialog_general_terms_and_privacy_policy_title"),
-								content: Text(.init(String(format: String(localized: "assistant_dialog_general_terms_and_privacy_policy_message"), generalTerms, privacyPolicy))),
-								titleFirstButton: nil,
-								actionFirstButton: {},
-								titleSecondButton: Text("dialog_accept"),
-								actionSecondButton: { acceptGeneralTerms() },
-								titleThirdButton: Text("dialog_deny"),
-								actionThirdButton: { self.isShowPopup.toggle() }
-							)
-							.background(.black.opacity(0.65))
-							.onTapGesture {
-								self.isShowPopup.toggle()
-							}
-						}
-					}
 				}
 				
 				if isShowHelpFragment {

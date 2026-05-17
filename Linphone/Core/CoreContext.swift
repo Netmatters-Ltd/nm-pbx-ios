@@ -123,7 +123,7 @@ class CoreContext: ObservableObject {
 		coreQueue.async {
 			LoggingService.Instance.logLevel = LogLevel.Debug
 			Factory.Instance.logCollectionPath = Factory.Instance.getDataDir(context: UnsafeMutablePointer<Int8>(mutating: (Config.appGroupName as NSString).utf8String))
-			Factory.Instance.enableLogCollection(state: LogCollectionState.Enabled)
+			Factory.Instance.enableLogCollection(state: LogCollectionState.Disabled)
 			
 			Log.info("Checking if linphonerc file exists already. If not, creating one as a copy of linphonerc-default")
 			if let rcDir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Config.appGroupName)?
@@ -170,9 +170,9 @@ class CoreContext: ObservableObject {
 			// Migration
 			self.mCore.config!.setBool(section: "sip", key: "auto_answer_replacing_calls", value: false)
 			self.mCore.config!.setBool(section: "sip", key: "deliver_imdn", value: false)
-			self.mCore.config!.setString(section: "misc", key: "log_collection_upload_server_url", value: "https://files.linphone.org:443/http-file-transfer-server/hft.php")
-			self.mCore.config!.setString(section: "misc", key: "file_transfer_server_url", value: "https://files.linphone.org:443/http-file-transfer-server/hft.php")
-			self.mCore.config!.setString(section: "misc", key: "version_check_url_root", value: "https://download.linphone.org/releases")
+			self.mCore.config!.setString(section: "misc", key: "log_collection_upload_server_url", value: "")
+			self.mCore.config!.setString(section: "misc", key: "file_transfer_server_url", value: "")
+			self.mCore.config!.setString(section: "misc", key: "version_check_url_root", value: "")
 			
 			self.mCore.imdnToEverybodyThreshold = 1
 			self.imdnToEverybodyThreshold = self.mCore.imdnToEverybodyThreshold == 1

@@ -113,26 +113,6 @@ struct ThirdPartySipAccountWarningFragment: View {
 					.multilineTextAlignment(.center)
 					.padding(.bottom)
 				
-				HStack {
-					Spacer()
-					
-					HStack {
-						Text("[linphone.org/contact](https://linphone.org/contact)")
-							.tint(Color.orangeMain500)
-							.default_text_style_orange_600(styleSize: 15)
-							.frame(height: 35)
-					}
-					.padding(.horizontal, 15)
-					.cornerRadius(60)
-					.overlay(
-						RoundedRectangle(cornerRadius: 60)
-							.inset(by: 0.5)
-							.stroke(Color.orangeMain500, lineWidth: 1)
-					)
-					
-					Spacer()
-				}
-				.padding(.vertical)
 			}
 			.frame(maxWidth: SharedMainViewModel.shared.maxWidth)
 			.padding(.horizontal, 20)

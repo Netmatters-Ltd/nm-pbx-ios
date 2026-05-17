@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D719ABB22ABC67BF00B41C10"
-               BuildableName = "LinphoneApp.app"
-               BlueprintName = "LinphoneApp"
-               ReferencedContainer = "container:LinphoneApp.xcodeproj">
+               BuildableName = "NMPBX.app"
+               BlueprintName = "NMPBX"
+               ReferencedContainer = "container:NMPBX.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,9 +44,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D719ABB22ABC67BF00B41C10"
-            BuildableName = "LinphoneApp.app"
-            BlueprintName = "LinphoneApp"
-            ReferencedContainer = "container:LinphoneApp.xcodeproj">
+            BuildableName = "NMPBX.app"
+            BlueprintName = "NMPBX"
+            ReferencedContainer = "container:NMPBX.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D719ABB22ABC67BF00B41C10"
-            BuildableName = "LinphoneApp.app"
-            BlueprintName = "LinphoneApp"
-            ReferencedContainer = "container:LinphoneApp.xcodeproj">
+            BuildableName = "NMPBX.app"
+            BlueprintName = "NMPBX"
+            ReferencedContainer = "container:NMPBX.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

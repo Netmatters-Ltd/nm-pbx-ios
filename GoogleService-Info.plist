@@ -2,35 +2,34 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Replace all values here with credentials from your own Firebase project when re-enabling Crashlytics. -->
 	<key>CLIENT_ID</key>
-	<string>221368768663-0ufgu96cel0auk4v0me863lgm252b9n2.apps.googleusercontent.com</string>
+	<string>REPLACE_WITH_YOUR_CLIENT_ID</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.221368768663-0ufgu96cel0auk4v0me863lgm252b9n2</string>
+	<string>REPLACE_WITH_YOUR_REVERSED_CLIENT_ID</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDJTtlRCM7IqdVUU2dSIYq2YIsTz6bqnkI</string>
+	<string>REPLACE_WITH_YOUR_API_KEY</string>
 	<key>GCM_SENDER_ID</key>
-	<string>221368768663</string>
+	<string>REPLACE_WITH_YOUR_GCM_SENDER_ID</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.linphone.phone</string>
+	<string>com.netmatters.nm-pbx</string>
 	<key>PROJECT_ID</key>
-	<string>linphone-iphone</string>
+	<string>REPLACE_WITH_YOUR_PROJECT_ID</string>
 	<key>STORAGE_BUCKET</key>
-	<string>linphone-iphone.firebasestorage.app</string>
+	<string>REPLACE_WITH_YOUR_STORAGE_BUCKET</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
 	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<false></false>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<false></false>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<false></false>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:221368768663:ios:a2c822bc087b5a219431d2</string>
-	<key>DATABASE_URL</key>
-	<string>https://linphone-iphone.firebaseio.com</string>
+	<string>REPLACE_WITH_YOUR_GOOGLE_APP_ID</string>
 </dict>
 </plist>

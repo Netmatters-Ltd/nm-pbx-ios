@@ -286,29 +286,6 @@ struct RegisterFragment: View {
 				
 				Spacer()
 				
-				Text("assistant_create_account_using_email_on_our_web_platform")
-					.default_text_style(styleSize: 15)
-					.foregroundStyle(Color.grayMain2c700)
-					.padding(.horizontal, 10)
-					.frame(maxWidth: .infinity, alignment: .center)
-				
-				Button(action: {
-					UIApplication.shared.open(URL(string: "https://subscribe.linphone.org/register/email")!)
-				}, label: {
-					Text("assistant_web_platform_link")
-						.default_text_style_orange_600(styleSize: 15)
-						.frame(height: 35)
-				})
-				.padding(.horizontal, 15)
-				.padding(.vertical, 5)
-				.cornerRadius(60)
-				.overlay(
-					RoundedRectangle(cornerRadius: 60)
-						.inset(by: 0.5)
-						.stroke(Color.orangeMain500, lineWidth: 1)
-				)
-				.padding(.bottom)
-				.frame(maxWidth: .infinity)
 			}
 			.frame(maxWidth: SharedMainViewModel.shared.maxWidth)
 			.padding(.horizontal, 20)

@@ -180,7 +180,7 @@ struct ThirdPartySipAccountLoginFragment: View {
 					.default_text_style_700(styleSize: 15)
 					.padding(.bottom, -5)
 				
-				TextField("sip.linphone.org", text: $accountLoginViewModel.domain)
+				TextField("yourdomain.example", text: $accountLoginViewModel.domain)
 					.default_text_style(styleSize: 15)
 					.disableAutocorrection(true)
 					.autocapitalization(.none)
