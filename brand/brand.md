@@ -36,11 +36,9 @@ The `NMPBX_X_Isolated_*` are square. They feature just the "X" which is the prim
 
 ## Colours
 
-#25af4b as primary brand colour. If used as a background this should have black text on it.
+`#0e2826` (dark green) used for background of title areas and menus. Use this in place of Linphone's default bright orange backgrounds.
 
-#0e2826 as secondary brand colour. If used as a background this should have white text on it.
-
-If using a gradient, it should go from #25af4b (the primary brand colour) to #a4cd3a.
+`#25af4b` (light green) used as background for calls to action such as the button to start a call. Avoid having multiple buttons with this colour visible at once. Also used for when a user's status is 'Available' (to avoid having two similar but slightly different greens on screen at once.)
 
 ## Typeface
 
