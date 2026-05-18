@@ -135,6 +135,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 	
 	func applicationWillTerminate(_ application: UIApplication) {
 		Log.info("IOS applicationWillTerminate")
+		TelecomManager.shared.providerDelegate.provider.invalidate()
 		if let coreContext = coreContext {
 			coreContext.doOnCoreQueue(synchronous: true) { core in
 				Log.info("applicationWillTerminate - Stopping linphone core")

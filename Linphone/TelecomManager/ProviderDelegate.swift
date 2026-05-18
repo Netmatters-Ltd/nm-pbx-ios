@@ -70,7 +70,7 @@ class ProviderDelegate: NSObject {
 	}
 	
 	static var providerConfiguration: CXProviderConfiguration {
-		let providerConfiguration = CXProviderConfiguration()
+		let providerConfiguration = CXProviderConfiguration(localizedName: "NMPBX Call")
 		// providerConfiguration.ringtoneSound = ConfigManager.instance().lpConfigBoolForKey(key: "use_device_ringtone") ? nil : "notes_of_the_optimistic.caf"
 		providerConfiguration.supportsVideo = true
 		providerConfiguration.iconTemplateImageData = UIImage(named: "linphone")?.pngData()

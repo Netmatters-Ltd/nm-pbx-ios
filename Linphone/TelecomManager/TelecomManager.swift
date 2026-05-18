@@ -105,7 +105,17 @@ class TelecomManager: ObservableObject {
 		
 		if TelecomManager.callKitEnabled(core: core) {// && !nextCallIsTransfer != true {
 			let uuid = UUID()
-			let name = addr?.asStringUriOnly() ?? "Unknown"
+			let friend = ContactsManager.shared.getFriendWithAddress(address: addr)
+			let name: String
+			if let friendName = friend?.name, !friendName.isEmpty {
+				name = friendName
+			} else if let displayName = addr?.displayName, !displayName.isEmpty {
+				name = displayName
+			} else if let username = addr?.username, !username.isEmpty {
+				name = username
+			} else {
+				name = addr?.asStringUriOnly().sipUsername ?? "Unknown"
+			}
 			let handle = CXHandle(type: .generic, value: addr?.asStringUriOnly() ?? "")
 			let startCallAction = CXStartCallAction(call: uuid, handle: handle)
 			let transaction = CXTransaction(action: startCallAction)
