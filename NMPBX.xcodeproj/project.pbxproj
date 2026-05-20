@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */; };
+		227A758F2FBE196000D61B8A /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 227A758E2FBE196000D61B8A /* LICENSE.txt */; };
 		22ACFE062FBA1518009909F0 /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 22ACFE042FBA1518009909F0 /* AppIntentVocabulary.plist */; };
 		660AAF7F2B839272004C0FA6 /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		660D8A712B517D260092694D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 660D8A702B517D260092694D /* GoogleService-Info.plist */; };
@@ -146,6 +147,7 @@
 		D783028F2D414847009CCB60 /* DebugFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783028E2D414845009CCB60 /* DebugFragment.swift */; };
 		D783C77C2B1089B200622CC2 /* assistant_linphone_default_values in Resources */ = {isa = PBXBuildFile; fileRef = D783C77A2B1089B200622CC2 /* assistant_linphone_default_values */; };
 		D783C77D2B1089B200622CC2 /* assistant_third_party_default_values in Resources */ = {isa = PBXBuildFile; fileRef = D783C77B2B1089B200622CC2 /* assistant_third_party_default_values */; };
+		63D283E1450B48F4A82FDAF5 /* AboutFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A370E25857774CD5868D6E1C /* AboutFragment.swift */; };
 		D78607712D36CB8A009E6A7E /* SettingsAdvancedFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78607702D36CB87009E6A7E /* SettingsAdvancedFragment.swift */; };
 		D78E06282BE3811D00CE3783 /* CallStatsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78E06272BE3811D00CE3783 /* CallStatsModel.swift */; };
 		D78E062A2BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78E06292BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift */; };
@@ -260,6 +262,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		227A758E2FBE196000D61B8A /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE.txt; path = Linphone/LICENSE.txt; sourceTree = "<group>"; };
 		22ACFE052FBA1518009909F0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = msgNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		660AAF842B8392E0004C0FA6 /* msgNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationService.entitlements; sourceTree = "<group>"; };
@@ -391,6 +394,7 @@
 		D783028E2D414845009CCB60 /* DebugFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFragment.swift; sourceTree = "<group>"; };
 		D783C77A2B1089B200622CC2 /* assistant_linphone_default_values */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_default_values; sourceTree = "<group>"; };
 		D783C77B2B1089B200622CC2 /* assistant_third_party_default_values */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_third_party_default_values; sourceTree = "<group>"; };
+		A370E25857774CD5868D6E1C /* AboutFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutFragment.swift; sourceTree = "<group>"; };
 		D78607702D36CB87009E6A7E /* SettingsAdvancedFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAdvancedFragment.swift; sourceTree = "<group>"; };
 		D78E06272BE3811D00CE3783 /* CallStatsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsModel.swift; sourceTree = "<group>"; };
 		D78E06292BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaEncryptedSheetBottomSheet.swift; sourceTree = "<group>"; };
@@ -672,6 +676,7 @@
 		D719ABAA2ABC67BF00B41C10 = {
 			isa = PBXGroup;
 			children = (
+				227A758E2FBE196000D61B8A /* LICENSE.txt */,
 				22ACFE042FBA1518009909F0 /* AppIntentVocabulary.plist */,
 				660D8A702B517D260092694D /* GoogleService-Info.plist */,
 				D719ABB52ABC67BF00B41C10 /* Linphone */,
@@ -1135,6 +1140,7 @@
 			children = (
 				D762102B2E97FDF8002E7999 /* CardDavAddressBookConfigurationFragment.swift */,
 				D711B1332E93F18300DF8C71 /* LdapServerConfigurationFragment.swift */,
+				A370E25857774CD5868D6E1C /* AboutFragment.swift */,
 				D78607702D36CB87009E6A7E /* SettingsAdvancedFragment.swift */,
 				D732C38B2D311D2100F78100 /* SettingsFragment.swift */,
 				D7C5003F2D27F16900DD53EC /* AccountSettingsFragment.swift */,
@@ -1324,6 +1330,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				227A758F2FBE196000D61B8A /* LICENSE.txt in Resources */,
 				D7D24D142AC1B4E800C6F35B /* NotoSans-Regular.ttf in Resources */,
 				D7D24D182AC1B4E800C6F35B /* NotoSans-ExtraBold.ttf in Resources */,
 				D7D24D152AC1B4E800C6F35B /* NotoSans-Light.ttf in Resources */,
@@ -1457,6 +1464,7 @@
 				D796F2002B0BB61A0041115F /* ToastViewModel.swift in Sources */,
 				D7C3650A2AF001C300FE6142 /* EditContactFragment.swift in Sources */,
 				D7A03FBD2ACC2DB60081A588 /* ContactsView.swift in Sources */,
+				63D283E1450B48F4A82FDAF5 /* AboutFragment.swift in Sources */,
 				D78607712D36CB8A009E6A7E /* SettingsAdvancedFragment.swift in Sources */,
 				D762102C2E97FDFD002E7999 /* CardDavAddressBookConfigurationFragment.swift in Sources */,
 				66E50A492BD12B2300AD61CA /* MeetingsView.swift in Sources */,

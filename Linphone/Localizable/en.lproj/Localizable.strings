@@ -525,6 +525,16 @@
 "settings_security_enable_vfs_title" = "Encrypt everything";
 "settings_security_prevent_screenshots_title" = "Prevent interface from being recorded";
 "settings_security_title" = "Security";
+"settings_about_copyright_heading" = "Copyright";
+"settings_about_copyright_netmatters_detail" = "© 2026 Netmatters Ltd";
+"settings_about_copyright_netmatters_title" = "NMPBX for iOS (this version)";
+"settings_about_copyright_original_detail" = "© 2010-2026 Belledonne Communications SARL";
+"settings_about_copyright_original_title" = "Linphone for iOS (original software)";
+"settings_about_license_heading" = "Licence";
+"settings_about_source_subtitle" = "github.com/Netmatters-Ltd/nm-pbx-ios";
+"settings_about_source_title" = "Source code";
+"settings_about_title" = "About";
+"about_license_unavailable" = "Licence text unavailable.";
 "settings_title" = "Settings";
 "sip_address" = "Number";
 "sip_address_copied_to_clipboard_toast" = "Number copied to clipboard";
