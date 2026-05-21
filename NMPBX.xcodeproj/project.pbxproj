@@ -10,6 +10,7 @@
 		1DF96AFC7E9DB6C36B7EE23E /* PresenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA48CA6B73BAA6CCA178BCE0 /* PresenceViewModel.swift */; };
 		227A758F2FBE196000D61B8A /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 227A758E2FBE196000D61B8A /* LICENSE.txt */; };
 		22ACFE062FBA1518009909F0 /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 22ACFE042FBA1518009909F0 /* AppIntentVocabulary.plist */; };
+		63D283E1450B48F4A82FDAF5 /* AboutFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A370E25857774CD5868D6E1C /* AboutFragment.swift */; };
 		660AAF7F2B839272004C0FA6 /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 660AAF7B2B839271004C0FA6 /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		660D8A712B517D260092694D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 660D8A702B517D260092694D /* GoogleService-Info.plist */; };
 		6613A0AE2BAEB7DF008923A4 /* MeetingFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6613A0AD2BAEB7DF008923A4 /* MeetingFragment.swift */; };
@@ -147,7 +148,6 @@
 		D783028F2D414847009CCB60 /* DebugFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783028E2D414845009CCB60 /* DebugFragment.swift */; };
 		D783C77C2B1089B200622CC2 /* assistant_linphone_default_values in Resources */ = {isa = PBXBuildFile; fileRef = D783C77A2B1089B200622CC2 /* assistant_linphone_default_values */; };
 		D783C77D2B1089B200622CC2 /* assistant_third_party_default_values in Resources */ = {isa = PBXBuildFile; fileRef = D783C77B2B1089B200622CC2 /* assistant_third_party_default_values */; };
-		63D283E1450B48F4A82FDAF5 /* AboutFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A370E25857774CD5868D6E1C /* AboutFragment.swift */; };
 		D78607712D36CB8A009E6A7E /* SettingsAdvancedFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78607702D36CB87009E6A7E /* SettingsAdvancedFragment.swift */; };
 		D78E06282BE3811D00CE3783 /* CallStatsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78E06272BE3811D00CE3783 /* CallStatsModel.swift */; };
 		D78E062A2BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78E06292BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift */; };
@@ -293,6 +293,7 @@
 		66F626B12BCEBB86003E2DEC /* AddParticipantsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddParticipantsFragment.swift; sourceTree = "<group>"; };
 		66FDB7802C7C689A00561566 /* EventEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEditViewController.swift; sourceTree = "<group>"; };
 		9002E7D13A5B137DDDB1CA05 /* PresencePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresencePickerView.swift; sourceTree = "<group>"; };
+		A370E25857774CD5868D6E1C /* AboutFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutFragment.swift; sourceTree = "<group>"; };
 		C60E8F182C0F649200A06DB8 /* UIApplicationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIApplicationExtension.swift; sourceTree = "<group>"; };
 		C62817272C1B389700DBA646 /* SideMenuAccountRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuAccountRow.swift; sourceTree = "<group>"; };
 		C628172D2C1C3A3600DBA646 /* AccountExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountExtension.swift; sourceTree = "<group>"; };
@@ -394,7 +395,6 @@
 		D783028E2D414845009CCB60 /* DebugFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFragment.swift; sourceTree = "<group>"; };
 		D783C77A2B1089B200622CC2 /* assistant_linphone_default_values */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_default_values; sourceTree = "<group>"; };
 		D783C77B2B1089B200622CC2 /* assistant_third_party_default_values */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_third_party_default_values; sourceTree = "<group>"; };
-		A370E25857774CD5868D6E1C /* AboutFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutFragment.swift; sourceTree = "<group>"; };
 		D78607702D36CB87009E6A7E /* SettingsAdvancedFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAdvancedFragment.swift; sourceTree = "<group>"; };
 		D78E06272BE3811D00CE3783 /* CallStatsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsModel.swift; sourceTree = "<group>"; };
 		D78E06292BEA698E00CE3783 /* MediaEncryptedSheetBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaEncryptedSheetBottomSheet.swift; sourceTree = "<group>"; };
@@ -1863,7 +1863,7 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
@@ -1930,7 +1930,7 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
 				DEVELOPMENT_TEAM = WCG94F5H22;

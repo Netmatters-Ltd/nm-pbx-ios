@@ -21,8 +21,8 @@ enum UserPresence: String, CaseIterable {
 	var badgeColor: Color {
 		switch self {
 		case .online: return .greenSuccess500
-		case .away: return .orangeWarning600
-		case .busy: return .orangeAway
+		case .away: return .orangeAway
+		case .busy: return .blueInfo500
 		case .doNotDisturb: return .redDanger500
 		case .offline: return .grayMain2c400
 		}
