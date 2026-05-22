@@ -28,8 +28,6 @@ enum CardDavProvisioningManager {
 	/// in the manual Settings → Contacts → CardDAV form for this server.
 	private static let defaultRealm = "NMPBX CardDAV"
 
-	private static var syncDelegates: [FriendListDelegate] = []
-
 	static func applyIfPresent(core: Core) {
 		guard let config = core.config else {
 			Log.error("\(TAG) core.config is nil, skipping")
@@ -132,8 +130,27 @@ enum CardDavProvisioningManager {
 			Log.warn("\(TAG) No rls_uri in [carddav_provision] — presence subscriptions will fall back to individual SUBSCRIBE (add rls_uri to provisioning XML to fix)")
 		}
 
-		attachSyncLogger(to: friendList)
-		friendList.synchronizeFriendsFromServer()
+		// Do NOT call synchronizeFriendsFromServer() here.
+		//
+		// applyIfPresent() is called twice per session: once at GlobalState.On
+		// (with the cached config) and again at ConfiguringState.Successful
+		// (after the remote XML is downloaded). Each call was previously starting
+		// its own sync on the same FriendList, and ContactsManager.fetchContacts()
+		// also calls refreshCardDavContacts() → synchronizeFriendsFromServer().
+		// That produced 2-3 concurrent syncs on the same list.
+		//
+		// The liblinphone CardDAV engine has a shared state machine per FriendList,
+		// so concurrent syncs corrupt its internal URL tracking. The symptom is the
+		// addressbook-query REPORT being sent to the home-set path
+		// (/carddav/addressbooks/1/) instead of the specific address book
+		// (/carddav/addressbooks/1/contacts/). The server returns an empty 207
+		// (no auth challenge) for that path, the SDK stores the CTAG, and every
+		// subsequent sync sees "CTAG unchanged" and fetches nothing.
+		//
+		// The sync is triggered exactly once by ContactsManager.fetchContacts() →
+		// refreshCardDavContacts(), which runs after RegistrationState.Ok.
+		// ConfiguringState.Successful always precedes RegistrationState.Ok, so the
+		// friend list created/updated here will be found and synced by that path.
 	}
 
 	/// Called from `CoreContext.onAuthenticationRequested` when the SDK asks the
@@ -163,25 +180,4 @@ enum CardDavProvisioningManager {
 		return true
 	}
 
-	private static func attachSyncLogger(to friendList: FriendList) {
-		var delegateRef: FriendListDelegate?
-		let delegate = FriendListDelegateStub(
-			onSyncStatusChanged: { (list: FriendList, status: FriendList.SyncStatus, message: String?) in
-				switch status {
-				case .Successful:
-					Log.info("\(TAG) Sync Successful for \(list.displayName ?? "")")
-				case .Failure:
-					Log.error("\(TAG) Sync Failure for \(list.displayName ?? ""): \(message ?? "")")
-				default:
-					return
-				}
-				if let delegateRef = delegateRef {
-					list.removeDelegate(delegate: delegateRef)
-					syncDelegates.removeAll { $0 === delegateRef }
-				}
-			})
-		delegateRef = delegate
-		syncDelegates.append(delegate)
-		friendList.addDelegate(delegate: delegate)
-	}
 }

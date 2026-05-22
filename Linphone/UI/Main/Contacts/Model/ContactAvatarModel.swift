@@ -52,7 +52,15 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	var presenceUserStatus: UserPresence {
 		switch presenceStatus {
 		case .Online:
-			return .online
+			// Person-level activity (e.g. <p2:busy/>) can arrive with the same or newer
+			// timestamp than the tuple's basic=open; honour it even when the SDK's
+			// consolidated presence is .Online.  nil activity → plain Available.
+			switch presenceActivity {
+			case .Away: return .away
+			case .Busy: return .busy
+			case .Other: return .doNotDisturb
+			default: return .online
+			}
 		case .Busy:
 			switch presenceActivity {
 			case .Away: return .away

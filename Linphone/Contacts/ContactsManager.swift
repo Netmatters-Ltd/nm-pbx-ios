@@ -50,8 +50,13 @@ final class ContactsManager: ObservableObject {
 		}
 	}
 	
+	@Published var isCardDavSyncing: Bool = false
 	@Published var starredChangeTrigger = UUID()
 	private var cancellables = Set<AnyCancellable>()
+
+	/// Prevents concurrent CardDAV syncs on the same FriendList.
+	/// Must only be read/written on the core queue (doOnCoreQueue).
+	private var cardDavSyncInProgress = false
 	
 	private var coreDelegate: CoreDelegate?
 	private var friendListDelegate: FriendListDelegate?
@@ -770,8 +775,32 @@ final class ContactsManager: ObservableObject {
 					return
 				}
 
+				// Guard against concurrent syncs on the same FriendList.
+				//
+				// fetchContacts() is called from both onAccountRegistrationStateChanged(.Ok)
+				// and onDefaultAccountChanged, which fire in close sequence on startup. Each
+				// call queues a refreshCardDavContacts() Task. Because doOnCoreQueue is serial,
+				// the check-and-set below is atomic: the first call sets the flag and proceeds;
+				// the second sees it set and returns without calling synchronizeFriendsFromServer.
+				//
+				// The liblinphone CardDAV engine has a single shared state machine per FriendList.
+				// Calling synchronizeFriendsFromServer() concurrently on the same list corrupts
+				// its internal URL tracking, causing the REPORT to go to the home-set path
+				// (/carddav/addressbooks/1/) instead of the specific address book
+				// (/carddav/addressbooks/1/contacts/). The server returns an empty 207, the SDK
+				// stores the CTAG with 0 contacts, and every subsequent sync sees "CTAG unchanged"
+				// and fetches nothing. (Diagnosed 2026-05-22 from card-related.log.)
+				guard !self.cardDavSyncInProgress else {
+					Log.warn("\(ContactsManager.TAG) refreshCardDavContacts() called while sync already in progress — skipping duplicate call")
+					continuation.resume()
+					return
+				}
+				self.cardDavSyncInProgress = true
+
 				var remaining = cardDavLists.count
 				var resumed = false
+
+				DispatchQueue.main.async { self.isCardDavSyncing = true }
 
 				for list in cardDavLists {
 					Log.info("\(ContactsManager.TAG) Found CardDAV friend list \(list.displayName ?? ""), starting update")
@@ -787,6 +816,17 @@ final class ContactsManager: ObservableObject {
 								remaining -= 1
 								if remaining == 0 && !resumed {
 									resumed = true
+									self.cardDavSyncInProgress = false
+									DispatchQueue.main.async {
+										// Raise isLoading *before* clearing isCardDavSyncing so the
+										// combined spinner condition (isCardDavSyncing || isLoading)
+										// in ContactsInnerFragment never drops to false while the
+										// dispatchGroup in addFriendListDelegate is still processing
+										// friends into avatarListModel. Both assignments land in the
+										// same main-thread render pass, so SwiftUI sees them together.
+										MagicSearchSingleton.shared.isLoading = true
+										self.isCardDavSyncing = false
+									}
 									continuation.resume()
 								}
 							default: break

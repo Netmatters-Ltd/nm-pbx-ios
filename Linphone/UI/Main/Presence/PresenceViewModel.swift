@@ -57,7 +57,8 @@ class PresenceViewModel: ObservableObject {
 				return
 			}
 
-			Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address=\(ownAddress.asStringUriOnly()) publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true)")
+			let savedStatus = core.config?.getString(section: self.configSection, key: self.configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
+			Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address=\(ownAddress.asStringUriOnly()) publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true) savedLocalStatus=\(savedStatus) currentPresence=\(self.currentPresence.rawValue)")
 
 			// Remove any leftover delegate from a previous registration cycle
 			if let prevDelegate = self.selfFriendDelegate, let prevFriend = self.selfFriend {
@@ -70,8 +71,11 @@ class PresenceViewModel: ObservableObject {
 				// Our own extension is in the contact directory — subscribe to it
 				// to receive whatever was last published by any device.
 				let delegate = FriendDelegateStub(onPresenceReceived: { [weak self] (friend: Friend) in
-					guard let self = self, !self.didSyncFromServer else { return }
-					Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: self-presence NOTIFY received consolidated=\(friend.consolidatedPresence) activity=\(String(describing: friend.presenceModel?.activity?.type))")
+					// Log EVERY NOTIFY that fires — before the guard — so we can see
+					// whether duplicates are arriving after didSyncFromServer is set.
+					let alreadySynced = self?.didSyncFromServer ?? true
+					Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: self-presence NOTIFY received (alreadySynced=\(alreadySynced)) consolidated=\(friend.consolidatedPresence) activity=\(String(describing: friend.presenceModel?.activity?.type)) nbServices=\(friend.presenceModel?.nbServices ?? 0) nbPersons=\(friend.presenceModel?.nbPersons ?? 0)")
+					guard let self = self, !alreadySynced else { return }
 					self.didSyncFromServer = true
 					// Remove delegate immediately so subsequent own-presence updates
 					// (from other contacts' views of us) don't re-trigger this path.
@@ -108,6 +112,29 @@ class PresenceViewModel: ObservableObject {
 	// Reads the server's current presence for our own identity and publishes the same
 	// status so the aggregated state seen by other extensions is unchanged.
 	private func applyServerPresence(from friend: Friend, core: Core) {
+		// Log full PIDF structure so we can see exactly what the server sent back.
+		if let model = friend.presenceModel {
+			let nbSvc = model.nbServices
+			let nbPer = model.nbPersons
+			Log.info("[PRESENCE-DEBUG] applyServerPresence: model timestamp=\(model.timestamp) nbServices=\(nbSvc) nbPersons=\(nbPer)")
+			for i in 0..<nbSvc {
+				if let svc = model.getNthService(index: UInt(i)) {
+					Log.info("[PRESENCE-DEBUG] applyServerPresence: service[\(i)] id=\(svc.id ?? "?") basicStatus=\(svc.basicStatus)")
+				}
+			}
+			for i in 0..<nbPer {
+				if let per = model.getNthPerson(index: UInt(i)) {
+					let acts = (0..<per.nbActivities).compactMap { per.getNthActivity(index: UInt($0))?.type }
+					Log.info("[PRESENCE-DEBUG] applyServerPresence: person[\(i)] id=\(per.id ?? "?") activities=\(acts)")
+				}
+			}
+			if nbSvc == 0 && nbPer == 0 {
+				Log.warn("[PRESENCE-DEBUG] applyServerPresence: presence model has no services or persons")
+			}
+		} else {
+			Log.warn("[PRESENCE-DEBUG] applyServerPresence: presenceModel is nil")
+		}
+
 		// Check consolidatedPresence first: basic=closed produces no activity, so
 		// activity?.type is nil and UserPresence.from(nil) would wrongly return .online.
 		// consolidatedPresence == .Offline catches both basic=closed and permanent-absence.
@@ -118,10 +145,45 @@ class PresenceViewModel: ObservableObject {
 		}
 
 		let activityKind = friend.presenceModel?.activity?.type
-		let presence = UserPresence.from(
+		var presence = UserPresence.from(
 			activityKind: activityKind,
 			description: activityKind == .Other ? UserPresence.dndDescription : nil
 		)
+		// Mirror the ContactAvatarModel fix: the existing Offline guard above already
+		// handles basic=closed → nil activity.  Do the same for the Busy consolidated
+		// state: when the SDK returns .Busy but couldn't parse a specific RPID activity
+		// (e.g. conflicting multi-tuple PIDF), UserPresence.from(nil) would wrongly
+		// return .online — keep it as .busy instead.
+		if presence == .online && friend.consolidatedPresence == .Busy {
+			presence = .busy
+		}
+
+		let savedLocalStatus = core.config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
+
+		if presence == .online {
+			// The server returned plain Available: basic=open with no <dm:person> element
+			// and therefore no RPID activity.  This is identical to what the server reports
+			// during the window AFTER we re-register but BEFORE our own PUBLISH(busy/away/dnd)
+			// has been processed — the server only has the SDK's automatic pidfonline:online
+			// registration tuple, not our user-set status.
+			//
+			// We cannot distinguish "server received no explicit activity yet (race)" from
+			// "user explicitly set Available on another device" from PIDF alone, so we
+			// prefer the locally-saved status when it is more specific than Available.
+			// Trade-off: an explicit Available set on the desktop will not auto-propagate
+			// to mobile via this path, but that is far less disruptive than the current
+			// behaviour where every app-switch reverts Busy/Away/DND to Available.
+			let savedPresence = UserPresence(rawValue: savedLocalStatus) ?? .online
+			if savedPresence != .online && savedPresence != .offline {
+				Log.warn("[PRESENCE-DEBUG] applyServerPresence: server shows plain Available but local has '\(savedPresence.rawValue)' — using local to avoid re-register race")
+				publishLocalConfig(core: core)
+				return
+			}
+		}
+
+		if presence.rawValue != savedLocalStatus {
+			Log.info("[PRESENCE-DEBUG] applyServerPresence: server status '\(presence.rawValue)' differs from local saved '\(savedLocalStatus)' — server wins")
+		}
 
 		if presence != .offline {
 			// Server has an active published status — mirror it.

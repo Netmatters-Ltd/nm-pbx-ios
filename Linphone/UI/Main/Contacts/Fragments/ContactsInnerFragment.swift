@@ -22,7 +22,6 @@ import linphonesw
 
 struct ContactsInnerFragment: View {
 
-	@ObservedObject var sharedMainViewModel = SharedMainViewModel.shared
 	@ObservedObject var contactsManager = ContactsManager.shared
 	@ObservedObject var magicSearch = MagicSearchSingleton.shared
 
@@ -82,33 +81,59 @@ struct ContactsInnerFragment: View {
 				
 				VStack {
 					List {
-						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in })}
+						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in })
+						// Invisible full-height row added only when the list is empty so
+						// the pull-to-refresh gesture still has something to grab onto,
+						// without creating a blank scrollable gap when contacts are shown.
+						if filteredContacts.isEmpty {
+							Color.clear
+								.frame(height: UIScreen.main.bounds.height)
+								.listRowBackground(Color.clear)
+								.listRowSeparator(.hidden)
+								.listRowInsets(.init())
+								.allowsHitTesting(false)
+						}
+					}
 					.safeAreaInset(edge: .top, content: {
 						Spacer()
 							.frame(height: 12)
 					})
 					.listStyle(.plain)
-					.if(sharedMainViewModel.cardDavFriendsListsCount > 0) { view in
-						view.refreshable {
-							await contactsManager.refreshCardDavContacts()
-						}
+					.refreshable {
+						await contactsManager.refreshCardDavContacts()
 					}
 					.overlay(
 						VStack {
 							if filteredContacts.isEmpty {
 								Spacer()
-								Image("illus-belledonne")
-									.resizable()
-									.scaledToFit()
-									.clipped()
-									.padding(.all)
-								Text(!text.isEmpty ? "list_filter_no_result_found" : "contacts_list_empty")
-									.default_text_style_800(styleSize: 16)
+								if !text.isEmpty {
+									Image("illus-belledonne")
+										.resizable()
+										.scaledToFit()
+										.clipped()
+										.padding(.all)
+									Text("list_filter_no_result_found")
+										.default_text_style_800(styleSize: 16)
+								} else if contactsManager.isCardDavSyncing || magicSearch.isLoading {
+									ProgressView()
+										.controlSize(.large)
+										.progressViewStyle(CircularProgressViewStyle(tint: .orangeMain500))
+								} else {
+									Image("illus-belledonne")
+										.resizable()
+										.scaledToFit()
+										.clipped()
+										.padding(.all)
+									Text("contacts_list_empty")
+										.default_text_style_800(styleSize: 16)
+								}
 								Spacer()
 								Spacer()
 							}
 						}
 							.padding(.all)
+							// Let pull-to-refresh gestures pass through to the underlying list.
+							.allowsHitTesting(false)
 					)
 				}
 			}

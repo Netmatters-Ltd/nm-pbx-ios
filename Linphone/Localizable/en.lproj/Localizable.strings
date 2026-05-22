@@ -187,7 +187,8 @@
 "contact_new_title" = "New contact";
 "contact_video_call_action" = "Video call";
 "contacts_list_all_contacts_title" = "All contacts";
-"contacts_list_empty" = "No contacts fetched yet.";
+"contacts_list_empty" = "No contacts fetched yet";
+"extensions_list_empty" = "No contacts fetched yet";
 "contacts_list_favourites_title" = "Favourites";
 "contacts_list_filter_popup_see_all" = "See all";
 "contacts_list_filter_popup_see_linphone_only" = "See %@ contacts";
