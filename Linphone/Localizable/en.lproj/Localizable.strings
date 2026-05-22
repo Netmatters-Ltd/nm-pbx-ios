@@ -82,7 +82,7 @@
 "assistant_no_account_yet" = "No account yet?";
 "assistant_permissions_access_camera_title" = "**Access camera:** Used during initial setup to scan the QR code.";
 "assistant_permissions_grant_all_of_them" = "OK";
-"assistant_permissions_post_notifications_title" = "**Post notifications:** Required to make your phone ring when the NMPBX app isn't active.";
+"assistant_permissions_post_notifications_title" = "**Post notifications:** Required to inform you of incoming NMPBX calls when the NMPBX app isn't active.";
 "assistant_permissions_read_contacts_title" = "**Read contacts:** Optional, to call contacts already on your iPhone through NMPBX.";
 "assistant_permissions_record_audio_title" = "**Microphone:** Used when making calls through NMPBX.";
 "assistant_permissions_skip_permissions" = "Do it later";

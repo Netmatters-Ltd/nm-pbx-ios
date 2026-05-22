@@ -1,5 +1,23 @@
 import SwiftUI
 
+private extension View {
+	/// Hides the intrinsic scroll/form background of a `TextEditor`.
+	/// - iOS 16+: uses the native `scrollContentBackground(.hidden)` modifier.
+	/// - iOS 15 and earlier: clears `UITextView.appearance().backgroundColor`
+	///   for the duration this view is on screen, then restores it on disappear
+	///   to minimise global side-effects.
+	@ViewBuilder
+	func clearTextEditorBackground() -> some View {
+		if #available(iOS 16.0, *) {
+			self.scrollContentBackground(.hidden)
+		} else {
+			self
+				.onAppear  { UITextView.appearance().backgroundColor = .clear }
+				.onDisappear { UITextView.appearance().backgroundColor = nil }
+		}
+	}
+}
+
 struct PresencePickerView: View {
 	@ObservedObject var presenceVM = PresenceViewModel.shared
 	@Environment(\.dismiss) private var dismiss
@@ -69,7 +87,7 @@ struct PresencePickerView: View {
 					TextEditor(text: $presenceVM.customStatusNote)
 						.font(Font.custom("Poppins-Regular", size: 14))
 						.foregroundStyle(Color.grayMain2c700)
-						.scrollContentBackground(.hidden)
+						.clearTextEditorBackground()
 						.focused($isNoteFieldFocused)
 						.frame(minHeight: 88)
 						.onChange(of: presenceVM.customStatusNote) { newValue in
