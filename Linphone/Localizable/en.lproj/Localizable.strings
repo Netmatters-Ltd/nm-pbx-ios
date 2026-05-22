@@ -187,7 +187,7 @@
 "contact_new_title" = "New contact";
 "contact_video_call_action" = "Video call";
 "contacts_list_all_contacts_title" = "All contacts";
-"contacts_list_empty" = "No contact for the moment…";
+"contacts_list_empty" = "No contacts fetched yet.";
 "contacts_list_favourites_title" = "Favourites";
 "contacts_list_filter_popup_see_all" = "See all";
 "contacts_list_filter_popup_see_linphone_only" = "See %@ contacts";
@@ -336,7 +336,7 @@
 "history_dialog_delete_all_call_logs_title" = "Do you really want to delete all calls history?";
 "history_group_call_start_dialog_set_subject" = "Set group call subject";
 "history_group_call_start_dialog_subject_hint" = "Group call subject";
-"history_list_empty_history" = "No call for the moment…";
+"history_list_empty_history" = "No call history yet";
 "history_list_empty_with_filter_history" = "No entries match your search";
 "history_title" = "Call History";
 "IM_MSG" = "You have received a message";

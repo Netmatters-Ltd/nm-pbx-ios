@@ -652,7 +652,12 @@ struct ContentView: View {
 												}
 											}
 											.popover(isPresented: $showPresencePicker) {
-												PresencePickerView()
+												if #available(iOS 16.0, *) {
+													PresencePickerView()
+														.presentationDetents([.medium])
+												} else {
+													PresencePickerView()
+												}
 											}
 											.frame(maxWidth: .infinity)
 											.frame(height: 50)

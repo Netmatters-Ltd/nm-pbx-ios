@@ -33,7 +33,10 @@ struct SettingsFragment: View {
 	@State var meetingsIsOpen: Bool = false
 	@State var networkIsOpen: Bool = false
 	@State var userInterfaceIsOpen: Bool = false
-	
+#if USE_CRASHLYTICS && SHOW_TEST_CRASH
+	@State private var showCrashConfirm: Bool = false
+#endif
+
 	var body: some View {
 		NavigationView {
 			ZStack {
@@ -464,6 +467,27 @@ struct SettingsFragment: View {
 							.padding(.vertical, 10)
 							.padding(.horizontal, 20)
 							.background(Color.gray100)
+#if USE_CRASHLYTICS && SHOW_TEST_CRASH
+							Button {
+								showCrashConfirm = true
+							} label: {
+								Text("Make the app crash")
+									.foregroundColor(.red)
+									.default_text_style_800(styleSize: 18)
+									.frame(maxWidth: .infinity, alignment: .leading)
+									.padding(.vertical, 10)
+									.padding(.horizontal, 20)
+							}
+							.background(Color.gray100)
+							.alert("Make the app crash?", isPresented: $showCrashConfirm) {
+								Button("Crash now", role: .destructive) {
+									CoreContext.shared.crashForCrashlytics()
+								}
+								Button("Cancel", role: .cancel) {}
+							} message: {
+								Text("The app will immediately crash to test Crashlytics. After the crash, relaunch the app and check the Firebase console.")
+							}
+#endif
 						}
 					}
 					.background(Color.gray100)

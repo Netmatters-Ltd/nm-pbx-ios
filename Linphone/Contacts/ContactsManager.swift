@@ -465,13 +465,14 @@ final class ContactsManager: ObservableObject {
 	
 	func addFriendListDelegate() {
 		self.coreContext.doOnCoreQueue { _ in
-			CoreContext.shared.mCore.friendListSubscriptionEnabled = true
-			
-			CoreContext.shared.mCore.friendsLists.forEach { friendList in
-				friendList.updateSubscriptions()
+			let allLists = CoreContext.shared.mCore.friendsLists
+			Log.info("[PRESENCE-DEBUG] addFriendListDelegate: \(allLists.count) friend list(s) present")
+			allLists.forEach { fl in
+				Log.info("[PRESENCE-DEBUG]   list '\(fl.displayName ?? "nil")' type=\(fl.type) friends=\(fl.friends.count) subscriptionsEnabled=\(fl.subscriptionsEnabled) rlsUri=\(fl.rlsUri ?? "nil")")
 			}
-			
+
 			if let friendListDelegateToDelete = self.friendListDelegate {
+				Log.info("[PRESENCE-DEBUG] addFriendListDelegate: removing previous delegate")
 				CoreContext.shared.mCore.friendsLists.forEach { friendList in
 					friendList.removeDelegate(delegate: friendListDelegateToDelete)
 				}
@@ -490,6 +491,7 @@ final class ContactsManager: ObservableObject {
 				},
 				onSyncStatusChanged: { (friendList: FriendList, status: FriendList.SyncStatus?, message: String?) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onSyncStatusChanged \(friendList.displayName ?? "No Display Name") -- Status: \(status != nil ? String(describing: status!) : "No Status")")
+					Log.info("[PRESENCE-DEBUG] onSyncStatusChanged: list='\(friendList.displayName ?? "nil")' status=\(String(describing: status)) friends=\(friendList.friends.count)")
 					if status == .Successful {
                         if friendList.displayName != self.nativeAddressBookFriendList && friendList.displayName != self.linphoneAddressBookFriendList {
                             if let tempRemoteFriendList = self.tempRemoteFriendList {
@@ -562,7 +564,15 @@ final class ContactsManager: ObservableObject {
                         dispatchGroup.notify(queue: .main) {
 							self.coreContext.doOnCoreQueue { _ in
 								MagicSearchSingleton.shared.searchForContacts()
+								// Refresh presence subscriptions for the list whose sync just
+								// completed. On a fresh install the list was empty when
+								// updateSubscriptions() ran during addFriendListDelegate(), so
+								// no SUBSCRIBE requests were sent. Calling it here ensures
+								// subscriptions are established once the contacts have arrived.
+								Log.info("[PRESENCE-DEBUG] onSyncStatusChanged post-process: calling updateSubscriptions() on '\(friendList.displayName ?? "nil")' (\(friendList.friends.count) friends)")
+								friendList.updateSubscriptions()
 								if let linphoneFL = self.tempRemoteFriendList {
+									Log.info("[PRESENCE-DEBUG] onSyncStatusChanged post-process: calling updateSubscriptions() on tempRemote (\(linphoneFL.friends.count) friends)")
 									linphoneFL.updateSubscriptions()
 								}
 							}
@@ -571,6 +581,12 @@ final class ContactsManager: ObservableObject {
 				},
 				onPresenceReceived: { (friendList: FriendList, friends: [Friend?]) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onPresenceReceived \(friends.count)")
+					Log.info("[PRESENCE-DEBUG] onPresenceReceived: list='\(friendList.displayName ?? "nil")' bodyless=\(friendList.isSubscriptionBodyless) count=\(friends.count)")
+					friends.forEach { f in
+						if let f = f {
+							Log.info("[PRESENCE-DEBUG]   friend '\(f.name ?? f.address?.asStringUriOnly() ?? "?")' consolidated=\(f.consolidatedPresence)")
+						}
+					}
 					if (friendList.isSubscriptionBodyless) {
 						Log.info("\(ContactsManager.TAG) Bodyless friendlist \(friendList.displayName ?? "No Display Name") presence received")
 						
@@ -663,9 +679,35 @@ final class ContactsManager: ObservableObject {
 			)
 			
 			self.friendListDelegate = friendListDelegateTmp
-			
+
 			CoreContext.shared.mCore.friendsLists.forEach { friendList in
 				friendList.addDelegate(delegate: friendListDelegateTmp)
+			}
+
+			// Enable subscriptions and trigger SUBSCRIBE only after the new delegate
+			// is registered, so any NOTIFY that arrives in response is handled by
+			// the correct callback rather than the old one or falling on the floor.
+			CoreContext.shared.mCore.friendListSubscriptionEnabled = true
+
+			// Safety net: if a list was loaded from SQLite before provisioning set
+			// the rlsUri (or if CardDavProvisioningManager hasn't run yet this
+			// session), apply the provisioned RLS URI now so updateSubscriptions()
+			// sends to the RLS rather than falling back to individual SUBSCRIBE.
+			let configRlsUri = CoreContext.shared.mCore.config?.getString(
+				section: "carddav_provision", key: "rls_uri", defaultString: "") ?? ""
+			if !configRlsUri.isEmpty {
+				CoreContext.shared.mCore.friendsLists.forEach { friendList in
+					if friendList.rlsUri == nil {
+						friendList.rlsUri = configRlsUri
+						Log.info("[PRESENCE-DEBUG] addFriendListDelegate: applied rlsUri '\(configRlsUri)' to '\(friendList.displayName ?? "nil")'")
+					}
+				}
+			}
+
+			Log.info("[PRESENCE-DEBUG] addFriendListDelegate: calling updateSubscriptions() on all lists")
+			CoreContext.shared.mCore.friendsLists.forEach { friendList in
+				Log.info("[PRESENCE-DEBUG]   updateSubscriptions for '\(friendList.displayName ?? "nil")' (\(friendList.friends.count) friends, rlsUri=\(friendList.rlsUri ?? "nil"))")
+				friendList.updateSubscriptions()
 			}
 		}
 	}

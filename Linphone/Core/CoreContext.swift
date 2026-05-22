@@ -367,15 +367,19 @@ class CoreContext: ObservableObject {
 					DispatchQueue.main.async {
 						NotificationCenter.default.post(name: NSNotification.Name("CoreStarted"), object: nil)
 					}
+					Log.info("[PRESENCE-DEBUG] Registration .Ok for \(account.params?.identityAddress?.asStringUriOnly() ?? "unknown") — triggering fetchContacts + restoreOrGoOnline")
 					ContactsManager.shared.fetchContacts()
-					
+
 					if let defaultAccountParams = self.mCore.defaultAccount?.params, defaultAccountParams.publishEnabled == false {
 						let params = defaultAccountParams
 						let clonedParams = params.clone()
 						clonedParams?.publishEnabled = true
 						self.mCore.defaultAccount?.params = clonedParams
+						Log.info("[PRESENCE-DEBUG] publishEnabled was false after registration, re-enabled it")
+					} else {
+						Log.info("[PRESENCE-DEBUG] publishEnabled already true after registration")
 					}
-					
+
 					PresenceViewModel.shared.restoreOrGoOnline()
 				case .Cleared:
 					Log.info("[CoreContext][onAccountRegistrationStateChanged] Account \(account.displayName()) registration was cleared.")

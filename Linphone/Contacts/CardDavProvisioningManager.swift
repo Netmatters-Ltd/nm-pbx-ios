@@ -46,6 +46,7 @@ enum CardDavProvisioningManager {
 		let password = config.getString(section: "carddav_provision", key: "password", defaultString: "")
 		let configuredName = config.getString(section: "carddav_provision", key: "display_name", defaultString: "")
 		let configuredRealm = config.getString(section: "carddav_provision", key: "realm", defaultString: "")
+		let rlsUri = config.getString(section: "carddav_provision", key: "rls_uri", defaultString: "")
 		let resolvedRealm = configuredRealm.isEmpty ? defaultRealm : configuredRealm
 
 		let normalisedUri: String = {
@@ -118,6 +119,17 @@ enum CardDavProvisioningManager {
 			core.addFriendList(list: created)
 			friendList = created
 			Log.info("\(TAG) Created CardDAV friend list at \(normalisedUri) (name=\(resolvedName))")
+		}
+
+		// The Flexisip presence server uses a Resource List Server (RLS) to aggregate
+		// subscriptions. Without an rlsUri on the friend list the SDK falls back to
+		// individual per-friend SUBSCRIBE, which the RLS-only server silently ignores,
+		// meaning no NOTIFY ever arrives. Set it from the provisioned value if present.
+		if !rlsUri.isEmpty {
+			friendList.rlsUri = rlsUri
+			Log.info("\(TAG) Set rlsUri=\(rlsUri) on '\(friendList.displayName ?? normalisedUri)'")
+		} else {
+			Log.warn("\(TAG) No rls_uri in [carddav_provision] — presence subscriptions will fall back to individual SUBSCRIBE (add rls_uri to provisioning XML to fix)")
 		}
 
 		attachSyncLogger(to: friendList)

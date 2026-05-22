@@ -161,11 +161,14 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	}
 	
 	func addFriendDelegate() {
+		let friendAddr = friend?.address?.asStringUriOnly() ?? friend?.name ?? "unknown"
+		Log.info("[PRESENCE-DEBUG] ContactAvatarModel.addFriendDelegate: '\(friendAddr)' currentPresence=\(friend?.consolidatedPresence ?? .Offline)")
 		friendDelegate = FriendDelegateStub(onPresenceReceived: { (friend: Friend) in
 			let latestActivityTimestamp = friend.presenceModel?.latestActivityTimestamp ?? -1
 			let consolidatedPresenceTmp = friend.consolidatedPresence
 			let presenceActivityTmp = friend.presenceModel?.activity?.type
 			let presenceNoteTmp = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
+			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(friend.address?.asStringUriOnly() ?? friend.name ?? "?")' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp))")
 			DispatchQueue.main.async {
 				self.presenceStatus = consolidatedPresenceTmp
 				self.presenceActivity = presenceActivityTmp
@@ -182,7 +185,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 				}
 			}
 		})
-		
+
 		if friend != nil && friendDelegate != nil {
 			friend!.addDelegate(delegate: friendDelegate!)
 		}

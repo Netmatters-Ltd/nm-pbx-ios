@@ -25,6 +25,7 @@ class PresenceViewModel: ObservableObject {
 			let savedStatus = core.config?.getString(section: self.configSection, key: self.configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
 			let savedNote = core.config?.getString(section: self.configSection, key: self.configKeyNote, defaultString: "") ?? ""
 			let presence = UserPresence(rawValue: savedStatus) ?? .online
+			Log.info("[PRESENCE-DEBUG] loadSavedPresence: status=\(savedStatus) note='\(savedNote)' publish_presence=\(core.config?.getBool(section: self.configSection, key: "publish_presence", defaultValue: true) == true)")
 			DispatchQueue.main.async {
 				self.currentPresence = presence
 				self.customStatusNote = savedNote
@@ -51,20 +52,26 @@ class PresenceViewModel: ObservableObject {
 		didSyncFromServer = false
 		CoreContext.shared.doOnCoreQueue { core in
 			guard let ownAddress = core.defaultAccount?.params?.identityAddress else {
+				Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: no identity address on default account, falling back to local config")
 				self.publishLocalConfig(core: core)
 				return
 			}
 
+			Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address=\(ownAddress.asStringUriOnly()) publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true)")
+
 			// Remove any leftover delegate from a previous registration cycle
 			if let prevDelegate = self.selfFriendDelegate, let prevFriend = self.selfFriend {
+				Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: removing leftover self-friend delegate from previous cycle")
 				prevFriend.removeDelegate(delegate: prevDelegate)
 			}
 
 			if let selfFriend = core.findFriend(address: ownAddress) {
+				Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address found in contacts (\(selfFriend.name ?? "no name")), attaching self-presence delegate")
 				// Our own extension is in the contact directory — subscribe to it
 				// to receive whatever was last published by any device.
 				let delegate = FriendDelegateStub(onPresenceReceived: { [weak self] (friend: Friend) in
 					guard let self = self, !self.didSyncFromServer else { return }
+					Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: self-presence NOTIFY received consolidated=\(friend.consolidatedPresence) activity=\(String(describing: friend.presenceModel?.activity?.type))")
 					self.didSyncFromServer = true
 					// Remove delegate immediately so subsequent own-presence updates
 					// (from other contacts' views of us) don't re-trigger this path.
@@ -79,6 +86,7 @@ class PresenceViewModel: ObservableObject {
 				selfFriend.addDelegate(delegate: delegate)
 			} else {
 				// Own address not in contacts — fall back immediately.
+				Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: own address NOT found in contacts, falling back to local config immediately")
 				self.publishLocalConfig(core: core)
 				return
 			}
@@ -87,6 +95,7 @@ class PresenceViewModel: ObservableObject {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
 				CoreContext.shared.doOnCoreQueue { core in
 					guard !self.didSyncFromServer else { return }
+					Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: no self-presence NOTIFY within 2s, falling back to local config")
 					self.didSyncFromServer = true
 					self.publishLocalConfig(core: core)
 				}
@@ -103,6 +112,7 @@ class PresenceViewModel: ObservableObject {
 		// activity?.type is nil and UserPresence.from(nil) would wrongly return .online.
 		// consolidatedPresence == .Offline catches both basic=closed and permanent-absence.
 		guard friend.consolidatedPresence != .Offline else {
+			Log.info("[PRESENCE-DEBUG] applyServerPresence: server reports consolidated=Offline, falling back to local config")
 			publishLocalConfig(core: core)
 			return
 		}
@@ -123,6 +133,7 @@ class PresenceViewModel: ObservableObject {
 			let savedNote = core.config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
 			let note = serverNote.isEmpty ? savedNote : serverNote
 
+			Log.info("[PRESENCE-DEBUG] applyServerPresence: mirroring server status=\(presence.rawValue) note='\(note)'")
 			core.config?.setString(section: configSection, key: configKeyStatus, value: presence.rawValue)
 			core.config?.setString(section: configSection, key: configKeyNote, value: note)
 			DispatchQueue.main.async {
@@ -132,6 +143,7 @@ class PresenceViewModel: ObservableObject {
 			publish(presence: presence, note: note, core: core)
 		} else {
 			// No active PUBLISH on the server (all devices offline) — use local config.
+			Log.info("[PRESENCE-DEBUG] applyServerPresence: server presence resolved to offline, falling back to local config")
 			publishLocalConfig(core: core)
 		}
 	}
@@ -140,6 +152,7 @@ class PresenceViewModel: ObservableObject {
 		let savedStatus = core.config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
 		let savedNote = core.config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
 		let presence = UserPresence(rawValue: savedStatus) ?? .online
+		Log.info("[PRESENCE-DEBUG] publishLocalConfig: status=\(savedStatus) note='\(savedNote)'")
 		DispatchQueue.main.async {
 			self.currentPresence = presence
 			self.customStatusNote = savedNote
@@ -148,7 +161,11 @@ class PresenceViewModel: ObservableObject {
 	}
 
 	private func publish(presence: UserPresence, note: String, core: Core) {
-		guard core.config?.getBool(section: configSection, key: "publish_presence", defaultValue: true) == true else { return }
+		guard core.config?.getBool(section: configSection, key: "publish_presence", defaultValue: true) == true else {
+			Log.warn("[PRESENCE-DEBUG] publish: skipped — publish_presence is disabled in config")
+			return
+		}
+		Log.info("[PRESENCE-DEBUG] publish: status=\(presence.rawValue) note='\(note)' publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true)")
 
 		do {
 			let model: PresenceModel
@@ -204,11 +221,13 @@ class PresenceViewModel: ObservableObject {
 			}
 
 			core.presenceModel = model
+			Log.info("[PRESENCE-DEBUG] publish: presenceModel set (basicStatus=\(model.basicStatus) activity=\(String(describing: model.activity?.type)))")
 
-			// Disable friend list subscriptions when offline (matches desktop behaviour)
-			core.friendListSubscriptionEnabled = presence != .offline
+			// Receiving others' presence is independent of what we publish — keep
+			// subscriptions active regardless of our own published status.
+			core.friendListSubscriptionEnabled = true
 		} catch {
-			Log.error("[PresenceViewModel] Failed to create presence model: \(error)")
+			Log.error("[PRESENCE-DEBUG] publish: failed to create presence model: \(error)")
 		}
 	}
 }
