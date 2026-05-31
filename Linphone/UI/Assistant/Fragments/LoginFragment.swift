@@ -23,12 +23,14 @@ import Combine
 struct LoginFragment: View {
 	
 	@ObservedObject private var coreContext = CoreContext.shared
-	
+	@ObservedObject private var permissionManager = PermissionManager.shared
+
 	@StateObject private var accountLoginViewModel = AccountLoginViewModel()
 	@StateObject private var keyboard = KeyboardResponder()
-	
+
 	@State private var isSecured: Bool = true
-	
+	@State private var provisioningUrl = ""
+
 	@FocusState var isNameFocused: Bool
 	@FocusState var isPasswordFocused: Bool
 	
@@ -40,7 +42,10 @@ struct LoginFragment: View {
 	@State private var isLinkREGActive = false
 	
 	@State var isShowHelpFragment = false
-	
+
+	@State private var showQRScanner = false
+	@State private var showCameraAlert = false
+
 	var isShowBack = false
 	
 	var onBackPressed: (() -> Void)?
@@ -81,8 +86,11 @@ struct LoginFragment: View {
 			.edgesIgnoringSafeArea(.horizontal)
 		}
 		.navigationViewStyle(StackNavigationViewStyle())
+		.onAppear {
+			permissionManager.refreshPermissionStatuses()
+		}
 	}
-	
+
 	func innerScrollView(geometry: GeometryProxy) -> some View {
 		VStack {
 			ZStack {
@@ -237,23 +245,30 @@ struct LoginFragment: View {
 //				}
 //				.padding(.bottom, 10)
 				
-				NavigationLink(destination: {
-					QrCodeScannerFragment()
-				}, label: {
+				NavigationLink(destination: QrCodeScannerFragment(), isActive: $showQRScanner) {
+					EmptyView()
+				}.hidden()
+
+				Button {
+					if permissionManager.cameraDenied {
+						showCameraAlert = true
+					} else {
+						showQRScanner = true
+					}
+				} label: {
 					HStack {
 						Image("qr-code")
 							.renderingMode(.template)
 							.resizable()
 							.foregroundStyle(Color.orangeMain500)
 							.frame(width: 20, height: 20)
-						
+
 						Text("assistant_scan_qr_code")
 							.default_text_style_orange_600(styleSize: 20)
 							.frame(height: 35)
 					}
 					.frame(maxWidth: .infinity)
-					
-				})
+				}
 				.padding(.horizontal, 20)
 				.padding(.vertical, 10)
 				.cornerRadius(60)
@@ -263,7 +278,65 @@ struct LoginFragment: View {
 						.stroke(Color.orangeMain500, lineWidth: 1)
 				)
 				.padding(.bottom)
-				
+				.alert(
+					String(localized: "camera_permission_required_title"),
+					isPresented: $showCameraAlert
+				) {
+					Button(String(localized: "assistant_open_settings")) {
+						UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+					}
+					Button(String(localized: "dialog_cancel"), role: .cancel) {}
+				} message: {
+					Text("assistant_permissions_access_camera_denied_detail")
+				}
+
+				if permissionManager.cameraDenied {
+					VStack(alignment: .leading, spacing: 6) {
+						Text("assistant_permissions_access_camera_denied_detail")
+							.default_text_style(styleSize: 14)
+							.foregroundStyle(Color.orangeMain500)
+							.multilineTextAlignment(.leading)
+
+						Button {
+							UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+						} label: {
+							Text("assistant_open_settings")
+								.default_text_style_orange_600(styleSize: 14)
+						}
+					}
+					.padding(.bottom)
+				}
+
+				HStack(spacing: 10) {
+					TextField(String(localized: "assistant_provisioning_url_placeholder"), text: $provisioningUrl)
+						.default_text_style(styleSize: 15)
+						.keyboardType(.URL)
+						.autocapitalization(.none)
+						.disableAutocorrection(true)
+						.padding(.horizontal, 20)
+						.padding(.vertical, 10)
+						.background(Color.grayMain2c100)
+						.cornerRadius(60)
+
+					Button {
+						let url = provisioningUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+						guard !url.isEmpty else { return }
+						coreContext.doOnCoreQueue { core in
+							try? core.setProvisioninguri(newValue: url)
+							core.stop()
+							try? core.start()
+						}
+					} label: {
+						Text("assistant_provisioning_url_submit")
+							.default_text_style_white_600(styleSize: 16)
+					}
+					.padding(.horizontal, 20)
+					.padding(.vertical, 10)
+					.background(Color.orangeMain500)
+					.cornerRadius(60)
+				}
+				.padding(.bottom)
+
 //				NavigationLink(isActive: $isLinkSIPActive, destination: {
 //					ThirdPartySipAccountWarningFragment(accountLoginViewModel: accountLoginViewModel)
 //				}, label: {

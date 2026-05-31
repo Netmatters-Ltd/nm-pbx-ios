@@ -36,6 +36,7 @@ struct ContentView: View {
 	@ObservedObject private var contactsManager = ContactsManager.shared
 	@ObservedObject private var magicSearch = MagicSearchSingleton.shared
 	@ObservedObject private var presenceViewModel = PresenceViewModel.shared
+	@ObservedObject private var permissionManager = PermissionManager.shared
 	
 	@StateObject private var callViewModel = CallViewModel()
 	@StateObject private var accountProfileViewModel = AccountProfileViewModel()
@@ -231,7 +232,53 @@ struct ContentView: View {
 					.padding(.horizontal, 10)
 					.background(Color.gray)
 				}
-				
+
+				if permissionManager.microphoneDenied && (!telecomManager.callInProgress || (telecomManager.callInProgress && !telecomManager.callDisplayed)) {
+					HStack {
+						Image("microphone")
+							.renderingMode(.template)
+							.resizable()
+							.foregroundStyle(.white)
+							.frame(width: 26, height: 26)
+							.padding(.leading, 10)
+
+						Text(String(localized: "permission_microphone_denied_warning"))
+							.default_text_style_white(styleSize: 16)
+
+						Spacer()
+					}
+					.frame(maxWidth: .infinity)
+					.frame(height: 40)
+					.padding(.horizontal, 10)
+					.background(Color.gray)
+					.onTapGesture {
+						UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+					}
+				}
+
+				if permissionManager.notificationsDenied && (!telecomManager.callInProgress || (telecomManager.callInProgress && !telecomManager.callDisplayed)) {
+					HStack {
+						Image("bell-simple")
+							.renderingMode(.template)
+							.resizable()
+							.foregroundStyle(.white)
+							.frame(width: 26, height: 26)
+							.padding(.leading, 10)
+
+						Text(String(localized: "permission_notifications_denied_warning"))
+							.default_text_style_white(styleSize: 16)
+
+						Spacer()
+					}
+					.frame(maxWidth: .infinity)
+					.frame(height: 40)
+					.padding(.horizontal, 10)
+					.background(Color.gray)
+					.onTapGesture {
+						UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+					}
+				}
+
 				if (telecomManager.callInProgress && !fullscreenVideo && ((!telecomManager.callDisplayed && callViewModel.callsCounter == 1) || callViewModel.callsCounter > 1)) || isShowConversationFragment {
 					HStack {
 						Image("phone")
@@ -1612,6 +1659,9 @@ struct ContentView: View {
 					}
 			}
 		}
+		.onAppear {
+			permissionManager.refreshPermissionStatuses()
+		}
 		.onRotate { newOrientation in
 			if (sharedMainViewModel.displayedFriend != nil || sharedMainViewModel.displayedCall != nil || sharedMainViewModel.displayedConversation != nil) && searchIsActive {
 				self.focusedField = false
@@ -1630,6 +1680,7 @@ struct ContentView: View {
 				if let conversationsListVM = conversationsListViewModel {
 					conversationsListVM.computeChatRoomsList()
 				}
+				permissionManager.refreshPermissionStatuses()
 			}
 		}
 		.id(coreContext.reloadID)

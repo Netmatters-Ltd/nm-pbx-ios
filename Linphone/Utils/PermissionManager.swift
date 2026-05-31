@@ -33,8 +33,14 @@ class PermissionManager: ObservableObject {
 	@Published var contactsPermissionGranted = false
 	@Published var microphonePermissionGranted = false
 	@Published var allPermissionsHaveBeenDisplayed = false
+
+	@Published var microphoneDenied = false
+	@Published var notificationsDenied = false
+	@Published var cameraDenied = false
 	
-	private init() {}
+	private init() {
+		refreshPermissionStatuses()
+	}
 	
 	func getPermissions() {
 		pushNotificationRequestPermission {
@@ -117,6 +123,16 @@ class PermissionManager: ObservableObject {
 		}
 	}
 	
+	func refreshPermissionStatuses() {
+		cameraDenied = AVCaptureDevice.authorizationStatus(for: .video) == .denied
+		microphoneDenied = AVAudioSession.sharedInstance().recordPermission == .denied
+		UNUserNotificationCenter.current().getNotificationSettings { settings in
+			DispatchQueue.main.async {
+				self.notificationsDenied = settings.authorizationStatus == .denied
+			}
+		}
+	}
+
 	func havePermissionsAlreadyBeenRequested() {
 		let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
 		let micStatus = AVAudioSession.sharedInstance().recordPermission
@@ -136,10 +152,11 @@ class PermissionManager: ObservableObject {
 									  micStatus != .undetermined &&
 									  contactsStatus != .notDetermined &&
 									  notifStatus != .notDetermined
-			
+
 			if allAlreadyRequested {
 				self.allPermissionsHaveBeenDisplayed = true
 			}
+			self.refreshPermissionStatuses()
 		}
 	}
 

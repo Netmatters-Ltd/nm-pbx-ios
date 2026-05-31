@@ -20,21 +20,30 @@
 import SwiftUI
 
 struct QrCodeScannerFragment: View {
-	
+
 	@ObservedObject private var coreContext = CoreContext.shared
-	
+	@ObservedObject private var permissionManager = PermissionManager.shared
+
 	@Environment(\.dismiss) var dismiss
-	
+
 	@State var scanResult = "Scan a QR code"
-	
+
 	var body: some View {
+		if permissionManager.cameraDenied {
+			cameraDeniedView
+		} else {
+			scannerView
+		}
+	}
+
+	private var scannerView: some View {
 		ZStack(alignment: .top) {
 			QRScanner(result: $scanResult)
-			
+
 			Text(scanResult)
 				.default_text_style_white_800(styleSize: 20)
 				.padding(.top, 175)
-			
+
 			HStack {
 				Button {
 					dismiss()
@@ -49,22 +58,53 @@ struct QrCodeScannerFragment: View {
 				}
 				.padding()
 				.padding(.top, 50)
-				
+
 				Spacer()
 			}
 		}
 		.edgesIgnoringSafeArea(.all)
 		.navigationBarHidden(true)
-		
-		/*
-		if $isShowToast {
-			ZStack {
-				
-			}.onAppear {
-				dismiss()
-			}
+		.onAppear {
+			permissionManager.refreshPermissionStatuses()
 		}
-		 */
+	}
+
+	private var cameraDeniedView: some View {
+		VStack(spacing: 20) {
+			Spacer()
+
+			Image(systemName: "camera.fill")
+				.resizable()
+				.scaledToFit()
+				.frame(width: 60, height: 60)
+				.foregroundStyle(Color.orangeMain500)
+
+			Text("assistant_permissions_access_camera_denied_detail")
+				.default_text_style(styleSize: 16)
+				.multilineTextAlignment(.center)
+				.padding(.horizontal, 30)
+
+			Button {
+				UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+			} label: {
+				Text("assistant_open_settings")
+					.default_text_style_orange_600(styleSize: 16)
+			}
+
+			Button {
+				dismiss()
+			} label: {
+				Text("assistant_go_back")
+					.default_text_style(styleSize: 16)
+					.foregroundStyle(Color.grayMain2c500)
+			}
+
+			Spacer()
+		}
+		.navigationBarHidden(true)
+		.onAppear {
+			permissionManager.refreshPermissionStatuses()
+		}
 	}
 }
 

@@ -147,8 +147,26 @@ struct PermissionsFragment: View {
 					.padding(16)
 					.background(Color.grayMain2c200)
 					.cornerRadius(40)
-					
+
 					Text("assistant_permissions_access_camera_title")
+						.default_text_style(styleSize: 15)
+						.padding(.leading, 10)
+				}
+				.padding(.bottom)
+
+				HStack {
+					HStack(alignment: .center) {
+						Image("wifi-high")
+							.renderingMode(.template)
+							.resizable()
+							.foregroundStyle(Color.grayMain2c500)
+							.frame(width: 20, height: 20, alignment: .leading)
+					}
+					.padding(16)
+					.background(Color.grayMain2c200)
+					.cornerRadius(40)
+
+					Text("assistant_permissions_local_network_title")
 						.default_text_style(styleSize: 15)
 						.padding(.leading, 10)
 				}
@@ -159,27 +177,6 @@ struct PermissionsFragment: View {
 			.padding(.horizontal, 20)
 			
 			Spacer()
-			
-			Button(action: {
-				withAnimation {
-					SharedMainViewModel.shared.changeWelcomeView()
-				}
-			}, label: {
-				Text("assistant_permissions_skip_permissions")
-					.default_text_style_orange_600(styleSize: 20)
-					.frame(height: 35)
-					.frame(maxWidth: .infinity)
-			})
-			.padding(.horizontal, 20)
-			.padding(.vertical, 10)
-			.cornerRadius(60)
-			.overlay(
-				RoundedRectangle(cornerRadius: 60)
-					.inset(by: 0.5)
-					.stroke(Color.orangeMain500, lineWidth: 1)
-			)
-			.frame(maxWidth: SharedMainViewModel.shared.maxWidth)
-			.padding(.horizontal)
 			
 			Button {
 				permissionManager.getPermissions()
