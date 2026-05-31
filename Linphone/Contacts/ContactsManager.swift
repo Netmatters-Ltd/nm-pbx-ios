@@ -87,14 +87,17 @@ final class ContactsManager: ObservableObject {
 							_ = friendList.removeFriend(linphoneFriend: friend)
 						}
 					}
+					// Local iPhone contacts are not registered on the presence server,
+					// so suppress SIP SUBSCRIBE to avoid leaking phone numbers off-device.
+					friendList.subscriptionsEnabled = false
 				}
-				
+
 				do {
 					self.linphoneFriendList = try core.getFriendListByName(name: self.linphoneAddressBookFriendList) ?? core.createFriendList()
 				} catch let error {
 					print("\(#function) - Failed to enumerate contacts: \(error)")
 				}
-				
+
 				if let linphoneFriendList = self.linphoneFriendList {
 					if linphoneFriendList.displayName == nil || linphoneFriendList.displayName!.isEmpty {
 						print("\(#function) - Friend list \(self.linphoneAddressBookFriendList) didn't exist yet, let's create it")
@@ -102,6 +105,9 @@ final class ContactsManager: ObservableObject {
 						linphoneFriendList.displayName = self.linphoneAddressBookFriendList
 						core.addFriendList(list: linphoneFriendList)
 					}
+					// Manually-added NMPBX contacts are not on the presence server either;
+					// only CardDAV-provisioned lists should send SUBSCRIBE.
+					linphoneFriendList.subscriptionsEnabled = false
 				}
                 
                 do {
