@@ -332,7 +332,7 @@ struct ContentView: View {
 											sharedMainViewModel.displayedMeeting = nil
 										}, label: {
 											VStack {
-												Image("phone-list")
+												Image("users")
 													.renderingMode(.template)
 													.resizable()
 													.foregroundStyle(sharedMainViewModel.indexView == 0 ? Color.orangeMain500 : Color.grayMain2c600)
@@ -923,7 +923,7 @@ struct ContentView: View {
 										sharedMainViewModel.displayedMeeting = nil
 									}, label: {
 										VStack {
-											Image("phone-list")
+											Image("users")
 												.renderingMode(.template)
 												.resizable()
 												.foregroundStyle(sharedMainViewModel.indexView == 0 ? Color.orangeMain500 : Color.grayMain2c600)
