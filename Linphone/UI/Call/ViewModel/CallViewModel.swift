@@ -812,6 +812,44 @@ class CallViewModel: ObservableObject {
 		}
 	}
 	
+	func sendTestSipMessage() {
+		coreContext.doOnCoreQueue { core in
+			guard let domain = core.defaultAccount?.params?.identityAddress?.domain else { return }
+			do {
+				let targetAddress = try Factory.Instance.createAddress(addr: "sip:*99rec@\(domain)")
+
+				let params = try core.createConferenceParams(conference: nil)
+				params.chatEnabled = true
+				params.groupEnabled = false
+				params.account = core.defaultAccount
+				params.chatParams?.backend = ChatRoom.Backend.Basic
+				params.chatParams?.ephemeralLifetime = 0
+
+				var chatRoom = core.searchChatRoom(
+					params: params,
+					localAddr: core.defaultAccount?.params?.identityAddress,
+					remoteAddr: nil,
+					participants: [targetAddress]
+				)
+				if chatRoom == nil {
+					chatRoom = try core.createChatRoom(params: params, participants: [targetAddress])
+				}
+
+				let formatter = DateFormatter()
+				formatter.dateFormat = "HH:mm:ss"
+				let text = "Example message content \(formatter.string(from: Date()))"
+
+				let message = try chatRoom!.createEmptyMessage()
+				message.addUtf8TextContent(text: text)
+				message.send()
+
+				Log.info("[CallViewModel] Sent SIP MESSAGE to \(targetAddress.asStringUriOnly()): \(text)")
+			} catch {
+				Log.error("[CallViewModel] Failed to send SIP MESSAGE: \(error)")
+			}
+		}
+	}
+
 	func togglePause() {
 		coreContext.doOnCoreQueue { _ in
 			if self.currentCall != nil && self.currentCall!.remoteAddress != nil {

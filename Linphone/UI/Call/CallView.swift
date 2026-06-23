@@ -2257,7 +2257,31 @@ struct CallView: View {
 						}
 						.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
 					}
-                    
+
+					VStack {
+						Button {
+							callViewModel.sendTestSipMessage()
+						} label: {
+							HStack {
+								Image(systemName: "paperplane.fill")
+									.renderingMode(.template)
+									.resizable()
+									.foregroundStyle(.white)
+									.frame(width: 28, height: 28)
+							}
+						}
+						.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
+						.frame(width: buttonSize, height: buttonSize)
+						.background(Color.gray500)
+						.cornerRadius(40)
+						.disabled(callViewModel.isPaused || telecomManager.isPausedByRemote)
+
+						Text("Send MSG")
+							.foregroundStyle(.white)
+							.default_text_style(styleSize: 15)
+					}
+					.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
+
                     VStack {
                         Button {
                         } label: {
@@ -2685,6 +2709,30 @@ struct CallView: View {
 						}
 						.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
                     }
+
+					VStack {
+						Button {
+							callViewModel.sendTestSipMessage()
+						} label: {
+							HStack {
+								Image(systemName: "paperplane.fill")
+									.renderingMode(.template)
+									.resizable()
+									.foregroundStyle(.white)
+									.frame(width: 28, height: 28)
+							}
+						}
+						.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
+						.frame(width: buttonSize, height: buttonSize)
+						.background(Color.gray500)
+						.cornerRadius(40)
+						.disabled(callViewModel.isPaused || telecomManager.isPausedByRemote)
+
+						Text("Send MSG")
+							.foregroundStyle(.white)
+							.default_text_style(styleSize: 15)
+					}
+					.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
                 }
                 .frame(height: geo.size.height * 0.15)
                 .padding(.horizontal, 20)
