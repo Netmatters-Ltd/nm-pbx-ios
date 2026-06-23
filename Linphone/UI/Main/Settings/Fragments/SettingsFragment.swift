@@ -421,6 +421,7 @@ struct SettingsFragment: View {
 								.transition(.move(edge: .top))
 							}
 							*/
+                            /*
 							NavigationLink(destination: {
 								SettingsAdvancedFragment(settingsViewModel: settingsViewModel)
 							}, label: {
@@ -444,6 +445,7 @@ struct SettingsFragment: View {
 							.padding(.vertical, 10)
 							.padding(.horizontal, 20)
 							.background(Color.gray100)
+                            */
 
 							NavigationLink(destination: {
 								AboutFragment()
@@ -467,6 +469,32 @@ struct SettingsFragment: View {
 							.padding(.vertical, 10)
 							.padding(.horizontal, 20)
 							.background(Color.gray100)
+
+							Button {
+								if let url = URL(string: UIApplication.openSettingsURLString) {
+									UIApplication.shared.open(url)
+								}
+							} label: {
+								HStack(alignment: .center) {
+									Text("settings_app_permissions_title")
+										.default_text_style_800(styleSize: 18)
+										.frame(maxWidth: .infinity, alignment: .leading)
+
+									Spacer()
+
+									Image("arrow-square-out")
+										.renderingMode(.template)
+										.resizable()
+										.foregroundStyle(Color.grayMain2c600)
+										.frame(width: 25, height: 25, alignment: .leading)
+										.padding(.all, 10)
+								}
+								.frame(maxWidth: .infinity)
+							}
+							.padding(.vertical, 10)
+							.padding(.horizontal, 20)
+							.background(Color.gray100)
+
 #if USE_CRASHLYTICS && SHOW_TEST_CRASH
 							Button {
 								showCrashConfirm = true

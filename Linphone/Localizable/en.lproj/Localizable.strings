@@ -81,10 +81,10 @@
 "assistant_login_third_party_sip_account" = "Use a third party SIP account";
 "assistant_no_account_yet" = "No account yet?";
 "assistant_permissions_access_camera_title" = "**Access camera:** Optional. Used during initial setup to scan a QR code instead of entering a URL.";
-"assistant_permissions_local_network_title" = "**Local network access:** Optional. Helps NMPBX connect calls directly when on Wi-Fi and route calls correctly on some mobile networks.";
+"assistant_permissions_local_network_title" = "**Local network access:** Optional. Helps NMPBX connect calls when on Wi-Fi and route calls correctly on some mobile data networks.";
 "assistant_permissions_grant_all_of_them" = "OK";
 "assistant_permissions_post_notifications_title" = "**Post notifications:** Required to inform you of incoming NMPBX calls when the NMPBX app isn't active.";
-"assistant_permissions_read_contacts_title" = "**Read contacts:** Optional. To call contacts already on your iPhone through NMPBX. Their phone number will be sent to the NMPBX server to make the call.";
+"assistant_permissions_read_contacts_title" = "**Read contacts:** Optional. To show contacts already on your iPhone within NMPBX. Your contacts are not sent to NMPBX, but phone numbers you call are communicated to the server as part of the call.";
 "assistant_permissions_record_audio_title" = "**Microphone:** Used when making calls through NMPBX.";
 "permission_microphone_denied_warning" = "Microphone access denied, you won't be able to transmit your voice during calls.";
 "permission_notifications_denied_warning" = "Notifications access denied, you may miss incoming calls.";
@@ -544,6 +544,7 @@
 "settings_about_source_subtitle" = "github.com/Netmatters-Ltd/nm-pbx-ios";
 "settings_about_source_title" = "Source code";
 "settings_about_title" = "About";
+"settings_app_permissions_title" = "App Permissions";
 "about_license_unavailable" = "Licence text unavailable.";
 "settings_title" = "Settings";
 "sip_address" = "Number";

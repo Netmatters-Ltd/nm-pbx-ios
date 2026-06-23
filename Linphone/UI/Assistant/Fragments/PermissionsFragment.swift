@@ -100,6 +100,24 @@ struct PermissionsFragment: View {
 						.padding(.leading, 10)
 				}
 				.padding(.bottom)
+                
+                HStack {
+                    HStack(alignment: .center) {
+                        Image("microphone")
+                            .renderingMode(.template)
+                            .resizable()
+                            .foregroundStyle(Color.grayMain2c500)
+                            .frame(width: 20, height: 20, alignment: .leading)
+                    }
+                    .padding(16)
+                    .background(Color.grayMain2c200)
+                    .cornerRadius(40)
+                    
+                    Text("assistant_permissions_record_audio_title")
+                        .default_text_style(styleSize: 15)
+                        .padding(.leading, 10)
+                }
+                .padding(.bottom)
 				
 				HStack {
 					HStack(alignment: .center) {
@@ -113,24 +131,6 @@ struct PermissionsFragment: View {
 					.background(Color.grayMain2c200)
 					.cornerRadius(40)
 					Text(.init(String(format: String(localized: "assistant_permissions_read_contacts_title"), Bundle.main.displayName)))
-						.default_text_style(styleSize: 15)
-						.padding(.leading, 10)
-				}
-				.padding(.bottom)
-				
-				HStack {
-					HStack(alignment: .center) {
-						Image("microphone")
-							.renderingMode(.template)
-							.resizable()
-							.foregroundStyle(Color.grayMain2c500)
-							.frame(width: 20, height: 20, alignment: .leading)
-					}
-					.padding(16)
-					.background(Color.grayMain2c200)
-					.cornerRadius(40)
-					
-					Text("assistant_permissions_record_audio_title")
 						.default_text_style(styleSize: 15)
 						.padding(.leading, 10)
 				}

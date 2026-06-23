@@ -448,7 +448,27 @@ class CoreContext: ObservableObject {
                         "[CoreContext][onMessageWaitingIndicationChanged] MWI NOTIFY received, messages are waiting (\(summaries.count) summaries)"
                     )
                     
-                    if let defaultAccount = core.defaultAccount?.params?.identityAddress, let mwiAccount = mwi.accountAddress, defaultAccount.weakEqual(address2: mwiAccount){
+                    // Match the MWI NOTIFY to the default account. An unsolicited NOTIFY
+                    // often carries the server's IP in its From header (e.g.
+                    // sip:5@206.189.115.172) rather than the provisioned SIP domain, so a
+                    // full weakEqual on the address fails when the domains differ. We don't
+                    // store the server's resolved IP (only the provisioned hostname), so we
+                    // can't compare against it directly. Instead, fall back to matching on
+                    // the username, which identifies the mailbox owner regardless of whether
+                    // the server identifies itself by hostname or IP. The handler is already
+                    // scoped to the default account, so a username match is safe here.
+                    let defaultIdentity = core.defaultAccount?.params?.identityAddress
+                    let mwiAccount = mwi.accountAddress
+                    let matchesDefaultAccount: Bool = {
+                        guard let defaultIdentity = defaultIdentity, let mwiAccount = mwiAccount else { return false }
+                        // Clean path: the server used the provisioned domain.
+                        if defaultIdentity.weakEqual(address2: mwiAccount) { return true }
+                        // Fallback: the server identified itself by IP (or any other host).
+                        guard let user = defaultIdentity.username, !user.isEmpty else { return false }
+                        return user == mwiAccount.username
+                    }()
+
+                    if matchesDefaultAccount {
                         if !summaries.isEmpty {
                             let summary = summaries.first
                             DispatchQueue.main.async {
@@ -457,6 +477,8 @@ class CoreContext: ObservableObject {
                                 }
                             }
                         }
+                    } else {
+                        Log.warn("[CoreContext][onMessageWaitingIndicationChanged] MWI NOTIFY account \(mwiAccount?.asStringUriOnly() ?? "nil") did not match default account \(defaultIdentity?.asStringUriOnly() ?? "nil"), ignoring")
                     }
 				} else {
 					Log.info("[CoreContext][onMessageWaitingIndicationChanged] MWI NOTIFY received, no message is waiting")
@@ -473,6 +495,7 @@ class CoreContext: ObservableObject {
 			self.mCore.autoIterateEnabled = true
 
 			try? self.mCore.start()
+			self.mCore.getPayloadType(type: "G722", rate: 8000, channels: 1)?.enable(enabled: true)
 			self.loadSavedPresence()
 		}
 	}
