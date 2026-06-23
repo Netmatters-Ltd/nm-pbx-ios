@@ -812,6 +812,7 @@ class CallViewModel: ObservableObject {
 		}
 	}
 	
+	#if TOGGLE_RECORDING
 	func sendTestSipMessage() {
 		coreContext.doOnCoreQueue { core in
 			guard let domain = core.defaultAccount?.params?.identityAddress?.domain else { return }
@@ -849,6 +850,7 @@ class CallViewModel: ObservableObject {
 			}
 		}
 	}
+	#endif
 
 	func togglePause() {
 		coreContext.doOnCoreQueue { _ in

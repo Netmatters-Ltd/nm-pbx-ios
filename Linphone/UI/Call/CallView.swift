@@ -1883,6 +1883,7 @@ struct CallView: View {
             
             if orientation != .landscapeLeft && orientation != .landscapeRight {
                 HStack(spacing: 0) {
+                    Spacer(minLength: 0)
                     if callViewModel.isOneOneCall {
                         VStack {
                             Button {
@@ -2064,63 +2065,12 @@ struct CallView: View {
                     }
                     .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
                     
-                    if callViewModel.isOneOneCall {
-                        VStack {
-                            Button {
-                                showingDialer.toggle()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    telecomManager.callStarted = false
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        telecomManager.callStarted = true
-                                    }
-                                }
-                            } label: {
-                                HStack {
-                                    Image("dialer")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .foregroundStyle(.white)
-                                        .frame(width: 32, height: 32)
-                                }
-                            }
-                            .buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-                            .frame(width: buttonSize, height: buttonSize)
-                            .background(Color.gray500)
-                            .cornerRadius(40)
-                            
-                            Text("call_action_show_dialer")
-                                .foregroundStyle(.white)
-                                .default_text_style(styleSize: 15)
-                        }
-                        .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-                    } else {
-                        VStack {
-                            Button {
-                                changeLayoutSheet = true
-                            } label: {
-                                HStack {
-                                    Image("layout")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .foregroundStyle(.white)
-                                        .frame(width: 32, height: 32)
-                                }
-                            }
-                            .buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-                            .frame(width: buttonSize, height: buttonSize)
-                            .background(Color.gray500)
-                            .cornerRadius(40)
-                            
-                            Text("call_action_change_layout")
-                                .foregroundStyle(.white)
-                                .default_text_style(styleSize: 15)
-                        }
-                        .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-                    }
+                    Spacer(minLength: 0)
                 }
                 .frame(height: geo.size.height * 0.15)
-                
+
                 HStack(spacing: 0) {
+                    Spacer(minLength: 0)
 					if !CorePreferences.disableChatFeature && callViewModel.chatEnabled {
                         VStack {
                             Button {
@@ -2196,68 +2146,37 @@ struct CallView: View {
 					.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
                     
                     if callViewModel.isOneOneCall {
-						ZStack {
-							VStack {
-								Button {
-									callViewModel.toggleRecording()
-								} label: {
-									HStack {
-										Image("record-fill")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(.white)
-											.frame(width: 32, height: 32)
-									}
-								}
-								.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-								.frame(width: buttonSize, height: buttonSize)
-								.background(callViewModel.isRecording ? Color.redDanger500 : Color.gray500)
-								.cornerRadius(40)
-								.disabled(callViewModel.isPaused || telecomManager.isPausedByRemote)
-								
-								Text("call_action_record_call")
-									.foregroundStyle(.white)
-									.default_text_style(styleSize: 15)
-							}
-							.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-							
-							if telecomManager.isPausedByRemote {
-								Color.gray600.opacity(0.8)
-									.allowsHitTesting(false)
-							}
-						}
-						.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-					} else {
-						ZStack {
-							VStack {
-								Button {
-								} label: {
-									HStack {
-										Image("record-fill")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(.white)
-											.frame(width: 32, height: 32)
-									}
-								}
-								.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-								.frame(width: buttonSize, height: buttonSize)
-								.background(Color.gray500)
-								.cornerRadius(40)
-								.disabled(true)
-								
-								Text("call_action_record_call")
-									.foregroundStyle(.white)
-									.default_text_style(styleSize: 15)
-							}
-							.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-							
-							Color.gray600.opacity(0.8)
-								.allowsHitTesting(false)
-						}
-						.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-					}
+                        VStack {
+                            Button {
+                                showingDialer.toggle()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    telecomManager.callStarted = false
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        telecomManager.callStarted = true
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Image("dialer")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .foregroundStyle(.white)
+                                        .frame(width: 32, height: 32)
+                                }
+                            }
+                            .buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
+                            .frame(width: buttonSize, height: buttonSize)
+                            .background(Color.gray500)
+                            .cornerRadius(40)
 
+                            Text("call_action_show_dialer")
+                                .foregroundStyle(.white)
+                                .default_text_style(styleSize: 15)
+                        }
+                        .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
+                    }
+
+					#if TOGGLE_RECORDING
 					VStack {
 						Button {
 							callViewModel.sendTestSipMessage()
@@ -2281,54 +2200,9 @@ struct CallView: View {
 							.default_text_style(styleSize: 15)
 					}
 					.frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
+					#endif
 
-                    VStack {
-                        Button {
-                        } label: {
-                            HStack {
-                                Image("video-camera")
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .foregroundStyle(.white)
-                                    .frame(width: 32, height: 32)
-                            }
-                        }
-                        .buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-                        .frame(width: buttonSize, height: buttonSize)
-                        .background(Color.gray500)
-                        .cornerRadius(40)
-                        
-                        Text("call_action_change_layout")
-                            .foregroundStyle(.white)
-                            .default_text_style(styleSize: 15)
-                    }
-                    .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-                    .hidden()
-                    
-					if CorePreferences.disableChatFeature || !callViewModel.chatEnabled {
-                        VStack {
-                            Button {
-                            } label: {
-                                HStack {
-                                    Image("video-camera")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .foregroundStyle(.white)
-                                        .frame(width: 32, height: 32)
-                                }
-                            }
-                            .buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-                            .frame(width: buttonSize, height: buttonSize)
-                            .background(Color.gray500)
-                            .cornerRadius(40)
-                            
-                            Text("call_action_change_layout")
-                                .foregroundStyle(.white)
-                                .default_text_style(styleSize: 15)
-                        }
-                        .frame(width: geo.size.width * 0.24, height: geo.size.width * 0.24)
-                        .hidden()
-                    }
+                    Spacer(minLength: 0)
                 }
                 .frame(height: geo.size.height * 0.15)
             } else {
@@ -2645,71 +2519,7 @@ struct CallView: View {
 					}
 					.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
                     
-                    if callViewModel.isOneOneCall {
-						ZStack {
-							VStack {
-								Button {
-									callViewModel.toggleRecording()
-								} label: {
-									HStack {
-										Image("record-fill")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(.white)
-											.frame(width: 32, height: 32)
-									}
-								}
-								.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-								.frame(width: buttonSize, height: buttonSize)
-								.background(callViewModel.isRecording ? Color.redDanger500 : Color.gray500)
-								.cornerRadius(40)
-								.disabled(callViewModel.isPaused || telecomManager.isPausedByRemote)
-								
-								Text("call_action_record_call")
-									.foregroundStyle(.white)
-									.default_text_style(styleSize: 15)
-							}
-							.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
-							
-							if callViewModel.isPaused || telecomManager.isPausedByRemote {
-								Color.gray600.opacity(0.8)
-									.allowsHitTesting(false)
-							}
-						}
-						.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
-					} else {
-						ZStack {
-							VStack {
-								Button {
-								} label: {
-									HStack {
-										Image("record-fill")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(Color.gray500)
-											.frame(width: 32, height: 32)
-									}
-								}
-								.buttonStyle(PressedButtonStyle(buttonSize: buttonSize))
-								.frame(width: buttonSize, height: buttonSize)
-								.background(.white)
-								.cornerRadius(40)
-								.disabled(true)
-								
-								Text("call_action_record_call")
-									.foregroundStyle(.white)
-									.default_text_style(styleSize: 15)
-							}
-							.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
-							
-							if true {
-								Color.gray600.opacity(0.8)
-									.allowsHitTesting(false)
-							}
-						}
-						.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
-                    }
-
+					#if TOGGLE_RECORDING
 					VStack {
 						Button {
 							callViewModel.sendTestSipMessage()
@@ -2733,6 +2543,7 @@ struct CallView: View {
 							.default_text_style(styleSize: 15)
 					}
 					.frame(width: geo.size.width * 0.125, height: geo.size.width * 0.125)
+					#endif
                 }
                 .frame(height: geo.size.height * 0.15)
                 .padding(.horizontal, 20)
