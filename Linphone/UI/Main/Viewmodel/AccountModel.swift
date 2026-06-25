@@ -132,7 +132,7 @@ class AccountModel: ObservableObject {
 			if preferences.object(forKey: photoAvatarModelKey) == nil {
 				self.saveImage(
 					image: ContactsManager.shared.textToImage(
-						firstName: usernaneAvatarTmp, lastName: ""),
+						firstName: usernaneAvatarTmp, lastName: "", useFullText: true),
 					name: usernaneAvatarTmp,
 					prefix: "-default")
 			} else {

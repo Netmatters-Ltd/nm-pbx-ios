@@ -207,25 +207,44 @@ final class ContactsManager: ObservableObject {
 		}
 	}
 	
-	func textToImage(firstName: String?, lastName: String?) -> UIImage {
-		let firstInitial = firstName?.first.map { String($0) } ?? ""
-		let lastInitial = lastName?.first.map { String($0) } ?? ""
-		let textToDisplay = (firstInitial + lastInitial).uppercased()
+	func textToImage(firstName: String?, lastName: String?, useFullText: Bool = false) -> UIImage {
+		let textToDisplay: String
+		if useFullText {
+			// Used for the active user's fallback avatar, where we want the whole
+			// extension number (e.g. "123") rather than just the first character.
+			textToDisplay = (firstName ?? "").uppercased()
+		} else {
+			let firstInitial = firstName?.first.map { String($0) } ?? ""
+			let lastInitial = lastName?.first.map { String($0) } ?? ""
+			textToDisplay = (firstInitial + lastInitial).uppercased()
+		}
 
 		let size = CGSize(width: 200, height: 200)
 		let renderer = UIGraphicsImageRenderer(size: size)
 
 		return renderer.image { _ in
 			let rect = CGRect(origin: .zero, size: size)
-			
+
 			UIColor(Color.grayMain2c200).setFill()
 			UIBezierPath(roundedRect: rect, cornerRadius: 10).fill()
-			
+
 			let paragraph = NSMutableParagraphStyle()
 			paragraph.alignment = .center
 
+			// Shrink the font when needed so longer strings (e.g. a full extension
+			// number) still fit within the image, leaving a little horizontal padding.
+			let maxFontSize: CGFloat = 80
+			let availableWidth = size.width - 24
+			var fontSize = maxFontSize
+			var font = UIFont(name: "NotoSans-ExtraBold", size: fontSize) ?? UIFont.boldSystemFont(ofSize: fontSize)
+			let measuredWidth = textToDisplay.size(withAttributes: [.font: font]).width
+			if measuredWidth > availableWidth {
+				fontSize = max(fontSize * (availableWidth / measuredWidth), 1)
+				font = UIFont(name: "NotoSans-ExtraBold", size: fontSize) ?? UIFont.boldSystemFont(ofSize: fontSize)
+			}
+
 			let attributes: [NSAttributedString.Key: Any] = [
-				.font: UIFont(name: "NotoSans-ExtraBold", size: 80) ?? UIFont.boldSystemFont(ofSize: 80),
+				.font: font,
 				.foregroundColor: UIColor(Color.grayMain2c600),
 				.paragraphStyle: paragraph
 			]

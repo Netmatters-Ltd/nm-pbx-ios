@@ -48,8 +48,8 @@ struct SideMenuAccountRow: View {
 						.clipShape(Circle())
 				case .failure:
 					Image(uiImage: contactsManager.textToImage(
-						firstName: model.avatarModel?.name ?? "",
-						lastName: ""))
+						firstName: model.usernaneAvatar,
+						lastName: "", useFullText: true))
 					.resizable()
 					.frame(width: avatarSize, height: avatarSize)
 					.clipShape(Circle())
