@@ -129,7 +129,7 @@ struct StartCallFragment: View {
 							.padding(.horizontal, 30)
 							.onChange(of: startCallViewModel.searchField) { newValue in
 								magicSearch.currentFilter = newValue
-								magicSearch.searchForContacts()
+								magicSearch.searchForContactsDebounced()
 							}
 							.simultaneousGesture(TapGesture().onEnded {
 								showingDialer = false
@@ -237,7 +237,7 @@ struct StartCallFragment: View {
 					
 					ZStack {
 						ScrollView {
-							if !ContactsManager.shared.lastSearch.isEmpty {
+							if !ContactsManager.shared.viewAvatarListModel.isEmpty {
 								HStack(alignment: .center) {
 									Text("contacts_list_all_contacts_title")
 										.default_text_style_800(styleSize: 16)
@@ -248,7 +248,7 @@ struct StartCallFragment: View {
 								.padding(.horizontal, 16)
 							}
 							
-							ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.avatarListModel, startCallFunc: { addr in
+							ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.viewAvatarListModel, startCallFunc: { addr in
 								if callViewModel.isTransferInsteadCall {
 									showingDialer = false
 									

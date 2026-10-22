@@ -197,6 +197,8 @@
 "contact_video_call_action" = "Video call";
 "contacts_list_all_contacts_title" = "All contacts";
 "contacts_list_empty" = "No contacts fetched yet";
+"contacts_list_truncated_message" = "Not all contacts are shown here. Use search to find any other contact.";
+"contacts_list_search_truncated_message" = "Only the first matches are shown. Type more of the name to narrow the results.";
 "extensions_list_empty" = "No contacts fetched yet";
 "contacts_list_favourites_title" = "Favourites";
 "contacts_list_filter_popup_see_all" = "See all";

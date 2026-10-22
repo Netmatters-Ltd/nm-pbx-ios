@@ -99,7 +99,7 @@ struct ConversationForwardMessageFragment: View {
 										conversationForwardMessageViewModel.filterConversations()
 									}
 									magicSearch.currentFilter = newValue
-									magicSearch.searchForContacts()
+									magicSearch.searchForContactsDebounced()
 								}
 							
 							HStack {
@@ -156,7 +156,7 @@ struct ConversationForwardMessageFragment: View {
 									conversationsList
 								}
 								
-								if !ContactsManager.shared.lastSearch.isEmpty {
+								if !ContactsManager.shared.viewAvatarListModel.isEmpty {
 									HStack(alignment: .center) {
 										Text("contacts_list_all_contacts_title")
 											.default_text_style_800(styleSize: 16)
@@ -167,7 +167,7 @@ struct ConversationForwardMessageFragment: View {
 									.padding(.horizontal, 16)
 								}
 								
-								ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.avatarListModel, startCallFunc: { addr in
+								ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.viewAvatarListModel, startCallFunc: { addr in
 									withAnimation {
 										conversationForwardMessageViewModel.createOneToOneChatRoomWith(remote: addr)
 									}

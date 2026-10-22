@@ -226,6 +226,13 @@ class CorePreferences {
 	static var maxAccountsCount: Int {
 		return Config.get().getInt(section: "ui", key: "max_account", defaultValue: 0)
 	}
+
+	// Maximum number of external contacts listed in the Contacts tab (and its search results),
+	// typing more of the name narrows the results to reach any contact. 0 or less disables the cap.
+	// Extensions are never capped, the app needs to see them all to track their presence.
+	static var maxContactsDisplayed: Int {
+		return Config.get().getInt(section: "ui", key: "max_number_of_contacts_displayed", defaultValue: 100)
+	}
 	
 	/*
 	static var configPath: String {

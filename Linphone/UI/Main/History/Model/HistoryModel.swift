@@ -42,6 +42,10 @@ class HistoryModel: ObservableObject, Identifiable {
 	@Published var duration: Int
 	@Published var isFriend: Bool = false
 	@Published var avatarModel: ContactAvatarModel?
+
+	// Number of views showing the avatar of the call, the row and its details. The avatar model is only
+	// loaded while it is above 0, see appear() and disappear(). Only used on the main thread.
+	private var shownCount = 0
 	
 	init(callLog: CallLog) {
 		self.callLog = callLog
@@ -113,10 +117,44 @@ class HistoryModel: ObservableObject, Identifiable {
 		}
 	}
 	
+	/// To be called when a view that shows the avatar of the call is about to appear. The avatar model is
+	/// loaded until the last of those views has disappeared.
+	func appear() {
+		shownCount += 1
+		if shownCount == 1 {
+			avatarModel?.load()
+		}
+	}
+
+	func disappear() {
+		guard shownCount > 0 else {
+			return
+		}
+
+		shownCount -= 1
+		if shownCount == 0 {
+			avatarModel?.unload()
+		}
+	}
+
+	// Sets the avatar model, loading it if a view is showing it and unloading the one it replaces
+	private func setAvatarModel(_ newAvatarModel: ContactAvatarModel) {
+		let previousAvatarModel = avatarModel
+		if shownCount > 0 {
+			newAvatarModel.load()
+		}
+
+		avatarModel = newAvatarModel
+
+		if shownCount > 0 {
+			previousAvatarModel?.unload()
+		}
+	}
+
 	func refreshAvatarModel() {
 		guard let address = (self.callLog.dir == .Outgoing ? self.callLog.toAddress : self.callLog.fromAddress) else {
 			DispatchQueue.main.async {
-				self.avatarModel = ContactAvatarModel(friend: nil, name: self.addressName, address: self.address, withPresence: false)
+				self.setAvatarModel(ContactAvatarModel(friend: nil, name: self.addressName, address: self.address, withPresence: false, deferLoad: true))
 			}
 			return
 		}
@@ -125,15 +163,12 @@ class HistoryModel: ObservableObject, Identifiable {
 		if let addressFriendTmp = addressFriendTmp {
 			let addressNameTmp = self.addressName
 			
-			let avatarModelTmp = ContactsManager.shared.avatarListModel.first(where: {
-				guard let friend = $0.friend else { return false }
-				return friend.name == addressFriendTmp.name &&
-					   friend.address?.asStringUriOnly() == addressFriendTmp.address?.asStringUriOnly()
-			}) ?? ContactAvatarModel(
+			let avatarModelTmp = ContactsManager.shared.avatarModel(forAddress: addressFriendTmp.address?.asStringUriOnly() ?? "") ?? ContactAvatarModel(
 				friend: nil,
 				name: self.addressName,
 				address: self.address,
-				withPresence: false
+				withPresence: false,
+				deferLoad: true
 			)
 			
 			let addressFriendNameTmp = addressFriendTmp.name ?? addressNameTmp
@@ -141,11 +176,11 @@ class HistoryModel: ObservableObject, Identifiable {
 			DispatchQueue.main.async {
 				self.isFriend = true
 				self.addressName = addressFriendNameTmp
-				self.avatarModel = avatarModelTmp
+				self.setAvatarModel(avatarModelTmp)
 			}
 		} else {
 			DispatchQueue.main.async {
-				self.avatarModel = ContactAvatarModel(friend: nil, name: self.addressName, address: self.address, withPresence: false)
+				self.setAvatarModel(ContactAvatarModel(friend: nil, name: self.addressName, address: self.address, withPresence: false, deferLoad: true))
 			}
 		}
 	}

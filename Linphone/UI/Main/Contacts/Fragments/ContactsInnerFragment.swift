@@ -34,7 +34,7 @@ struct ContactsInnerFragment: View {
 	var mode: ContactsFilterMode
 
 	var filteredContacts: [ContactAvatarModel] {
-		contactsManager.avatarListModel.filter { mode == .extensions ? $0.isInternal : !$0.isInternal }
+		mode == .extensions ? contactsListViewModel.extensionContacts : contactsListViewModel.contacts
 	}
 
 	var body: some View {
@@ -82,6 +82,20 @@ struct ContactsInnerFragment: View {
 				VStack {
 					List {
 						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in })
+						// Scrolls with the list instead of taking space on the page, to tell the user
+						// that the list was cut short
+						if mode == .contacts && contactsManager.contactsListTruncated && !filteredContacts.isEmpty {
+							Text(text.isEmpty ? "contacts_list_truncated_message" : "contacts_list_search_truncated_message")
+								.font(Font.custom("Poppins-Regular", size: 12))
+								.foregroundStyle(Color.grayMain2c500)
+								.multilineTextAlignment(.center)
+								.frame(maxWidth: .infinity)
+								.padding(.top, 16)
+								.padding(.bottom, 24)
+								.listRowBackground(Color.clear)
+								.listRowSeparator(.hidden)
+								.listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24))
+						}
 						// Invisible full-height row added only when the list is empty so
 						// the pull-to-refresh gesture still has something to grab onto,
 						// without creating a blank scrollable gap when contacts are shown.

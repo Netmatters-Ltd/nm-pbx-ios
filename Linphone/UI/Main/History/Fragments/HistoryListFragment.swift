@@ -184,6 +184,12 @@ struct HistoryRow: View {
 			historyListViewModel.selectedCall = historyModel
 			showingSheet.toggle()
 		}
+		.onAppear {
+			historyModel.appear()
+		}
+		.onDisappear {
+			historyModel.disappear()
+		}
 	}
 	
 	func doCall(historyModel: HistoryModel) {

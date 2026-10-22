@@ -770,7 +770,7 @@ struct ContentView: View {
 													.onChange(of: text) { newValue in
 														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
-															magicSearch.searchForContacts()
+															magicSearch.searchForContactsDebounced()
 														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															if text.isEmpty {
 																historyListVM.resetFilterCallLogs()
@@ -812,7 +812,7 @@ struct ContentView: View {
 													.onChange(of: text) { newValue in
 														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
-															magicSearch.searchForContacts()
+															magicSearch.searchForContactsDebounced()
 														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															historyListVM.filterCallLogs(filter: text)
 														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 3 {

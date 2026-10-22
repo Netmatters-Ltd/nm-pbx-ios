@@ -123,7 +123,7 @@ struct AddParticipantsFragment: View {
 						.padding(.horizontal, 30)
 						.onChange(of: addParticipantsViewModel.searchField) { newValue in
 						  	magicSearch.currentFilter = newValue
-							magicSearch.searchForContacts()
+							magicSearch.searchForContactsDebounced()
 						}.onAppear {
 							magicSearch.searchForContacts()
 						}
@@ -169,21 +169,21 @@ struct AddParticipantsFragment: View {
 				
 				ZStack {
 					ScrollView {
-						ForEach(0..<contactsManager.avatarListModel.count, id: \.self) { index in
+						ForEach(0..<contactsManager.viewAvatarListModel.count, id: \.self) { index in
 							HStack {
 								HStack {
 									if index == 0
-										|| contactsManager.avatarListModel[index].name.lowercased().folding(
+										|| contactsManager.viewAvatarListModel[index].name.lowercased().folding(
 											options: .diacriticInsensitive,
 											locale: .current
 										).first
-										!= contactsManager.avatarListModel[index-1].name.lowercased().folding(
+										!= contactsManager.viewAvatarListModel[index-1].name.lowercased().folding(
 											options: .diacriticInsensitive,
 											locale: .current
 										).first {
 										Text(
 											String(
-												(contactsManager.avatarListModel[index].name.uppercased().folding(
+												(contactsManager.viewAvatarListModel[index].name.uppercased().folding(
 													options: .diacriticInsensitive,
 													locale: .current
 												).first)!))
@@ -199,15 +199,15 @@ struct AddParticipantsFragment: View {
 											.padding(.trailing, 5)
 									}
 									
-									Avatar(contactAvatarModel: contactsManager.avatarListModel[index], avatarSize: 50)
+									Avatar(contactAvatarModel: contactsManager.viewAvatarListModel[index], avatarSize: 50)
 									
-									Text(contactsManager.avatarListModel[index].name)
+									Text(contactsManager.viewAvatarListModel[index].name)
 										.default_text_style(styleSize: 16)
 										.frame(maxWidth: .infinity, alignment: .leading)
 										.foregroundStyle(Color.orangeMain500)
 									
 									if addParticipantsViewModel.participantsToAdd.contains(where: {
-										$0.address.asStringUriOnly() == contactsManager.avatarListModel[index].address
+										$0.address.asStringUriOnly() == contactsManager.viewAvatarListModel[index].address
 									}) {
 										Image("check")
 											.renderingMode(.template)
@@ -220,7 +220,7 @@ struct AddParticipantsFragment: View {
 							}
 							.background(.white)
 							.onTapGesture {
-								if let addr = try? Factory.Instance.createAddress(addr: contactsManager.avatarListModel[index].address) {
+								if let addr = try? Factory.Instance.createAddress(addr: contactsManager.viewAvatarListModel[index].address) {
 									addParticipantsViewModel.selectParticipant(addr: addr)
 								}
 							}

@@ -96,6 +96,8 @@ class MeetingWaitingRoomViewModel: ObservableObject {
 					}) ?? ContactAvatarModel(friend: nil, name: userNameTmp, address: addressTmp, withPresence: false)
 					: ContactAvatarModel(friend: nil, name: userNameTmp, address: addressTmp, withPresence: false)
 					
+					avatarModelTmp.load()
+
 					if core.videoEnabled && !core.videoPreviewEnabled {
 						DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 							core.videoPreviewEnabled = true

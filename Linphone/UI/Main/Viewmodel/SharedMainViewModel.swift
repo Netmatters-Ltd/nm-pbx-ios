@@ -30,7 +30,15 @@ class SharedMainViewModel: ObservableObject {
 	@Published var defaultAvatar: URL?
 	@Published var indexView: Int = 0
 	
-	@Published var displayedFriend: ContactAvatarModel?
+	// The contact whose details are shown. Its model is loaded for as long as it is displayed, as it may be one of
+	// the models of ContactsManager.avatarListModel that nothing else has loaded.
+	@Published var displayedFriend: ContactAvatarModel? {
+		didSet {
+			// The new one is loaded first, so it stays loaded if it is the same model
+			displayedFriend?.load()
+			oldValue?.unload()
+		}
+	}
 	@Published var displayedCall: HistoryModel?
 	@Published var displayedConversation: ConversationModel?
 	@Published var displayedMeeting: MeetingModel?

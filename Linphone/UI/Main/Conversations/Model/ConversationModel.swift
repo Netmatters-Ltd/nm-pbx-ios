@@ -101,6 +101,7 @@ class ConversationModel: ObservableObject, Identifiable {
 				$0.friend?.name == addressFriend.name &&
 				$0.friend?.address?.asStringUriOnly() == addressFriend.address?.asStringUriOnly()
 			}) {
+				existingAvatarModel.load()
 				avatarModelTmp = existingAvatarModel
 			} else {
 				avatarModelTmp = ContactAvatarModel(

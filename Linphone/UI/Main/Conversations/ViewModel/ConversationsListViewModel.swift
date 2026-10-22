@@ -104,12 +104,14 @@ class ConversationsListViewModel: ObservableObject {
 								}
 							} else if !conversationModel.isGroup, let firstParticipantAddress = conversationModel.participantsAddress.first, firstParticipantAddress.contains(contactAvatarModel.address) {
 								if let index = self.conversationsList.firstIndex(where: { $0.chatRoom === conversationModel.chatRoom }) {
+									contactAvatarModel.load()
 									DispatchQueue.main.async {
 										conversationModel.avatarModel = contactAvatarModel
 										conversationModel.subject = contactAvatarModel.name
 										self.conversationsList[index].avatarModel = contactAvatarModel
 									}
 								} else {
+									contactAvatarModel.load()
 									DispatchQueue.main.async {
 										conversationModel.avatarModel = contactAvatarModel
 										conversationModel.subject = contactAvatarModel.name
@@ -163,12 +165,14 @@ class ConversationsListViewModel: ObservableObject {
 							}
 						} else if !conversationModel.isGroup, let firstParticipantAddress = conversationModel.participantsAddress.first, firstParticipantAddress.contains(contactAvatarModel.address) {
 							if let index = self.conversationsList.firstIndex(where: { $0.chatRoom === conversationModel.chatRoom }) {
+								contactAvatarModel.load()
 								DispatchQueue.main.async {
 									conversationModel.avatarModel = contactAvatarModel
 									conversationModel.subject = contactAvatarModel.name
 									self.conversationsList[index].avatarModel = contactAvatarModel
 								}
 							} else {
+								contactAvatarModel.load()
 								DispatchQueue.main.async {
 									conversationModel.avatarModel = contactAvatarModel
 									conversationModel.subject = contactAvatarModel.name

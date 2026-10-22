@@ -74,24 +74,134 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	}
 	
 	private var friendDelegate: FriendDelegate?
-	
-	init(friend: Friend?, name: String, address: String, withPresence: Bool?) {
-		self.name = name
-	 	self.address = address
-		self.resetContactAvatarModel(friend: friend, name: name, address: address, withPresence: withPresence)
+
+	// What load() reads the model from, kept as plain values so it can be called from any thread
+	private var loadName = ""
+	private var loadAddress = ""
+	private var presenceWanted: Bool?
+
+	// What the search filter compares, prepared when the model is created so a search only has to look for
+	// the text in them, and so it can be done before the model is loaded. Written on the core queue.
+	private(set) var searchName = ""
+	private(set) var searchUris: [String] = []
+	private(set) var searchUsernames: [String] = []
+	private(set) var searchNumbers: [String] = []
+
+	// Number of views showing the model. The details and the presence are only read and followed while
+	// it is above 0, see load() and unload().
+	private let loadLock = NSLock()
+	private var loadCount = 0
+
+	private var isLoaded: Bool {
+		loadLock.lock()
+		defer { loadLock.unlock() }
+		return loadCount > 0
 	}
 	
+	init(friend: Friend?, name: String, address: String, withPresence: Bool?, deferLoad: Bool = false) {
+		self.name = name
+	 	self.address = address
+		self.friend = friend
+		self.loadName = name
+		self.loadAddress = address
+		self.presenceWanted = withPresence
+
+		// A model that is not deferred is loaded for good, a deferred one waits for a view to load it
+		if !deferLoad {
+			load()
+		} else {
+			loadAddresses(friend: friend)
+		}
+	}
+	
+	/// Lowercase and without accents, which is how names and the search text are compared
+	static func normalisedForSearch(_ text: String) -> String {
+		return text.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+	}
+
+	// The username of a SIP address, which is the extension: "sip:101@domain" gives "101"
+	private static func username(ofSipUri uri: String) -> String {
+		var rest = Substring(uri)
+		if let colon = rest.firstIndex(of: ":") {
+			rest = rest[rest.index(after: colon)...]
+		}
+
+		let username = rest.split(separator: "@", maxSplits: 1).first.map(String.init) ?? ""
+		return normalisedForSearch(username)
+	}
+
+	// The part of the model that is needed before it is loaded: its addresses and numbers, for the search
+	// filter, and whether it is an extension, for the Extensions and Contacts split. Read when the model is
+	// created if it is deferred, and again whenever it is reset.
+	private func loadAddresses(friend: Friend?) {
+		CoreContext.shared.doOnCoreQueue { core in
+			let friendAddresses = friend?.addresses ?? []
+			let addressesTmp = friendAddresses.map { $0.asStringUriOnly() }
+			
+			self.searchUris = addressesTmp
+			self.searchName = ContactAvatarModel.normalisedForSearch(self.loadName)
+			self.searchUsernames = addressesTmp.map { ContactAvatarModel.username(ofSipUri: $0) }
+			// Only the digits of a phone number are compared, ignoring spaces and punctuation
+			self.searchNumbers = (friend?.phoneNumbers ?? []).map { $0.filter { $0.isNumber } }.filter { !$0.isEmpty }
+			
+			let domain = core.defaultAccount?.params?.domain ?? ""
+			let isInternalTmp = !domain.isEmpty && friendAddresses.contains { $0.domain == domain }
+			
+			DispatchQueue.main.async {
+				self.addresses = addressesTmp
+				self.isInternal = isInternalTmp
+			}
+		}
+	}
+	
+
+	/// Reads everything from the friend and starts following its presence. Counted, so every call must
+	/// be matched by an unload() when the view stops showing the model.
+	func load() {
+		loadLock.lock()
+		loadCount += 1
+		let isFirst = loadCount == 1
+		loadLock.unlock()
+
+		if isFirst {
+			// The values are read on the core queue, where resetContactAvatarModel writes them
+			CoreContext.shared.doOnCoreQueue { _ in
+				self.resetContactAvatarModel(friend: self.friend, name: self.loadName, address: self.loadAddress, withPresence: self.presenceWanted)
+			}
+		}
+	}
+
+	/// Stops following the presence once the last view that loaded the model has unloaded it. The values
+	/// already read are kept, so loading the model again only has to start following the presence.
+	func unload() {
+		loadLock.lock()
+		guard loadCount > 0 else {
+			loadLock.unlock()
+			return
+		}
+		loadCount -= 1
+		let isLast = loadCount == 0
+		loadLock.unlock()
+
+		if isLast {
+			CoreContext.shared.doOnCoreQueue { _ in
+				// Loaded again before this ran
+				if !self.isLoaded {
+					self.removeFriendDelegate()
+				}
+			}
+		}
+	}
+
 	func resetContactAvatarModel(friend: Friend?, name: String, address: String, withPresence: Bool?) {
 		CoreContext.shared.doOnCoreQueue { core in
 			self.friend = friend
+			self.loadName = name
+			self.loadAddress = address
+			self.presenceWanted = withPresence
+			self.loadAddresses(friend: friend)
 			let nameTmp = name
 			let addressTmp = address
-			var addressesTmp: [String] = []
-			if let friend = friend {
-				friend.addresses.forEach { address in
-					addressesTmp.append(address.asStringUriOnly())
-				}
-			}
 			var phoneNumbersWithLabelTmp: [(label: String, phoneNumber: String)] = []
 			if let friend = friend {
 				friend.phoneNumbersWithLabel.forEach { phoneNum in
@@ -102,8 +212,6 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			let editableTmp = friend?.friendList?.type == .CardDAV || nativeUriTmp.isEmpty
 			let isReadOnlyTmp = (friend?.isReadOnly == true) || (friend?.inList() == false)
 			let withPresenceTmp = withPresence
-			let domain = core.defaultAccount?.params?.domain ?? ""
-			let isInternalTmp = !domain.isEmpty && (friend?.addresses.contains { $0.domain == domain } ?? false)
 			let starredTmp = friend?.starred ?? false
 			let vcardTmp = friend?.vcard ?? nil
 			let organizationTmp = friend?.organization ?? ""
@@ -148,13 +256,11 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			DispatchQueue.main.async {
 				self.name = nameTmp
 				self.address = addressTmp
-				self.addresses = addressesTmp
 				self.phoneNumbersWithLabel = phoneNumbersWithLabelTmp
 				self.nativeUri = nativeUriTmp
 				self.editable = editableTmp
 				self.isReadOnly = isReadOnlyTmp
 				self.withPresence = withPresenceTmp
-				self.isInternal = isInternalTmp
 				self.starred = starredTmp
 				self.vcard = vcardTmp
 				self.organization = organizationTmp
@@ -247,6 +353,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 					if avatarModel == nil {
 						avatarModel = ContactAvatarModel(friend: nil, name: addressFriend.name!, address: addressFriend.address!.asStringUriOnly(), withPresence: false)
 					}
+					avatarModel!.load()
 					completion(avatarModel!)
 				} else {
 					var name = ""

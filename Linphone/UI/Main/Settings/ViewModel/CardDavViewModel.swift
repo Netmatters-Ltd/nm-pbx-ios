@@ -134,11 +134,13 @@ class CardDavViewModel: ObservableObject {
 						if let friendAddress = friend.address,
 						   friendList.friends.contains(where: { $0.address?.weakEqual(address2: friendAddress) == true }) {
 							_ = tempRemoteFriendList.removeFriend(linphoneFriend: friend)
+							LookupService.shared.markStale(tempRemoteFriendList.displayName ?? "")
 						}
 					}
 				}
 				
 				core.removeFriendList(list: friendList)
+				LookupService.shared.unregister(friendList.displayName ?? "")
 				Log.info("\(CardDavViewModel.TAG) Removed friends list with display name \(name ?? "")")
 				
 				Log.info("\(CardDavViewModel.TAG) Notifying contacts manager that contacts have changed")
@@ -172,6 +174,7 @@ class CardDavViewModel: ObservableObject {
 				if let foundFriendList = foundFriendList {
 					Log.warn("\(CardDavViewModel.TAG) Friend list \(name) already exists, removing it first")
 					core.removeFriendList(list: foundFriendList)
+					LookupService.shared.unregister(foundFriendList.displayName ?? "")
 				}
 			}
 			
@@ -286,6 +289,7 @@ class CardDavViewModel: ObservableObject {
 								friendList.removeDelegate(delegate: friendListDelegate)
 							}
 							core.removeFriendList(list: friendList)
+							LookupService.shared.unregister(friendList.displayName ?? "")
 						}
 					default: break
 					}

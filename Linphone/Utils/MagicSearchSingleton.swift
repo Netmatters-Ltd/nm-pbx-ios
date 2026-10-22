@@ -17,214 +17,113 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import linphonesw
+import Foundation
 import Combine
-import SwiftUI
 
 final class MagicSearchSingleton: ObservableObject {
-	
+
 	static let shared = MagicSearchSingleton()
-	private var coreContext = CoreContext.shared
 	private var contactsManager = ContactsManager.shared
-	
-	private var magicSearch: MagicSearch?
-	
+
 	var currentFilter: String = ""
-	var previousFilter: String?
-	
-	var needUpdateLastSearchContacts = false
-	
-	private var limitSearchToLinphoneAccounts = true
-	
-	@Published var allContact = true
-	
-	var linphoneDomain = true
-	var domainDefaultAccount = ""
-	
-	var searchDelegate: MagicSearchDelegate?
-    
-    private var contactLoadedDebounceWorkItem: DispatchWorkItem?
-    
-    let nativeAddressBookFriendList = "Native address-book"
-    let linphoneAddressBookFriendList = "NMPBX address-book"
-    let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
-	
+
 	@Published var isLoading = false
-	
-	func destroyMagicSearch() {
-		magicSearch = nil
-	}
-	
-	private init() {
-		allContact = CorePreferences.contactsFilter == ""
-		
-		coreContext.doOnCoreQueue { core in
-			self.linphoneDomain = CorePreferences.defaultDomain == core.defaultAccount?.params?.domain
-			self.domainDefaultAccount = CorePreferences.contactsFilter
-			
-			self.magicSearch = try? core.createMagicSearch()
-			
-			guard let magicSearch = self.magicSearch else {
-				return
+
+	// Delay after the last keystroke before a search starts. Must only be used on the main thread.
+	private let searchDebounceDelay: TimeInterval = 0.3
+	private var searchDebounceWorkItem: DispatchWorkItem?
+
+	private init() {}
+
+	/// Searches once typing has paused, for search boxes that search on every keystroke. A search
+	/// still waiting is replaced, so only the last text of a burst of keystrokes is searched.
+	func searchForContactsDebounced() {
+		DispatchQueue.main.async {
+			self.searchDebounceWorkItem?.cancel()
+
+			let workItem = DispatchWorkItem {
+				self.updateViewAvatarListModel()
+				ContactsManager.shared.searchForSuggestions(filter: self.currentFilter)
 			}
-			
-			magicSearch.limitedSearch = false
-			
-			self.searchDelegate = MagicSearchDelegateStub(onSearchResultsReceived: { (magicSearch: MagicSearch) in
-				print("[MagicSearchSingleton] [onSearchResultsReceived] Received search results")
-				self.needUpdateLastSearchContacts = true
-				
-				var lastSearchFriend: [SearchResult] = []
-				var lastSearchSuggestions: [SearchResult] = []
-				
-				magicSearch.lastSearch.forEach { searchResult in
-                    if searchResult.friend != nil && (searchResult.friend?.friendList?.displayName == self.nativeAddressBookFriendList || searchResult.friend?.friendList?.displayName == self.linphoneAddressBookFriendList || searchResult.friend?.friendList?.displayName == self.tempRemoteAddressBookFriendList) {
-						if let address = searchResult.address,
-						   !lastSearchFriend.contains(where: { $0.address?.weakEqual(address2: address) ?? false }) {
-							lastSearchFriend.append(searchResult)
-						} else if let phoneNumber = searchResult.phoneNumber,
-								  !lastSearchFriend.contains(where: { $0.phoneNumber == phoneNumber }) {
-							lastSearchFriend.append(searchResult)
-						}
-					} else if searchResult.friend != nil && (searchResult.hasSourceFlag(source: .RemoteCardDAV) || searchResult.friend?.friendList?.type == .CardDAV || searchResult.hasSourceFlag(source: .LdapServers)) {
-						lastSearchFriend.append(searchResult)
-					} else {
-						lastSearchSuggestions.append(searchResult)
-					}
-				}
-				
-				lastSearchSuggestions.sort(by: {
-					($0.address?.asStringUriOnly() ?? "") < ($1.address?.asStringUriOnly() ?? "")
-				})
-				
-				if let defaultAccount = core.defaultAccount, let contactAddress = defaultAccount.params?.identityAddress {
-					lastSearchSuggestions.removeAll {
-						$0.address?.weakEqual(address2: contactAddress) ?? false
-					}
-				}
-				
-				let sortedLastSearch = lastSearchFriend.sorted {
-					let name1 = $0.friend?.name?.lowercased()
-						.folding(options: .diacriticInsensitive, locale: .current) ?? ""
-					let name2 = $1.friend?.name?.lowercased()
-						.folding(options: .diacriticInsensitive, locale: .current) ?? ""
-					return name1 < name2
-				}
-				
-				var addedAvatarListModel: [ContactAvatarModel] = []
-				sortedLastSearch.forEach { searchResult in
-					if searchResult.friend != nil {
-                        if (searchResult.friend?.friendList?.displayName == self.nativeAddressBookFriendList || searchResult.friend?.friendList?.displayName == self.linphoneAddressBookFriendList || searchResult.friend?.friendList?.displayName == self.tempRemoteAddressBookFriendList) {
-                            addedAvatarListModel.append(
-                                ContactAvatarModel(
-                                    friend: searchResult.friend!,
-                                    name: searchResult.friend?.name ?? "",
-                                    address: searchResult.friend?.address?.clone()?.asStringUriOnly() ?? "",
-                                    withPresence: true
-                                )
-                            )
-						} else if searchResult.hasSourceFlag(source: .RemoteCardDAV) || searchResult.friend?.friendList?.type == .CardDAV {
-							addedAvatarListModel.append(
-								ContactAvatarModel(
-									friend: searchResult.friend!,
-									name: searchResult.friend?.name ?? "",
-									address: searchResult.friend?.address?.clone()?.asStringUriOnly() ?? "",
-									withPresence: true
-								)
-							)
-						} else if searchResult.hasSourceFlag(source: .LdapServers) {
-							addedAvatarListModel.append(
-								ContactAvatarModel(
-									friend: searchResult.friend!,
-									name: searchResult.friend?.name ?? "",
-									address: searchResult.friend?.address?.clone()?.asStringUriOnly() ?? "",
-									withPresence: false
-								)
-							)
-						}
-					}
-				}
-				
-				self.contactsManager.avatarListModel.forEach { contactAvatarModel in
-					contactAvatarModel.removeFriendDelegate()
-				}
-                
-                self.updateContacts(sortedLastSearch: sortedLastSearch, lastSearchSuggestions: lastSearchSuggestions, addedAvatarListModel: addedAvatarListModel)
-			})
-			
-			magicSearch.addDelegate(delegate: self.searchDelegate!)
+			self.searchDebounceWorkItem = workItem
+			DispatchQueue.main.asyncAfter(deadline: .now() + self.searchDebounceDelay, execute: workItem)
 		}
 	}
-	
-	func changeAllContact(allContactBool: Bool) {
-		allContact = allContactBool
-		domainDefaultAccount = allContactBool ? "" : (linphoneDomain ? CorePreferences.defaultDomain : "*")
-		CorePreferences.contactsFilter = domainDefaultAccount
-	}
-    
-    func updateContacts(
-        sortedLastSearch: [SearchResult],
-        lastSearchSuggestions: [SearchResult],
-        addedAvatarListModel: [ContactAvatarModel]
-    ) {
-        DispatchQueue.main.async {			
-			if SharedMainViewModel.shared.displayedFriend != nil {
-				if let avatarModel = addedAvatarListModel.first(where: { $0.address == SharedMainViewModel.shared.displayedFriend?.address }) {
-					SharedMainViewModel.shared.displayedFriend = avatarModel
-				}
-			}
-			
-            self.contactsManager.lastSearch = sortedLastSearch
-            self.contactsManager.lastSearchSuggestions = lastSearchSuggestions
-            
-            self.contactsManager.avatarListModel.removeAll()
-            self.contactsManager.avatarListModel += addedAvatarListModel
 
-            // Cancel previous debounce task
-            self.contactLoadedDebounceWorkItem?.cancel()
-
-            // Schedule new debounce task
-            let workItem = DispatchWorkItem {
-                NotificationCenter.default.post(name: NSNotification.Name("ContactLoaded"), object: nil)
-            }
-			
-			self.isLoading = false
-
-            self.contactLoadedDebounceWorkItem = workItem
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: workItem)
-        }
-    }
-	
+	/// Checks whether the contacts have changed since the models were made, makes them again if they have, and
+	/// then lists the models that match the current filter in contactsManager.viewAvatarListModel, see
+	/// updateViewAvatarListModel().
 	func searchForContacts() {
-		coreContext.doOnCoreQueue { _ in
-			DispatchQueue.main.async {
-				self.isLoading = true
-			}
-			
-			var needResetCache = false
-			
-			if let oldFilter = self.previousFilter {
-				if oldFilter.count > self.currentFilter.count || oldFilter != self.currentFilter {
-					needResetCache = true
-				}
-			}
-			
-			self.previousFilter = self.currentFilter
-			
-			guard let magicSearch = self.magicSearch else {
-				return
-			}
-			
-			if needResetCache {
-				magicSearch.resetSearchCache()
-			}
-			
-			magicSearch.getContactsListAsync(
-				filter: self.currentFilter,
-				domain: self.allContact ? "" : self.domainDefaultAccount,
-				sourceFlags: MagicSearch.Source.All.rawValue, //MagicSearch.Source.Friends.rawValue | MagicSearch.Source.LdapServers.rawValue | MagicSearch.Source.RemoteCardDAV.rawValue,
-				aggregation: MagicSearch.Aggregation.Friend
-			)
+		DispatchQueue.main.async {
+			// A search is starting now, so one still waiting would only repeat it
+			self.searchDebounceWorkItem?.cancel()
+			self.searchDebounceWorkItem = nil
 		}
+		
+		ContactsManager.shared.populateAvatarListModel {
+			self.updateViewAvatarListModel()
+		}
+		
+		ContactsManager.shared.searchForSuggestions(filter: currentFilter)
+	}
+
+	/// Filters avatarListModel by the current filter against the name, the phone numbers and the number of the
+	/// SIP address (the extension) of each model, and lists the matches in contactsManager.viewAvatarListModel,
+	/// each of them loaded while it is in that list. An empty filter matches every model.
+	///
+	/// The matches are split into extensions and contacts before any limit is applied: only the contacts are
+	/// limited, to CorePreferences.maxContactsDisplayed, so the limit never hides an extension. Extensions are
+	/// never limited, the app needs to see them all to track their presence.
+	///
+	/// Must be called on the main thread.
+	func updateViewAvatarListModel() {
+		let text = ContactAvatarModel.normalisedForSearch(currentFilter.trimmingCharacters(in: .whitespaces))
+
+		// Phone numbers are only compared when the filter looks like a number, ignoring spaces and punctuation
+		let digits = text.filter { $0.isNumber }
+		let isNumberFilter = !digits.isEmpty && text.allSatisfy { $0.isNumber || " +-().".contains($0) }
+
+		let maxContacts = CorePreferences.maxContactsDisplayed
+
+		var found: [ContactAvatarModel] = []
+		var contactsCount = 0
+		var truncated = false
+		for model in contactsManager.avatarListModel {
+			if !text.isEmpty && !isMatch(model, text: text, digits: isNumberFilter ? digits : "") {
+				continue
+			}
+
+			if !model.isInternal {
+				if maxContacts > 0 && contactsCount >= maxContacts {
+					truncated = true
+					continue
+				}
+
+				contactsCount += 1
+			}
+
+			found.append(model)
+		}
+
+		// Load the new models before unloading the previous ones, so a model in both lists stays loaded
+		let previous = contactsManager.viewAvatarListModel
+		found.forEach { $0.load() }
+		contactsManager.contactsListTruncated = truncated
+		contactsManager.viewAvatarListModel = found
+		previous.forEach { $0.unload() }
+
+		isLoading = false
+	}
+
+	private func isMatch(_ model: ContactAvatarModel, text: String, digits: String) -> Bool {
+		if model.searchName.contains(text) {
+			return true
+		}
+
+		if model.searchUsernames.contains(where: { $0.contains(text) }) {
+			return true
+		}
+
+		return !digits.isEmpty && model.searchNumbers.contains { $0.contains(digits) }
 	}
 }

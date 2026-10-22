@@ -411,6 +411,12 @@ struct HistoryContactFragment: View {
 			}
 		}
 		.navigationViewStyle(.stack)
+		.onAppear {
+			historyModel.appear()
+		}
+		.onDisappear {
+			historyModel.disappear()
+		}
 	}
 }
 
