@@ -64,7 +64,7 @@ class ParticipantModel: ObservableObject {
 			}
 		}
 		
-		ContactAvatarModel.getAvatarModelFromAddress(address: self.address) { avatarResult in
+		ContactsManager.shared.avatarModel(address: self.address) { avatarResult in
 			self.avatarModel = avatarResult
 		}
 	}

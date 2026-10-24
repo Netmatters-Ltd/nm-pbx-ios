@@ -30,16 +30,16 @@ struct LookupKey: Hashable {
 }
 
 /// Index of registered lists by property value, so finding the record with a given address or phone
-/// number is a dictionary access instead of a scan of every record. A lookup returns the position of
-/// the record in the list it was registered with, for the caller to read from that same list:
+/// number is a dictionary access instead of a scan of every record. The service keeps the records it
+/// indexed, so a lookup returns the record itself and the caller never reads the list again:
 ///
 ///     LookupService.shared.register("linphoneFriendList", items: { linphoneFriendList.friends }, keys: { friend in ... })
-///     let friend = LookupService.shared.index(in: "linphoneFriendList", property: .address, value: uri).map { linphoneFriendList.friends[$0] }
+///     let friend: Friend? = LookupService.shared.item(in: "linphoneFriendList", property: .address, value: uri)
 ///
 /// The service does not rank the lists, the caller searches them in the order it wants.
 ///
 /// A list is indexed the first time it is searched and marked stale when its records change, it is
-/// rebuilt by the next search. A position is only valid until then and must not be kept across it.
+/// rebuilt by the next search. Until then a lookup gives the records as they were when it was indexed.
 ///
 /// Safe to use from any thread: the state is only touched on a private serial queue, in short steps
 /// that never call out. A rebuild calls `items` and `keys`, which read the SDK, so it runs on the core
@@ -52,8 +52,10 @@ final class LookupService {
 	private let queue = DispatchQueue(label: "org.linphone.LookupService")
 
 	// Everything below is only read or written on `queue`
-	private var builders: [String: () -> [LookupKey: Int]] = [:]
+	private var builders: [String: () -> (index: [LookupKey: Int], items: [Any])] = [:]
 	private var indexes: [String: [LookupKey: Int]] = [:]
+	// The records each index was built from, the positions in the index are positions in these
+	private var itemLists: [String: [Any]] = [:]
 	private var staleLists: Set<String> = []
 	// Changes whenever a list is registered or marked stale, so a rebuild that was running while that
 	// happened does not clear the stale mark it has not taken into account
@@ -65,20 +67,22 @@ final class LookupService {
 	/// current records of the list, it is called again on every rebuild. `keys` returns the searchable
 	/// values of one record, it is called for every record of the list.
 	func register<Item>(_ name: String, items: @escaping () -> [Item], keys: @escaping (Item) -> [LookupKey]) {
-		let builder: () -> [LookupKey: Int] = {
+		let builder: () -> (index: [LookupKey: Int], items: [Any]) = {
 			var index: [LookupKey: Int] = [:]
-			for (position, item) in items().enumerated() {
+			let list = items()
+			for (position, item) in list.enumerated() {
 				for key in keys(item) where index[key] == nil {
 					// The first record wins when several share a value, as with first(where:)
 					index[key] = position
 				}
 			}
-			return index
+			return (index, list)
 		}
 
 		queue.sync {
 			builders[name] = builder
 			indexes[name] = nil
+			itemLists[name] = nil
 			staleLists.insert(name)
 			generations[name, default: 0] += 1
 		}
@@ -92,6 +96,7 @@ final class LookupService {
 		queue.sync {
 			builders[name] = nil
 			indexes[name] = nil
+			itemLists[name] = nil
 			staleLists.remove(name)
 			generations[name, default: 0] += 1
 		}
@@ -110,19 +115,34 @@ final class LookupService {
 		}
 	}
 
+	/// A number that changes whenever the list is registered or marked stale, so a caller can tell cheaply whether
+	/// the records may have changed since it last looked
+	func generation(of name: String) -> Int {
+		return queue.sync { generations[name, default: 0] }
+	}
+
 	/// Rebuilds the index of the list now
 	func refresh(_ name: String) {
 		rebuild(name)
 	}
 
-	/// The position in the list of the record whose property has this value
-	func index(in name: String, property: LookupProperty, value: String) -> Int? {
+	/// The record whose property has this value, as it was when the list was last indexed. Nil if there is none, or
+	/// if the records are not of type `Item`.
+	func item<Item>(in name: String, property: LookupProperty, value: String) -> Item? {
 		let needsRebuild = queue.sync { staleLists.contains(name) || indexes[name] == nil }
 		if needsRebuild {
 			rebuild(name)
 		}
 
-		return queue.sync { indexes[name]?[LookupKey(property: property, value: value)] }
+		return queue.sync { () -> Item? in
+			guard let position = indexes[name]?[LookupKey(property: property, value: value)],
+				  let list = itemLists[name],
+				  list.indices.contains(position) else {
+				return nil
+			}
+
+			return list[position] as? Item
+		}
 	}
 
 	// Builds the index on the core queue, as it reads the SDK, and stores it on `queue`
@@ -132,13 +152,13 @@ final class LookupService {
 			return
 		}
 
-		var built: [LookupKey: Int]?
+		var built: (index: [LookupKey: Int], items: [Any])?
 		CoreContext.shared.doOnCoreQueue(synchronous: true) { _ in
 			built = build()
 		}
 
 		// Nothing was built when the core is off, the list stays as it was
-		guard let index = built else {
+		guard let built = built else {
 			return
 		}
 
@@ -148,7 +168,8 @@ final class LookupService {
 				return
 			}
 
-			indexes[name] = index
+			indexes[name] = built.index
+			itemLists[name] = built.items
 
 			// Only clear the stale mark when nothing changed since the build started
 			if generations[name, default: 0] == generation {

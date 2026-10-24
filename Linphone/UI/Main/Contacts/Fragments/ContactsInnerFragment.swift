@@ -40,7 +40,9 @@ struct ContactsInnerFragment: View {
 	var body: some View {
 		ZStack {
 			VStack(alignment: .leading) {
-				if filteredContacts.contains(where: { $0.starred }) {
+				// The favourites of this page come from all of its contacts, not only the pages listed below
+				let favourites = magicSearch.favourites()
+				if !favourites.isEmpty {
 					HStack(alignment: .center) {
 						Text("contacts_list_favourites_title")
 							.default_text_style_800(styleSize: 16)
@@ -64,7 +66,7 @@ struct ContactsInnerFragment: View {
 					}
 					
 					if isFavoriteOpen {
-						FavoriteContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts)
+						FavoriteContactsListFragment(showingSheet: $showingSheet, displayedContacts: favourites)
 							.zIndex(-1)
 							.transition(.move(edge: .top))
 					}
@@ -81,21 +83,9 @@ struct ContactsInnerFragment: View {
 				
 				VStack {
 					List {
-						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in })
-						// Scrolls with the list instead of taking space on the page, to tell the user
-						// that the list was cut short
-						if mode == .contacts && contactsManager.contactsListTruncated && !filteredContacts.isEmpty {
-							Text(text.isEmpty ? "contacts_list_truncated_message" : "contacts_list_search_truncated_message")
-								.font(Font.custom("Poppins-Regular", size: 12))
-								.foregroundStyle(Color.grayMain2c500)
-								.multilineTextAlignment(.center)
-								.frame(maxWidth: .infinity)
-								.padding(.top, 16)
-								.padding(.bottom, 24)
-								.listRowBackground(Color.clear)
-								.listRowSeparator(.hidden)
-								.listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24))
-						}
+						ContactsListFragment(showingSheet: $showingSheet, displayedContacts: filteredContacts, startCallFunc: {_ in }, loadMore: {
+							magicSearch.loadNextPage()
+						})
 						// Invisible full-height row added only when the list is empty so
 						// the pull-to-refresh gesture still has something to grab onto,
 						// without creating a blank scrollable gap when contacts are shown.
@@ -129,9 +119,18 @@ struct ContactsInnerFragment: View {
 									Text("list_filter_no_result_found")
 										.default_text_style_800(styleSize: 16)
 								} else if contactsManager.isCardDavSyncing || magicSearch.isLoading {
-									ProgressView()
-										.controlSize(.large)
-										.progressViewStyle(CircularProgressViewStyle(tint: .orangeMain500))
+									VStack(spacing: 12) {
+										ProgressView()
+											.controlSize(.large)
+											.progressViewStyle(CircularProgressViewStyle(tint: .orangeMain500))
+										// The first sync of a big address book takes minutes, so say what is going on
+										// rather than look as if there are no contacts
+										if contactsManager.isCardDavSyncing {
+											Text(mode == .extensions ? "extensions_list_fetching" : "contacts_list_fetching")
+												.default_text_style_800(styleSize: 16)
+												.multilineTextAlignment(.center)
+										}
+									}
 								} else {
 									Image("illus-belledonne")
 										.resizable()

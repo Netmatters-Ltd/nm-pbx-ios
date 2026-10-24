@@ -552,6 +552,7 @@ struct ContentView: View {
                                                     let finalUrl = imagePath.appendingQueryItem("v", value: UUID().uuidString)
 
                                                     ZStack(alignment: .bottomTrailing) {
+                                                        if let photo = account.photoAvatarModel, !photo.isEmpty {
                                                         AsyncImage(url: finalUrl)
                                                             { image in
                                                                 switch image {
@@ -595,6 +596,16 @@ struct ContentView: View {
                                                             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImageChanged"))) { _ in
                                                                 imageTmp = nil
                                                             }
+                                                        } else {
+                                                            // No picture, the avatar shows initials
+                                                            Image(uiImage: contactsManager.textToImage(firstName: account.avatarModel?.name ?? "", lastName: ""))
+                                                                .resizable()
+                                                                .frame(width: avatarSize, height: avatarSize)
+                                                                .clipShape(Circle())
+                                                                .onTapGesture {
+                                                                    showPresencePicker = true
+                                                                }
+                                                        }
 
                                                         if presenceViewModel.currentPresence != .offline {
                                                             Circle()

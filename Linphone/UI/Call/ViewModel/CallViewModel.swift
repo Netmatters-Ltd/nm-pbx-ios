@@ -194,7 +194,7 @@ class CallViewModel: ObservableObject {
 						self.displayName = displayNameTmp
 					}
 					
-					ContactAvatarModel.getAvatarModelFromAddress(address: self.currentCall!.remoteAddress!) { avatarResult in
+					ContactsManager.shared.avatarModel(address: self.currentCall!.remoteAddress!) { avatarResult in
 						DispatchQueue.main.async {
 							self.avatarModel = avatarResult
 						}
@@ -317,7 +317,7 @@ class CallViewModel: ObservableObject {
 		coreContext.doOnCoreQueue { core in
 			let callsTmp = core.calls
 			callsTmp.forEach { call in
-				ContactAvatarModel.getAvatarModelFromAddress(address: call.callLog!.remoteAddress!) { avatarResult in
+				ContactsManager.shared.avatarModel(address: call.callLog!.remoteAddress!) { avatarResult in
 					DispatchQueue.main.async {
 						print("getCallsListgetCallsList 00 \(callsTmp.count)")
 						self.callsContactAvatarModel.append(avatarResult)

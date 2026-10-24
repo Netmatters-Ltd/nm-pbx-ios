@@ -234,14 +234,20 @@ class ContactsListViewModel: ObservableObject {
 						}
 					}
 				}
+				// The list is read before the friend is removed, as it has none after. Marked stale so the lists and the
+				// lookup do not keep the contact.
+				let listName = self.selectedFriendToDelete!.friend!.friendList?.displayName ?? ""
 				self.selectedFriendToDelete!.friend!.remove()
+				LookupService.shared.markStale(listName)
 			} else if SharedMainViewModel.shared.displayedFriend != nil {
 				DispatchQueue.main.async {
 					withAnimation {
 						SharedMainViewModel.shared.displayedFriend = nil
 					}
 				}
+				let listName = SharedMainViewModel.shared.displayedFriend!.friend!.friendList?.displayName ?? ""
 				SharedMainViewModel.shared.displayedFriend!.friend!.remove()
+				LookupService.shared.markStale(listName)
 			}
 			
 			MagicSearchSingleton.shared.searchForContacts()

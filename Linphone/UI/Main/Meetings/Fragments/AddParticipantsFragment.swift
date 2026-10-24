@@ -169,6 +169,8 @@ struct AddParticipantsFragment: View {
 				
 				ZStack {
 					ScrollView {
+						// Lazy, so the next page is asked for when the end of the list is scrolled to, not when it is drawn
+						LazyVStack(spacing: 8) {
 						ForEach(0..<contactsManager.viewAvatarListModel.count, id: \.self) { index in
 							HStack {
 								HStack {
@@ -226,6 +228,12 @@ struct AddParticipantsFragment: View {
 							}
 							.buttonStyle(.borderless)
 							.listRowSeparator(.hidden)
+							.onAppear {
+								if index == contactsManager.viewAvatarListModel.count - 1 {
+									magicSearch.loadNextPage()
+								}
+							}
+						}
 						}
 						
 						HStack(alignment: .center) {

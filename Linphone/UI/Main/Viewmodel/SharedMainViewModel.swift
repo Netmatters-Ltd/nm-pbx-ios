@@ -30,13 +30,12 @@ class SharedMainViewModel: ObservableObject {
 	@Published var defaultAvatar: URL?
 	@Published var indexView: Int = 0
 	
-	// The contact whose details are shown. Its model is loaded for as long as it is displayed, as it may be one of
-	// the models of ContactsManager.avatarListModel that nothing else has loaded.
+	// The contact whose details are shown. Its model is kept loaded, as it may be one of the models of
+	// ContactsManager.avatarListModel that nothing else has loaded. The views that show it keep it loaded from
+	// then on, see Avatar.
 	@Published var displayedFriend: ContactAvatarModel? {
 		didSet {
-			// The new one is loaded first, so it stays loaded if it is the same model
-			displayedFriend?.load()
-			oldValue?.unload()
+			displayedFriend?.keepLoaded()
 		}
 	}
 	@Published var displayedCall: HistoryModel?
@@ -152,6 +151,9 @@ class SharedMainViewModel: ObservableObject {
 		
 		indexView = indexViewInt
 		preferences.set(indexView, forKey: indexViewKey)
+
+		// The Extensions page lists extensions, the Contacts page contacts, and any other screen both
+		MagicSearchSingleton.shared.showKinds(indexViewInt == 0 ? .extensions : (indexViewInt == 1 ? .contacts : .all))
 	}
 	
 	func getDialPlansList() {

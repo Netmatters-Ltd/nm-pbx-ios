@@ -167,12 +167,17 @@ struct ConversationForwardMessageFragment: View {
 									.padding(.horizontal, 16)
 								}
 								
+								// Lazy, so the next page is asked for when the end of the list is scrolled to, not when it is drawn
+								LazyVStack(spacing: 8) {
 								ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.viewAvatarListModel, startCallFunc: { addr in
 									withAnimation {
 										conversationForwardMessageViewModel.createOneToOneChatRoomWith(remote: addr)
 									}
 
+								}, loadMore: {
+									magicSearch.loadNextPage()
 								})
+								}
 								.padding(.horizontal, 16)
 								
 								if !contactsManager.lastSearchSuggestions.isEmpty {

@@ -627,7 +627,7 @@ class ConversationViewModel: ObservableObject {
 			}
 			self.sharedMainViewModel.displayedConversation!.chatRoom.participants.forEach { participant in
 				if participant.address != nil {
-					ContactAvatarModel.getAvatarModelFromAddress(address: participant.address!) { avatarResult in
+					ContactsManager.shared.avatarModel(address: participant.address!) { avatarResult in
 						let avatarModelTmp = avatarResult
 						if participant.isAdmin {
 							DispatchQueue.main.async {
@@ -646,7 +646,7 @@ class ConversationViewModel: ObservableObject {
 			if !self.sharedMainViewModel.displayedConversation!.isReadOnly {
 				if let currentUser = self.sharedMainViewModel.displayedConversation?.chatRoom.me,
 				   let address = currentUser.address {
-					ContactAvatarModel.getAvatarModelFromAddress(address: address) { avatarResult in
+					ContactsManager.shared.avatarModel(address: address) { avatarResult in
 						let avatarModelTmp = avatarResult
 						DispatchQueue.main.async {
 							if currentUser.isAdmin {
@@ -664,7 +664,7 @@ class ConversationViewModel: ObservableObject {
 	
 	func addParticipantConversationModel(address: Address) {
 		coreContext.doOnCoreQueue { _ in
-			ContactAvatarModel.getAvatarModelFromAddress(address: address) { avatarResult in
+			ContactsManager.shared.avatarModel(address: address) { avatarResult in
 				let avatarModelTmp = avatarResult
 				DispatchQueue.main.async {
 					if self.participantConversationModel.first(where: {$0.address == avatarModelTmp.address}) == nil {
@@ -2468,7 +2468,7 @@ class ConversationViewModel: ObservableObject {
 				var participantListDisplayed: [InnerSheetCategory] = []
 				participantsImdnDisplayed.forEach({ participantImdn in
 					if participantImdn.participant != nil && participantImdn.participant!.address != nil {
-						ContactAvatarModel.getAvatarModelFromAddress(address: participantImdn.participant!.address!) { avatarResult in
+						ContactsManager.shared.avatarModel(address: participantImdn.participant!.address!) { avatarResult in
 							let innerSheetCat = InnerSheetCategory(contact: avatarResult, detail: self.getMessageTime(startDate: participantImdn.stateChangeTime))
 							participantListDisplayed.append(innerSheetCat)
 						}
@@ -2479,7 +2479,7 @@ class ConversationViewModel: ObservableObject {
 				var participantListDeliveredToUser: [InnerSheetCategory] = []
 				participantsImdnDeliveredToUser.forEach({ participantImdn in
 					if participantImdn.participant != nil && participantImdn.participant!.address != nil {
-						ContactAvatarModel.getAvatarModelFromAddress(address: participantImdn.participant!.address!) { avatarResult in
+						ContactsManager.shared.avatarModel(address: participantImdn.participant!.address!) { avatarResult in
 							let innerSheetCat = InnerSheetCategory(contact: avatarResult, detail: self.getMessageTime(startDate: participantImdn.stateChangeTime))
 							participantListDeliveredToUser.append(innerSheetCat)
 						}
@@ -2490,7 +2490,7 @@ class ConversationViewModel: ObservableObject {
 				var participantListDelivered: [InnerSheetCategory] = []
 				participantsImdnDelivered.forEach({ participantImdn in
 					if participantImdn.participant != nil && participantImdn.participant!.address != nil {
-						ContactAvatarModel.getAvatarModelFromAddress(address: participantImdn.participant!.address!) { avatarResult in
+						ContactsManager.shared.avatarModel(address: participantImdn.participant!.address!) { avatarResult in
 							let innerSheetCat = InnerSheetCategory(contact: avatarResult, detail: self.getMessageTime(startDate: participantImdn.stateChangeTime))
 							participantListDelivered.append(innerSheetCat)
 						}
@@ -2501,7 +2501,7 @@ class ConversationViewModel: ObservableObject {
 				var participantListNotDelivered: [InnerSheetCategory] = []
 				participantsImdnNotDelivered.forEach({ participantImdn in
 					if participantImdn.participant != nil && participantImdn.participant!.address != nil {
-						ContactAvatarModel.getAvatarModelFromAddress(address: participantImdn.participant!.address!) { avatarResult in
+						ContactsManager.shared.avatarModel(address: participantImdn.participant!.address!) { avatarResult in
 							let innerSheetCat = InnerSheetCategory(contact: avatarResult, detail: self.getMessageTime(startDate: participantImdn.stateChangeTime))
 							participantListNotDelivered.append(innerSheetCat)
 						}
@@ -2535,7 +2535,7 @@ class ConversationViewModel: ObservableObject {
 				chatMessageToDisplay!.reactions.forEach { chatMessageReaction in
 					if chatMessageReaction.fromAddress != nil {
 						dispatchGroup.enter()
-						ContactAvatarModel.getAvatarModelFromAddress(address: chatMessageReaction.fromAddress!) { avatarResult in
+						ContactsManager.shared.avatarModel(address: chatMessageReaction.fromAddress!) { avatarResult in
 							if let account = core.defaultAccount,
 							   let contactAddress = account.params?.identityAddress,
 							   contactAddress.asStringUriOnly().contains(avatarResult.address) {

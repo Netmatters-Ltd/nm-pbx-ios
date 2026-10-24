@@ -248,6 +248,8 @@ class CardDavViewModel: ObservableObject {
 			let delegate = FriendListDelegateStub(
 				onSyncStatusChanged: { (friendList: FriendList, status: FriendList.SyncStatus, message: String?) in
 					Log.info("\(CardDavViewModel.TAG) Friend list \(friendList.displayName ?? "") sync status changed to \(status) with message \(message ?? "")")
+					// The friends of the list may have changed, and this delegate is the only one on a list added here
+					LookupService.shared.markStale(friendList.displayName ?? "")
 					switch status {
 					case .Successful:
 						DispatchQueue.main.async {

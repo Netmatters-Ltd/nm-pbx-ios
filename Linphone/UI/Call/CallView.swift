@@ -1890,6 +1890,8 @@ struct CallView: View {
                                 if callViewModel.callsCounter < 2 {
                                     withAnimation {
                                         callViewModel.isTransferInsteadCall = true
+                                        // Whatever tab was last open, the picker lists every kind
+                                        MagicSearchSingleton.shared.searchForContacts(kinds: .all)
                                         isShowStartCallFragment.toggle()
                                     }
                                     
@@ -2213,6 +2215,8 @@ struct CallView: View {
                                 if callViewModel.callsCounter < 2 {
                                     withAnimation {
                                         callViewModel.isTransferInsteadCall = true
+                                        // Whatever tab was last open, the picker lists every kind
+                                        MagicSearchSingleton.shared.searchForContacts(kinds: .all)
                                         isShowStartCallFragment.toggle()
                                     }
                                     

@@ -90,14 +90,14 @@ class MeetingWaitingRoomViewModel: ObservableObject {
 					}
 					
 					let avatarModelTmp = friend != nil
-					? ContactsManager.shared.avatarListModel.first(where: {
-						$0.friend!.name == friend!.name
-						&& $0.friend!.address!.asStringUriOnly() == core.defaultAccount!.params?.identityAddress!.asStringUriOnly()
+					? ContactsManager.shared.currentAvatarSnapshot().first(where: {
+						// A model without a friend, or without an address, is never the one
+						$0.friend?.address != nil
+						&& $0.friend?.name == friend?.name
+						&& $0.friend?.address?.asStringUriOnly() == core.defaultAccount?.params?.identityAddress?.asStringUriOnly()
 					}) ?? ContactAvatarModel(friend: nil, name: userNameTmp, address: addressTmp, withPresence: false)
 					: ContactAvatarModel(friend: nil, name: userNameTmp, address: addressTmp, withPresence: false)
 					
-					avatarModelTmp.load()
-
 					if core.videoEnabled && !core.videoPreviewEnabled {
 						DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 							core.videoPreviewEnabled = true

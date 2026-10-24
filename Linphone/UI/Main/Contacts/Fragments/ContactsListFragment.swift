@@ -28,6 +28,8 @@ struct ContactsListFragment: View {
 
 	var displayedContacts: [ContactAvatarModel]
     var startCallFunc: (_ addr: Address) -> Void
+	// Called when the last row is shown, for the list to ask for its next page
+	var loadMore: (() -> Void)?
 
 	var body: some View {
 		ForEach(Array(displayedContacts.enumerated()), id: \.element.id) { index, contactAvatarModel in
@@ -38,6 +40,11 @@ struct ContactsListFragment: View {
 				showingSheet: $showingSheet,
 				startCallFunc: startCallFunc
 			)
+			.onAppear {
+				if index == displayedContacts.count - 1 {
+					loadMore?()
+				}
+			}
 		}
 	}
 }

@@ -48,15 +48,6 @@ class AccountProfileViewModel: ObservableObject {
 							try? newParams?.setIdentityaddress(newValue: newIdentityAddress)
 						}
 						
-						if self.getImagePath().lastPathComponent.contains("-default") || self.getImagePath().lastPathComponent == "Documents" {
-							let usernameTmp = CoreContext.shared.accounts[self.accountModelIndex!].usernaneAvatar
-							
-							self.saveImage(
-								image: ContactsManager.shared.textToImage(
-									firstName: displayNameAccountModel.isEmpty ? usernameTmp : displayNameAccountModel, lastName: ""),
-								name: usernameTmp,
-								prefix: "-default")
-						}
 					}
 					
 					if self.dialPlanSelected != nil
@@ -134,27 +125,43 @@ class AccountProfileViewModel: ObservableObject {
 		}
 	}
 	
-	func saveImage(image: UIImage, name: String, prefix: String) {
+	/// Saves the picture of the account as a file in the image store, and remembers its name. Without an image the
+	/// picture is removed, and nothing is remembered, so the avatar shows initials.
+	func saveImage(image: UIImage?) {
+		let photoAvatarModelKey = CoreContext.shared.accounts[self.accountModelIndex!].usernaneAvatar
+
+		guard let image = image else {
+			self.pictureSaved(name: "", key: photoAvatarModelKey)
+			return
+		}
+
 		guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
 			return
 		}
-		
-		let photoAvatarModelKey = CoreContext.shared.accounts[self.accountModelIndex!].usernaneAvatar
-		
-		ContactsManager.shared.awaitDataWrite(data: data, name: name, prefix: prefix) { result in
-			UserDefaults.standard.set(result, forKey: photoAvatarModelKey)
-			
-			DispatchQueue.main.async {
-				CoreContext.shared.accounts[self.accountModelIndex ?? 0].photoAvatarModel = ""
-				CoreContext.shared.accounts[self.accountModelIndex ?? 0].imagePathAvatar = nil
-				NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
+
+		ContactImageStore.shared.path(for: data) { path in
+			guard let path = path else {
+				return
 			}
+
+			// The path is "file:/<hash>.png", the account keeps the name of the file
+			self.pictureSaved(name: String(path.dropFirst(6)), key: photoAvatarModelKey)
+		}
+	}
+
+	private func pictureSaved(name result: String, key photoAvatarModelKey: String) {
+		UserDefaults.standard.set(result, forKey: photoAvatarModelKey)
 			
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-				CoreContext.shared.accounts[self.accountModelIndex ?? 0].photoAvatarModel = result
-				CoreContext.shared.accounts[self.accountModelIndex ?? 0].imagePathAvatar = CoreContext.shared.accounts[self.accountModelIndex ?? 0].getImagePath()
-				NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
-			}
+		DispatchQueue.main.async {
+			CoreContext.shared.accounts[self.accountModelIndex ?? 0].photoAvatarModel = ""
+			CoreContext.shared.accounts[self.accountModelIndex ?? 0].imagePathAvatar = nil
+			NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
+		}
+			
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+			CoreContext.shared.accounts[self.accountModelIndex ?? 0].photoAvatarModel = result
+			CoreContext.shared.accounts[self.accountModelIndex ?? 0].imagePathAvatar = CoreContext.shared.accounts[self.accountModelIndex ?? 0].getImagePath()
+			NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
 		}
 	}
 	

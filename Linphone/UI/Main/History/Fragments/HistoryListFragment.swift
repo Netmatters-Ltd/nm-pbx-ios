@@ -37,6 +37,12 @@ struct HistoryListFragment: View {
 			List {
 				ForEach(historyListViewModel.callLogs) { historyModel in
 					HistoryRow(historyModel: historyModel, showingSheet: $showingSheet)
+						.onAppear {
+							// The next page is asked for when the end of the list is reached
+							if historyModel.id == historyListViewModel.callLogs.last?.id {
+								historyListViewModel.loadNextPage()
+							}
+						}
 				}
 			}
 			.safeAreaInset(edge: .top, content: {
@@ -183,12 +189,6 @@ struct HistoryRow: View {
 		.onLongPressGesture(minimumDuration: 0.2) {
 			historyListViewModel.selectedCall = historyModel
 			showingSheet.toggle()
-		}
-		.onAppear {
-			historyModel.appear()
-		}
-		.onDisappear {
-			historyModel.disappear()
 		}
 	}
 	

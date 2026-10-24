@@ -38,10 +38,6 @@ final class ContactsManager: ObservableObject {
 	let linphoneAddressBookFriendList = "NMPBX address-book"
     let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
-	// Number of friends of each list when its LookupService index was last built, a different size
-	// means the index is out of date. Must only be used on the core queue.
-	private var lookupCounts: [String: Int] = [:]
-
 	var friendList: FriendList?
 	var linphoneFriendList: FriendList?
     var tempRemoteFriendList: FriendList?
@@ -59,15 +55,14 @@ final class ContactsManager: ObservableObject {
 			LookupService.shared.markStale(ContactsManager.avatarLookupName)
 
 			// The filtered list is made from this one, so it has to be made again
-			MagicSearchSingleton.shared.updateViewAvatarListModel()
+			// The pages already listed stay listed, so the list does not jump back to its first page
+			MagicSearchSingleton.shared.updateViewAvatarListModel(page: MagicSearchSingleton.shared.loadedPage)
 		}
 	}
 	
 	// The models the screens list: the ones of avatarListModel that match the search filter, see
 	// MagicSearchSingleton.updateViewAvatarListModel(). Must only be used on the main thread.
 	@Published var viewAvatarListModel: [ContactAvatarModel] = []
-	// True when more contacts matched the filter than viewAvatarListModel lists, so the UI can point the user at search
-	@Published var contactsListTruncated = false
 
 	@Published var isCardDavSyncing: Bool = false
 	@Published var starredChangeTrigger = UUID()
@@ -76,6 +71,11 @@ final class ContactsManager: ObservableObject {
 	/// Prevents concurrent CardDAV syncs on the same FriendList.
 	/// Must only be read/written on the core queue (doOnCoreQueue).
 	private var cardDavSyncInProgress = false
+
+	/// The friend lists that had a contact created, updated or deleted during their current sync. Only these need
+	/// their presence subscriptions refreshing once the sync succeeds, as the refresh sends the whole list of a big
+	/// address book again. Must only be used on the core queue.
+	private var friendListsChangedDuringSync = Set<ObjectIdentifier>()
 	
 	private var coreDelegate: CoreDelegate?
 	private var friendListDelegate: FriendListDelegate?
@@ -87,6 +87,12 @@ final class ContactsManager: ObservableObject {
 	// Hash of the friends the models were last made from, the models are only made again when it changes.
 	// Only used on the core queue.
 	private var lastPopulateHash: Int?
+
+	// What the lists looked like, by contactsVersion(core:), when the models were last made and when the search that is
+	// waiting for its results started. A populate with the same version as the last one has nothing new to find, so
+	// it does not search. Only used on the core queue.
+	private var lastPopulateVersion: String?
+	private var populateVersion: String?
 	private var magicSearchDelegate: MagicSearchDelegate?
 	
 	// avatarListModel as the LookupService searches it, by the addresses of its models. A copy, as the service
@@ -105,7 +111,9 @@ final class ContactsManager: ObservableObject {
 		)
 	}
 	
-	private func currentAvatarSnapshot() -> [ContactAvatarModel] {
+	/// avatarListModel as it was last set, for code that is not on the main thread, where avatarListModel itself
+	/// must not be read as it is replaced there. Can be called from any thread.
+	func currentAvatarSnapshot() -> [ContactAvatarModel] {
 		avatarSnapshotLock.lock()
 		defer { avatarSnapshotLock.unlock() }
 		return avatarSnapshot
@@ -115,17 +123,16 @@ final class ContactsManager: ObservableObject {
 	/// found through the LookupService instead of a scan of the list. Can be called from any thread.
 	func avatarModel(forAddress uri: String) -> ContactAvatarModel? {
 		guard !uri.isEmpty,
-			  let position = LookupService.shared.index(in: ContactsManager.avatarLookupName, property: .address, value: uri) else {
+			  let model: ContactAvatarModel = LookupService.shared.item(in: ContactsManager.avatarLookupName, property: .address, value: uri) else {
 			return nil
 		}
-		
+
 		// The list may have been replaced since the index was made, so check the model is the right one
-		let snapshot = currentAvatarSnapshot()
-		guard snapshot.indices.contains(position), snapshot[position].searchUris.contains(uri) else {
+		guard model.searchUris.contains(uri) else {
 			return nil
 		}
-		
-		return snapshot[position]
+
+		return model
 	}
 	
 	func fetchContacts() {
@@ -151,6 +158,8 @@ final class ContactsManager: ObservableObject {
 						friendList.friends.forEach { friend in
 							_ = friendList.removeFriend(linphoneFriend: friend)
 						}
+						// Nothing else marks the list if no contact is added back
+						LookupService.shared.markStale(self.nativeAddressBookFriendList)
 					}
 					// Local iPhone contacts are not registered on the presence server,
 					// so suppress SIP SUBSCRIBE to avoid leaking phone numbers off-device.
@@ -236,25 +245,18 @@ final class ContactsManager: ObservableObject {
 								imageData: ""
 							)
 							
-							let imageThumbnail = UIImage(data: contact.thumbnailImageData ?? Data())
-							if let image = imageThumbnail {
-								self.saveImage(
-									image: image,
-									name: contact.givenName + contact.familyName,
-									prefix: "",
-									contact: newContact, linphoneFriend: self.nativeAddressBookFriendList, existingFriend: nil) {
+							self.updateFriend(
+								name: contact.givenName + contact.familyName,
+								contact: newContact, linphoneFriend: self.nativeAddressBookFriendList, existingFriend: nil) { friend in
+									// The thumbnail of the contact, as it is on the phone, is its photo
+									if let friend = friend, let thumbnail = contact.thumbnailImageData {
+										self.saveImage(data: thumbnail, friend: friend) {
+											dispatchGroup.leave()
+										}
+									} else {
 										dispatchGroup.leave()
 									}
-							} else {
-								let image = self.textToImage(firstName: contact.givenName, lastName: contact.familyName)
-								self.saveImage(
-									image: image,
-									name: contact.givenName + contact.familyName,
-									prefix: "-default",
-									contact: newContact, linphoneFriend: self.nativeAddressBookFriendList, existingFriend: nil) {
-										dispatchGroup.leave()
-									}
-							}
+								}
 						})
 						
 						dispatchGroup.notify(queue: .main) {
@@ -332,74 +334,94 @@ final class ContactsManager: ObservableObject {
 		}
 	}
 	
-	func imageFromBase64(_ base64String: String) -> UIImage? {
-		let cleanedString: String
-		if let range = base64String.range(of: "base64,") {
-			cleanedString = String(base64String[range.upperBound...])
-		} else {
-			cleanedString = base64String
-		}
-		
-		guard let imageData = Data(base64Encoded: cleanedString, options: .ignoreUnknownCharacters) else {
-			print("Error: failed to decode Base64 string")
-			return nil
-		}
-		
-		return UIImage(data: imageData)
-	}
-	
-	func saveImage(image: UIImage, name: String, prefix: String, contact: Contact, linphoneFriend: String, existingFriend: Friend?, editingFriend: Bool = false, completion: @escaping () -> Void) {
-		guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
-			return
-		}
-		
-		let base64Tmp = existingFriend?.friendList?.type == .CardDAV || linphoneAddressBookFriendList != CorePreferences.friendListInWhichStoreNewlyCreatedFriends
-		
-		awaitDataWrite(data: data, name: name, prefix: prefix, base64: base64Tmp) { result in
-			if existingFriend?.friendList?.type != .CardDAV
-				|| (existingFriend?.friendList?.type == .CardDAV && linphoneFriend == self.linphoneAddressBookFriendList)
-				|| (editingFriend && linphoneFriend == CorePreferences.friendListInWhichStoreNewlyCreatedFriends) {
-				self.saveFriend(result: result, contact: contact, existingFriend: existingFriend) { resultFriend in
-					self.coreContext.doOnCoreQueue { core in
-						if let friend = resultFriend {
-							if linphoneFriend != self.nativeAddressBookFriendList && existingFriend == nil {
-								if let linphoneFL = self.linphoneFriendList, linphoneFriend == linphoneFL.displayName {
+	func updateFriend(name: String, contact: Contact, linphoneFriend: String, existingFriend: Friend?, editingFriend: Bool = false, completion: @escaping (Friend?) -> Void) {
+
+		if existingFriend?.friendList?.type != .CardDAV
+			|| (existingFriend?.friendList?.type == .CardDAV && linphoneFriend == self.linphoneAddressBookFriendList)
+			|| (editingFriend && linphoneFriend == CorePreferences.friendListInWhichStoreNewlyCreatedFriends) {
+			self.saveFriend(contact: contact, existingFriend: existingFriend) { resultFriend in
+				self.coreContext.doOnCoreQueue { core in
+					if let friend = resultFriend {
+						if linphoneFriend != self.nativeAddressBookFriendList && existingFriend == nil {
+							if let linphoneFL = self.linphoneFriendList, linphoneFriend == linphoneFL.displayName {
+								_ = linphoneFL.addFriend(linphoneFriend: friend)
+								LookupService.shared.markStale(linphoneFL.displayName ?? "")
+							} else if let linphoneFL = core.friendsLists.first(where: { $0.type == .CardDAV && $0.displayName == CorePreferences.friendListInWhichStoreNewlyCreatedFriends }) {
+								if linphoneFL.type == .CardDAV {
 									_ = linphoneFL.addFriend(linphoneFriend: friend)
 									LookupService.shared.markStale(linphoneFL.displayName ?? "")
-								} else if let linphoneFL = core.friendsLists.first(where: { $0.type == .CardDAV && $0.displayName == CorePreferences.friendListInWhichStoreNewlyCreatedFriends }) {
-									if linphoneFL.type == .CardDAV {
-										_ = linphoneFL.addFriend(linphoneFriend: friend)
-										LookupService.shared.markStale(linphoneFL.displayName ?? "")
-									}
-								} else if let linphoneFL = self.tempRemoteFriendList {
-									if friend.friendList?.type != .CardDAV {
-										_ = linphoneFL.addFriend(linphoneFriend: friend)
-										LookupService.shared.markStale(linphoneFL.displayName ?? "")
-									}
 								}
-							} else if existingFriend == nil {
-								if let friendListTmp = self.friendList {
-									_ = friendListTmp.addLocalFriend(linphoneFriend: friend)
-									LookupService.shared.markStale(self.nativeAddressBookFriendList)
+							} else if let linphoneFL = self.tempRemoteFriendList {
+								if friend.friendList?.type != .CardDAV {
+									_ = linphoneFL.addFriend(linphoneFriend: friend)
+									LookupService.shared.markStale(linphoneFL.displayName ?? "")
 								}
 							}
-						}
-						
-						DispatchQueue.main.async {
-							completion()
+						} else if existingFriend == nil {
+							if let friendListTmp = self.friendList {
+								_ = friendListTmp.addLocalFriend(linphoneFriend: friend)
+								LookupService.shared.markStale(self.nativeAddressBookFriendList)
+							}
 						}
 					}
+					
+					DispatchQueue.main.async {
+						completion(resultFriend)
+					}
 				}
-			} else {
-				DispatchQueue.main.async {
-					completion()
-				}
+			}
+		} else {
+			DispatchQueue.main.async {
+				completion(nil)
 			}
 		}
 	}
 
 	
-	func saveFriend(result: String, contact: Contact, existingFriend: Friend?, completion: @escaping (Friend?) -> Void) {
+	/// Sets the photo of the friend to the image, as a data URI like the ones a CardDAV server sends. The file for it is
+	/// made when the avatar of the friend is loaded, see ContactAvatarModel.loadPhoto(). Without an image the photo is
+	/// removed.
+	func saveImage(image: UIImage?, friend: Friend, completion: @escaping () -> Void) {
+		guard let image = image else {
+			setPhoto("", friend: friend, completion: completion)
+			return
+		}
+
+		if let data = image.jpegData(compressionQuality: 1) {
+			saveImage(data: data, friend: friend, completion: completion)
+		} else if let data = image.pngData() {
+			saveImage(data: data, mimeType: "image/png", friend: friend, completion: completion)
+		} else {
+			DispatchQueue.main.async {
+				completion()
+			}
+		}
+	}
+
+	/// The same for image data that is already encoded, such as the thumbnail of a contact of the phone, so it is saved
+	/// as it is. The data is turned into the data URI off the main thread.
+	func saveImage(data: Data, mimeType: String = "image/jpeg", friend: Friend, completion: @escaping () -> Void) {
+		DispatchQueue.global(qos: .utility).async {
+			self.setPhoto("data:\(mimeType);base64," + data.base64EncodedString(), friend: friend, completion: completion)
+		}
+	}
+
+	// Sets the photo of the friend, an empty one removes it, and calls back on the main thread
+	private func setPhoto(_ photo: String, friend: Friend, completion: @escaping () -> Void) {
+		self.coreContext.doOnCoreQueue { _ in
+			friend.edit()
+			friend.photo = photo
+			friend.done()
+
+			LookupService.shared.markStale(friend.friendList?.displayName ?? "")
+
+			DispatchQueue.main.async {
+				completion()
+			}
+		}
+	}
+
+	func saveFriend(contact: Contact, existingFriend: Friend?, completion: @escaping (Friend?) -> Void) {
 		self.coreContext.doOnCoreQueue { core in
 			do {
 				// Create or use existing friend
@@ -455,9 +477,6 @@ final class ContactsManager: ObservableObject {
 					}
 				}
 				
-				// Set photo
-				friend.photo = (friend.friendList?.type != .CardDAV && self.linphoneAddressBookFriendList == CorePreferences.friendListInWhichStoreNewlyCreatedFriends ? "file:/" : "") + result
-				
 				// NMPBX subscription settings
 				try friend.setSubscribesenabled(newValue: false)
 				try friend.setIncsubscribepolicy(newValue: .SPDeny)
@@ -485,44 +504,6 @@ final class ContactsManager: ObservableObject {
 		return imagePath
 	}
 	
-	func awaitDataWrite(data: Data, name: String, prefix: String, base64: Bool? = false, completion: @escaping (String) -> Void) {
-		guard let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-			completion("")
-			return
-		}
-		if base64 == false {
-			do {
-				let fileName = name + prefix + ".png"
-				
-				let fileURL = directory.appendingPathComponent(fileName.replacingOccurrences(of: " ", with: ""))
-				
-				try data.write(to: fileURL)
-				completion(fileName.replacingOccurrences(of: " ", with: ""))
-			} catch {
-				print("Error writing image: \(error)")
-				completion("")
-			}
-		} else {
-			do {
-				let fileName = name + prefix + ".png"
-				
-				let fileURL = directory.appendingPathComponent(fileName.replacingOccurrences(of: " ", with: ""))
-				
-				try data.write(to: fileURL)
-				
-				if prefix.isEmpty {
-					let base64 = data.base64EncodedString()
-					completion("data:image/jpeg;base64,\(base64)")
-				} else {
-					completion("")
-				}
-			} catch {
-				print("Error writing image: \(error)")
-				completion("")
-			}
-		}
-	}
-	
 	func getFriendWithContact(contact: Contact) -> Friend? {
 		if friendList != nil {
 			let friend = friendList!.friends.first(where: {$0.nativeUri == contact.identifier})
@@ -546,18 +527,15 @@ final class ContactsManager: ObservableObject {
 	private func registerLookup(_ name: String, friendList: @escaping () -> FriendList?) {
 		LookupService.shared.register(
 			name,
-			items: {
-				let friends = friendList()?.friends ?? []
-				self.lookupCounts[name] = friends.count
-				return friends
-			},
+			items: { friendList()?.friends ?? [] },
 			keys: ContactsManager.lookupKeys
 		)
 	}
 
 	// The friend of the list with this address, or with a phone number equal to its username, found
-	// through the LookupService instead of a scan of the list. An index is rebuilt when the list size
-	// changed since it was built, or when it points at a friend that no longer matches.
+	// through the LookupService instead of a scan of the list. The service keeps the friends it indexed, so the
+	// list is not read here. An index is rebuilt when the list is marked stale, or when it gives a friend that no
+	// longer matches.
 	private func friend(in friendList: FriendList?, address: Address, sipUri: String) -> Friend? {
 		guard let friendList = friendList, let name = friendList.displayName else {
 			return nil
@@ -565,22 +543,18 @@ final class ContactsManager: ObservableObject {
 
 		let lookupService = LookupService.shared
 
-		for _ in 0..<2 {
-			let friends = friendList.friends
-			if lookupCounts[name] != friends.count {
-				lookupService.markStale(name)
-			}
+		func find(_ property: LookupProperty, _ value: String) -> Friend? {
+			return lookupService.item(in: name, property: property, value: value)
+		}
 
-			let position = lookupService.index(in: name, property: .address, value: sipUri)
-				?? address.username.flatMap { lookupService.index(in: name, property: .phoneNumber, value: $0) }
-			guard let position = position else {
+		for _ in 0..<2 {
+			guard let friend = find(.address, sipUri) ?? address.username.flatMap({ find(.phoneNumber, $0) }) else {
 				return nil
 			}
 
-			if friends.indices.contains(position),
-			   friends[position].addresses.contains(where: { $0.asStringUriOnly() == sipUri })
-				|| friends[position].phoneNumbers.contains(where: { $0 == address.username }) {
-				return friends[position]
+			if friend.addresses.contains(where: { $0.asStringUriOnly() == sipUri })
+				|| friend.phoneNumbers.contains(where: { $0 == address.username }) {
+				return friend
 			}
 
 			lookupService.markStale(name)
@@ -643,6 +617,17 @@ final class ContactsManager: ObservableObject {
 		}
 		
 		coreContext.doOnCoreQueue { core in
+			// None of the lists has changed since the models were made, so a search would find the same friends
+			let version = self.contactsVersion(core: core)
+			if version == self.lastPopulateVersion {
+				DispatchQueue.main.async {
+					MagicSearchSingleton.shared.isLoading = false
+				}
+				self.finishPopulate()
+				return
+			}
+			self.populateVersion = version
+
 			if self.populateMagicSearch == nil {
 				guard let magicSearch = try? core.createMagicSearch() else {
 					self.finishPopulate()
@@ -763,15 +748,42 @@ final class ContactsManager: ObservableObject {
 	/// Releases the search used by populateAvatarListModel(), to be called before the core is stopped.
 	/// Must be called on the core queue.
 	func destroyMagicSearch() {
+		lastPopulateVersion = nil
+		populateVersion = nil
 		populateMagicSearch = nil
 		populateMagicSearchDelegate = nil
 		suggestionsMagicSearch = nil
 		suggestionsMagicSearchDelegate = nil
 	}
 
+	// Tells cheaply whether the friends may have changed: every list with how many times it was marked stale, which
+	// every change to a list does, plus what else decides which models are made (the domain that makes a friend an
+	// extension and the contacts domain setting). Must be called on the core queue.
+	private func contactsVersion(core: Core) -> String {
+		let lists = core.friendsLists.map { friendList -> String in
+			let name = friendList.displayName ?? ""
+			return "\(name):\(LookupService.shared.generation(of: name))"
+		}
+
+		return lists.joined(separator: "|")
+			+ "|" + (core.defaultAccount?.params?.domain ?? "")
+			+ "|" + CorePreferences.contactsFilter
+	}
+
+	// What stands in for the vCard when a friend has none, or it cannot be written out: the same fields, with each
+	// address as its username and domain, as that is what identifies it and it is cheaper than the whole URI
+	private static func signatureWithoutVcard(of friend: Friend) -> String {
+		let addresses = friend.addresses.map { "\($0.username ?? "")@\($0.domain)" }
+
+		return "\(friend.name ?? "")|\(addresses)|\(friend.phoneNumbers)|\(friend.organization ?? "")|\(friend.jobTitle ?? "")|\(friend.photo ?? "")"
+	}
+
 	// Turns the results of the search into the models and `lastSearch`, if the contacts have changed. Must be called
 	// on the core queue.
 	private func processPopulateSearchResults(core: Core, results: [SearchResult]) {
+		// The results are of the lists as they were when the search started
+		lastPopulateVersion = populateVersion
+
 		var friendResults: [SearchResult] = []
 
 		// A friend result is dropped when another one with the same address (ignoring tags and headers, as
@@ -817,23 +829,30 @@ final class ContactsManager: ObservableObject {
 			return name1 < name2
 		}
 
-		// One string per friend of everything the models show: the vCard (name, addresses, numbers,
-		// organisation, job title and the photo's path), plus what is not in it. They are sorted before they are
-		// hashed, so friends that come back in another order, as ones with the same name can, do not change it.
-		var friendSignatures = sortedFriendResults.map { result -> String in
+		// A hash per friend of everything the models show: the vCard (name, addresses, numbers, organisation, job
+		// title and the photo's path), plus what is not in it. Each one is kept on the friend's model, to tell
+		// later whether the friend has changed.
+		var friendHashes: [ObjectIdentifier: Int] = [:]
+		let domain = core.defaultAccount?.params?.domain ?? ""
+		sortedFriendResults.forEach { result in
 			guard let friend = result.friend else {
-				return ""
+				return
 			}
 
 			let vcard = friend.vcard.flatMap { try? $0.asVcard4String() }
-				?? "\(friend.name ?? "")|\(friend.addresses.map { $0.asStringUriOnly() })|\(friend.phoneNumbers)"
+				?? ContactsManager.signatureWithoutVcard(of: friend)
 
-			return "\(friend.friendList?.displayName ?? "")|\(result.address?.asStringUriOnly() ?? "")|\(result.phoneNumber ?? "")|\(friend.starred)|\(vcard)"
+			var friendHasher = Hasher()
+			friendHasher.combine(vcard)
+			// Not part of the vCard, as far as is known, so a change to it would not be seen otherwise
+			friendHasher.combine(friend.starred)
+			friendHashes[ObjectIdentifier(result)] = friendHasher.finalize()
 		}
-		friendSignatures.sort()
 
+		// The hashes are sorted before they are combined, so friends that come back in another order, as ones
+		// with the same name can, do not change the result
 		var hasher = Hasher()
-		friendSignatures.forEach { hasher.combine($0) }
+		friendHashes.values.sorted().forEach { hasher.combine($0) }
 		// What the models and the list also depend on, though it is not in the friends: the domain that makes a friend an
 		// extension, and the contacts domain setting
 		hasher.combine(core.defaultAccount?.params?.domain ?? "")
@@ -850,9 +869,20 @@ final class ContactsManager: ObservableObject {
 		}
 		lastPopulateHash = hash
 
+		// The models that are still right are kept, matched by the hash of their friend and by being made from the same
+		// friend object, so only the ones for new or changed friends are made. The ones left over are dropped.
+		var existingModels: [Int: [ContactAvatarModel]] = [:]
+		currentAvatarSnapshot().forEach { existingModels[$0.contentHash, default: []].append($0) }
+
 		var avatarModels: [ContactAvatarModel] = []
 		sortedFriendResults.forEach { result in
 			guard let friend = result.friend else {
+				return
+			}
+
+			let friendHash = friendHashes[ObjectIdentifier(result)] ?? 0
+			if let index = existingModels[friendHash]?.firstIndex(where: { $0.friend === friend }) {
+				avatarModels.append(existingModels[friendHash]!.remove(at: index))
 				return
 			}
 
@@ -861,16 +891,16 @@ final class ContactsManager: ObservableObject {
 			let address = friend.address?.clone()?.asStringUriOnly() ?? ""
 
 			if listName == self.nativeAddressBookFriendList || listName == self.linphoneAddressBookFriendList || listName == self.tempRemoteAddressBookFriendList {
-				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: true, deferLoad: true))
+				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: true, contentHash: friendHash))
 			} else if result.hasSourceFlag(source: .RemoteCardDAV) || friend.friendList?.type == .CardDAV {
-				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: true, deferLoad: true))
+				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: true, contentHash: friendHash))
 			} else if result.hasSourceFlag(source: .LdapServers) {
-				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: false, deferLoad: true))
+				avatarModels.append(ContactAvatarModel(friend: friend, name: name, address: address, withPresence: false, contentHash: friendHash))
 			}
 		}
 
-		// The models of the previous list stop following the presence of their friends
-		self.avatarListModel.forEach { $0.removeFriendDelegate() }
+		// The models that were not kept stop following the presence of their friends
+		existingModels.values.forEach { $0.forEach { $0.removeFriendDelegate() } }
 
 		DispatchQueue.main.async {
 			self.lastSearch = sortedFriendResults
@@ -889,6 +919,23 @@ final class ContactsManager: ObservableObject {
 		}
 		
 		finishPopulate()
+	}
+
+	/// The model to show for the person with this address, called back on the core queue. A contact gets its model
+	/// from avatarListModel (a model with no friend, named after the contact, if it is not there), and anyone else a
+	/// model with no friend named from the address. The model is not loaded, the view that shows it loads it.
+	func avatarModel(address: Address, completion: @escaping (ContactAvatarModel) -> Void) {
+		coreContext.doOnCoreQueue { _ in
+			guard let friend = self.getFriendWithAddress(address: address),
+				  let friendAddress = friend.address?.asStringUriOnly() else {
+				completion(ContactAvatarModel(address: address))
+				return
+			}
+
+			let avatarModel = self.avatarModel(forAddress: friendAddress)
+				?? ContactAvatarModel(friend: nil, name: friend.name ?? "", address: friendAddress, withPresence: false)
+			completion(avatarModel)
+		}
 	}
 
 	func getFriendWithAddressInCoreQueue(address: Address?, completion: @escaping (Friend?) -> Void) {
@@ -916,20 +963,28 @@ final class ContactsManager: ObservableObject {
 			let friendListDelegateTmp = FriendListDelegateStub(
 				onContactCreated: { (friendList: FriendList, linphoneFriend: Friend) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onContactCreated")
+					self.friendListsChangedDuringSync.insert(ObjectIdentifier(friendList))
 					LookupService.shared.markStale(friendList.displayName ?? "")
 				},
 				onContactDeleted: { (friendList: FriendList, linphoneFriend: Friend) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onContactDeleted")
+					self.friendListsChangedDuringSync.insert(ObjectIdentifier(friendList))
 					LookupService.shared.markStale(friendList.displayName ?? "")
 				},
 				onContactUpdated: { (friendList: FriendList, newFriend: Friend, oldFriend: Friend) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onContactUpdated")
+					self.friendListsChangedDuringSync.insert(ObjectIdentifier(friendList))
 					LookupService.shared.markStale(friendList.displayName ?? "")
 				},
 				onSyncStatusChanged: { (friendList: FriendList, status: FriendList.SyncStatus?, message: String?) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onSyncStatusChanged \(friendList.displayName ?? "No Display Name") -- Status: \(status != nil ? String(describing: status!) : "No Status")")
 					Log.info("[PRESENCE-DEBUG] onSyncStatusChanged: list='\(friendList.displayName ?? "nil")' status=\(String(describing: status)) friends=\(friendList.friends.count)")
 					LookupService.shared.markStale(friendList.displayName ?? "")
+					if status == .Started || status == .Failure {
+						self.friendListsChangedDuringSync.remove(ObjectIdentifier(friendList))
+					}
+					// Whether the sync changed the list, which is only known to be so while this delegate is on the list
+					let changedDuringSync = status == .Successful && self.friendListsChangedDuringSync.remove(ObjectIdentifier(friendList)) != nil
 					if status == .Successful {
                         if friendList.displayName != self.nativeAddressBookFriendList && friendList.displayName != self.linphoneAddressBookFriendList {
                             if let tempRemoteFriendList = self.tempRemoteFriendList {
@@ -960,44 +1015,11 @@ final class ContactsManager: ObservableObject {
 								imageData: ""
 							)
 							
-							let image: UIImage?
-							
-							if let photo = friend.photo, !photo.isEmpty, friendList.type == .CardDAV {
-								if let imageTmp = self.imageFromBase64(photo) {
-									image = imageTmp
-									if let image = image {
-										self.saveImage(
-											image: image,
-											name: friend.name ?? addressTmp,
-											prefix: "",
-											contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: friend.friendList?.type == .CardDAV ? friend : nil) {
-												dispatchGroup.leave()
-											}
-									}
-								} else {
-									image = self.textToImage(firstName: friend.name ?? addressTmp, lastName: "")
-									if let image = image {
-										self.saveImage(
-											image: image,
-											name: friend.name ?? addressTmp,
-											prefix: "-default",
-											contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: friend.friendList?.type == .CardDAV ? friend : nil) {
-												dispatchGroup.leave()
-											}
-									}
+							self.updateFriend(
+								name: friend.name ?? addressTmp,
+								contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: friend.friendList?.type == .CardDAV ? friend : nil) { _ in
+									dispatchGroup.leave()
 								}
-							} else {
-								image = self.textToImage(firstName: friend.name ?? addressTmp, lastName: "")
-								if let image = image {
-									self.saveImage(
-										image: image,
-										name: friend.name ?? addressTmp,
-										prefix: "-default",
-										contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: friend.friendList?.type == .CardDAV ? friend : nil) {
-											dispatchGroup.leave()
-										}
-								}
-							}
 						}
                         
                         dispatchGroup.notify(queue: .main) {
@@ -1008,6 +1030,12 @@ final class ContactsManager: ObservableObject {
 								// updateSubscriptions() ran during addFriendListDelegate(), so
 								// no SUBSCRIBE requests were sent. Calling it here ensures
 								// subscriptions are established once the contacts have arrived.
+								// A sync that changed nothing is skipped: the subscriptions made at start-up
+								// already cover the list, and sending a big one again costs the core thread time.
+								if !changedDuringSync {
+									Log.info("[PRESENCE-DEBUG] onSyncStatusChanged post-process: '\(friendList.displayName ?? "nil")' unchanged by the sync, keeping presence subscriptions")
+									return
+								}
 								Log.info("[PRESENCE-DEBUG] onSyncStatusChanged post-process: calling updateSubscriptions() on '\(friendList.displayName ?? "nil")' (\(friendList.friends.count) friends)")
 								friendList.updateSubscriptions()
 								if let linphoneFL = self.tempRemoteFriendList {
@@ -1061,12 +1089,9 @@ final class ContactsManager: ObservableObject {
 									imageData: ""
 								)
 								
-								let image = self.textToImage(firstName: friend.name ?? addressTmp, lastName: "")
-								self.saveImage(
-									image: image,
+								self.updateFriend(
 									name: friend.name ?? addressTmp,
-									prefix: "-default",
-									contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: nil) {
+									contact: newContact, linphoneFriend: friendList.displayName ?? "No Display Name", existingFriend: nil) { _ in
 										dispatchGroup.leave()
 									}
 							}
@@ -1085,7 +1110,7 @@ final class ContactsManager: ObservableObject {
 				onNewSipAddressDiscovered: { (friendList: FriendList, linphoneFriend: Friend, sipUri: String) in
 					Log.info("\(ContactsManager.TAG) FriendListDelegateStub onNewSipAddressDiscovered \(linphoneFriend.name ?? "")")
 					var addedAvatarListModel: [ContactAvatarModel] = []
-					if !self.avatarListModel.contains(where: {$0.friend?.name == linphoneFriend.name}) {
+					if !self.currentAvatarSnapshot().contains(where: {$0.friend?.name == linphoneFriend.name}) {
 						if let address = try? Factory.Instance.createAddress(addr: sipUri) {
 							linphoneFriend.edit()
 							linphoneFriend.addAddress(address: address)
@@ -1102,11 +1127,15 @@ final class ContactsManager: ObservableObject {
 								)
 							)
 							
-							addedAvatarListModel += self.avatarListModel
-							addedAvatarListModel = addedAvatarListModel.sorted { $0.name < $1.name }
 							
 							DispatchQueue.main.async {
-								self.avatarListModel = addedAvatarListModel
+								// Added to the list here, as it is replaced on the main thread and a change made in between would be lost
+								// Sorted by the name without case or accents, as populateAvatarListModel() sorts them, each name
+								// prepared once
+								self.avatarListModel = (addedAvatarListModel + self.avatarListModel)
+									.map { (key: ContactAvatarModel.normalisedForSearch($0.name), model: $0) }
+									.sorted { $0.key < $1.key }
+									.map { $0.model }
 								
 								NotificationCenter.default.post(
 									name: NSNotification.Name("ContactAdded"),
@@ -1187,6 +1216,8 @@ final class ContactsManager: ObservableObject {
 		cancellables.removeAll()
 		for contact in avatarListModel {
 			contact.$starred
+				// The first value is the current one, sent as soon as the subscription is made, not a change
+				.dropFirst()
 				.sink { [weak self] _ in
 					self?.starredChangeTrigger = UUID()
 				}
@@ -1245,6 +1276,8 @@ final class ContactsManager: ObservableObject {
 						onSyncStatusChanged: { (fl: FriendList, status: FriendList.SyncStatus, _: String?) in
 							switch status {
 							case .Successful, .Failure:
+								// The friends of the list may have changed, whether or not the main delegate is on this list
+								LookupService.shared.markStale(fl.displayName ?? "")
 								if let d = selfDelegate {
 									fl.removeDelegate(delegate: d)
 									selfDelegate = nil

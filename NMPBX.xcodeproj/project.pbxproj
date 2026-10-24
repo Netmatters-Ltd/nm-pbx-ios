@@ -184,6 +184,7 @@
 		D7C500422D2BE98100DD53EC /* AccountSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */; };
 		D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */; };
 		D7CA4DA1000000000000002A /* LookupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000002B /* LookupService.swift */; };
+		D7CA4DA1000000000000003A /* ContactImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000003B /* ContactImageStore.swift */; };
 		D7CEE0352B7A210300FD79B7 /* ConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */; };
 		D7CEE0382B7A214F00FD79B7 /* ConversationsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */; };
 		D7CEE03B2B7A234200FD79B7 /* ConversationsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */; };
@@ -437,6 +438,7 @@
 		D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsViewModel.swift; sourceTree = "<group>"; };
 		D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavProvisioningManager.swift; sourceTree = "<group>"; };
 		D7CA4DA1000000000000002B /* LookupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupService.swift; sourceTree = "<group>"; };
+		D7CA4DA1000000000000003B /* ContactImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageStore.swift; sourceTree = "<group>"; };
 		D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsView.swift; sourceTree = "<group>"; };
 		D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsListViewModel.swift; sourceTree = "<group>"; };
 		D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsFragment.swift; sourceTree = "<group>"; };
@@ -934,6 +936,7 @@
 				D777DBB22AE12C5900565A99 /* ContactsManager.swift */,
 				D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */,
 				D7CA4DA1000000000000002B /* LookupService.swift */,
+				D7CA4DA1000000000000003B /* ContactImageStore.swift */,
 			);
 			path = Contacts;
 			sourceTree = "<group>";
@@ -1473,6 +1476,7 @@
 				D777DBB32AE12C5900565A99 /* ContactsManager.swift in Sources */,
 				D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */,
 				D7CA4DA1000000000000002A /* LookupService.swift in Sources */,
+				D7CA4DA1000000000000003A /* ContactImageStore.swift in Sources */,
 				D720E6AD2BAD822000DDFD87 /* ParticipantModel.swift in Sources */,
 				D796F2002B0BB61A0041115F /* ToastViewModel.swift in Sources */,
 				D7C3650A2AF001C300FE6142 /* EditContactFragment.swift in Sources */,

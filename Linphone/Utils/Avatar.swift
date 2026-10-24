@@ -35,7 +35,21 @@ struct Avatar: View {
         self.hidePresence = hidePresence
     }
 	
+	// Keeps the model following its friend's presence for as long as the avatar is on screen: straight away, and then
+	// every 30 seconds, as the model stops following it 100 seconds after the last time. The task is cancelled when
+	// the avatar goes, and starts again for another model.
 	var body: some View {
+		content
+			.task(id: contactAvatarModel.id) {
+				while !Task.isCancelled {
+					contactAvatarModel.keepLoaded()
+					try? await Task.sleep(nanoseconds: 30_000_000_000)
+				}
+			}
+	}
+
+	@ViewBuilder
+	private var content: some View {
 		if !contactAvatarModel.photo.isEmpty {
 			let uniqueUrl = ContactsManager.shared.getImagePath(friendPhotoPath: contactAvatarModel.photo)
 			//let finalUrl = uniqueUrl.appendingQueryItem("v", value: UUID().uuidString)

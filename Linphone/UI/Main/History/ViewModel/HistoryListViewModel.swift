@@ -25,8 +25,23 @@ class HistoryListViewModel: ObservableObject {
 	
 	private var coreContext = CoreContext.shared
 	
+	// The call logs listed: the first pages of the ones that match the filter, see updateCallLogs(page:)
 	@Published var callLogs: [HistoryModel] = []
+	// Every call log, whatever the filter or the page
 	var callLogsTmp: [HistoryModel] = []
+
+	// True when more call logs match the filter than the pages listed, so the next page can be asked for
+	@Published private(set) var hasMore = false
+	private var loadedPage = 0
+	private var currentFilter = ""
+
+	// A search is made once typing has paused
+	private let filterDebounceDelay: TimeInterval = 0.3
+	private var filterWorkItem: DispatchWorkItem?
+
+	// The models made for the call logs, so a call log that is still there keeps its model when the others change.
+	// Only used on the core queue.
+	private var modelCache: [ObjectIdentifier: HistoryModel] = [:]
 	
 	var callLogsAddressToDelete = ""
 	var callLogCoreDelegate: CoreDelegate?
@@ -44,56 +59,79 @@ class HistoryListViewModel: ObservableObject {
 	
 	func computeCallLogsList() {
 		coreContext.doOnCoreQueue { core in
-			let account = core.defaultAccount
-			
-			// Fetch all call logs if only one account to workaround no history issue
-			// TODO FIXME: remove workaround later
-			let logs = (core.accountList.count > 1)
-				? (account?.callLogs ?? core.callLogs)
-				: core.callLogs
-			
-			var callLogsBis: [HistoryModel] = []
-			var callLogsTmpBis: [HistoryModel] = []
-			
-			logs.forEach { log in
-				let history = HistoryModel(callLog: log)
-				callLogsBis.append(history)
-				callLogsTmpBis.append(history)
-			}
-			
-			DispatchQueue.main.async {
-				self.callLogs.removeAll()
-				self.callLogsTmp.removeAll()
-				
-				self.callLogs = callLogsBis
-				self.callLogsTmp = callLogsTmpBis
-			}
-			
-			self.callLogCoreDelegate = CoreDelegateStub(onCallLogUpdated: { (_: Core, _: CallLog) in
-				let account = core.defaultAccount
-				let logs = account?.callLogs != nil ? account!.callLogs : core.callLogs
-				
-				var callLogsBis: [HistoryModel] = []
-				var callLogsTmpBis: [HistoryModel] = []
-				
-				logs.forEach { log in
-					let history = HistoryModel(callLog: log)
-					callLogsBis.append(history)
-					callLogsTmpBis.append(history)
-				}
-				
-				DispatchQueue.main.async {
-					self.callLogs.removeAll()
-					self.callLogsTmp.removeAll()
-					
-					self.callLogs = callLogsBis
-					self.callLogsTmp = callLogsTmpBis
-				}
-				
+			self.updateModels(core: core, updatedCallLog: nil)
+
+			self.callLogCoreDelegate = CoreDelegateStub(onCallLogUpdated: { (_: Core, callLog: CallLog) in
+				self.updateModels(core: core, updatedCallLog: callLog)
+
                 SharedMainViewModel.shared.updateMissedCallsCount()
 			})
 			core.addDelegate(delegate: self.callLogCoreDelegate!)
 		}
+	}
+
+	// Makes the models of the call logs, and lists them. A call log that already has a model keeps it, so a change to
+	// one call log does not make a model for every other. Only the call log that was updated is read again. Must be
+	// called on the core queue.
+	private func updateModels(core: Core, updatedCallLog: CallLog?) {
+		// Fetch all call logs if only one account to workaround no history issue
+		// TODO FIXME: remove workaround later
+		let logs = (core.accountList.count > 1)
+			? (core.defaultAccount?.callLogs ?? core.callLogs)
+			: core.callLogs
+
+		var models: [HistoryModel] = []
+		var cache: [ObjectIdentifier: HistoryModel] = [:]
+
+		logs.forEach { log in
+			let key = ObjectIdentifier(log)
+			let model: HistoryModel
+			if let existing = modelCache[key] {
+				model = existing
+				if log === updatedCallLog {
+					model.initValue(callLog: log)
+				}
+			} else {
+				model = HistoryModel(callLog: log)
+			}
+
+			cache[key] = model
+			models.append(model)
+		}
+
+		modelCache = cache
+
+		DispatchQueue.main.async {
+			self.callLogsTmp = models
+			// The pages already listed stay listed
+			self.updateCallLogs(page: self.loadedPage)
+		}
+	}
+
+	/// Lists the call logs that match the filter, the first pages of them up to `page`, in callLogs. Page 0 lists the
+	/// first page, a page above 0 adds that page to what is listed. Must be called on the main thread.
+	private func updateCallLogs(page: Int = 0) {
+		loadedPage = page
+
+		// Compared lowercase and without accents, like the contacts search
+		let filter = ContactAvatarModel.normalisedForSearch(currentFilter)
+		let matching = filter.isEmpty ? callLogsTmp : callLogsTmp.filter { $0.searchName.contains(filter) }
+
+		let pageSize = CorePreferences.pageSize
+		let limit = pageSize > 0 ? (page + 1) * pageSize : Int.max
+
+		hasMore = matching.count > limit
+		callLogs = Array(matching.prefix(limit))
+	}
+
+	/// Lists the next page of call logs, if there is one. For the list to call when its end is reached. Must be called
+	/// on the main thread.
+	func loadNextPage() {
+		guard hasMore else {
+			return
+		}
+
+		updateCallLogs(page: loadedPage + 1)
 	}
 	
 	func getCallIconResId(callStatus: Call.Status, isOutgoing: Bool) -> String {
@@ -170,17 +208,25 @@ class HistoryListViewModel: ObservableObject {
 		}
 	}
 	
+	/// Lists the call logs whose name has the filter in it, once typing has paused. A search still waiting is replaced,
+	/// so only the last text of a burst of keystrokes is searched. Must be called on the main thread.
 	func filterCallLogs(filter: String) {
-		callLogs.removeAll()
-		callLogsTmp.forEach { callLog in
-			if callLog.addressName.lowercased().contains(filter.lowercased()) {
-				callLogs.append(callLog)
-			}
+		filterWorkItem?.cancel()
+
+		let workItem = DispatchWorkItem { [weak self] in
+			self?.currentFilter = filter
+			self?.updateCallLogs()
 		}
+		filterWorkItem = workItem
+		DispatchQueue.main.asyncAfter(deadline: .now() + filterDebounceDelay, execute: workItem)
 	}
-	
+
 	func resetFilterCallLogs() {
-		callLogs = callLogsTmp
+		filterWorkItem?.cancel()
+		filterWorkItem = nil
+
+		currentFilter = ""
+		updateCallLogs()
 	}
 	
 	func removeCallLogs() {
@@ -196,6 +242,7 @@ class HistoryListViewModel: ObservableObject {
 				DispatchQueue.main.async {
 					self.callLogs.removeAll()
 					self.callLogsTmp.removeAll()
+					self.hasMore = false
 				}
 			}
 		} else {
@@ -205,26 +252,33 @@ class HistoryListViewModel: ObservableObject {
 	}
 	
 	func removeCallLogsWithAddress() {
-		self.callLogs.filter { $0.address == callLogsAddressToDelete || $0.address == callLogsAddressToDelete }.forEach { historyModel in
+		// Every call log of the address, not only the ones in the pages listed
+		self.callLogsTmp.filter { $0.address == callLogsAddressToDelete }.forEach { historyModel in
 			removeCallLog(historyModel: historyModel)
 		}
 	}
-	
+
 	func removeCallLog(historyModel: HistoryModel) {
-		let index = self.callLogs.firstIndex(where: {$0.id == historyModel.id})
-		self.callLogs.remove(at: index!)
-		
-		let indexTmp = self.callLogsTmp.firstIndex(where: {$0.id == historyModel.id})
-		self.callLogsTmp.remove(at: indexTmp!)
-		
+		if let index = self.callLogs.firstIndex(where: {$0.id == historyModel.id}) {
+			self.callLogs.remove(at: index)
+		}
+
+		if let indexTmp = self.callLogsTmp.firstIndex(where: {$0.id == historyModel.id}) {
+			self.callLogsTmp.remove(at: indexTmp)
+		}
+
 		coreContext.doOnCoreQueue { core in
 			core.removeCallLog(callLog: historyModel.callLog)
 		}
 	}
 	
+	/// Finds the avatar models of the call logs again, for when the contacts have changed. Must be called on the main
+	/// thread.
 	func refreshHistoryAvatarModel() {
+		// Every call log, as the ones outside the pages listed are listed later with the model they have now
+		let models = callLogsTmp
 		coreContext.doOnCoreQueue { _ in
-			self.callLogs.forEach { historyModel in
+			models.forEach { historyModel in
 				historyModel.refreshAvatarModel()
 			}
 		}

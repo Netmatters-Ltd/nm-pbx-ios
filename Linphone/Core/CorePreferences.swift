@@ -227,11 +227,10 @@ class CorePreferences {
 		return Config.get().getInt(section: "ui", key: "max_account", defaultValue: 0)
 	}
 
-	// Maximum number of external contacts listed in the Contacts tab (and its search results),
-	// typing more of the name narrows the results to reach any contact. 0 or less disables the cap.
-	// Extensions are never capped, the app needs to see them all to track their presence.
-	static var maxContactsDisplayed: Int {
-		return Config.get().getInt(section: "ui", key: "max_number_of_contacts_displayed", defaultValue: 100)
+	// Number of items listed in a page of a paged list, such as the contacts and the extensions. The next page is
+	// listed when the end of the list is reached. 0 or less disables paging.
+	static var pageSize: Int {
+		return Config.get().getInt(section: "ui", key: "page_size", defaultValue: 50)
 	}
 	
 	/*

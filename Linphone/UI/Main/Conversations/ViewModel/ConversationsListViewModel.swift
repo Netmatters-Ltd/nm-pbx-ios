@@ -66,7 +66,7 @@ class ConversationsListViewModel: ObservableObject {
 	func updateChatRoomsList() {
 		CoreContext.shared.doOnCoreQueue { _ in
 			if !self.conversationsList.isEmpty {
-				self.contactsManager.avatarListModel.forEach { contactAvatarModel in
+				self.contactsManager.currentAvatarSnapshot().forEach { contactAvatarModel in
 					self.conversationsList.forEach { conversationModel in
 						if conversationModel.participantsAddress.contains(contactAvatarModel.address) {
 							if conversationModel.isGroup && conversationModel.participantsAddress.count > 1 {
@@ -104,14 +104,12 @@ class ConversationsListViewModel: ObservableObject {
 								}
 							} else if !conversationModel.isGroup, let firstParticipantAddress = conversationModel.participantsAddress.first, firstParticipantAddress.contains(contactAvatarModel.address) {
 								if let index = self.conversationsList.firstIndex(where: { $0.chatRoom === conversationModel.chatRoom }) {
-									contactAvatarModel.load()
 									DispatchQueue.main.async {
 										conversationModel.avatarModel = contactAvatarModel
 										conversationModel.subject = contactAvatarModel.name
 										self.conversationsList[index].avatarModel = contactAvatarModel
 									}
 								} else {
-									contactAvatarModel.load()
 									DispatchQueue.main.async {
 										conversationModel.avatarModel = contactAvatarModel
 										conversationModel.subject = contactAvatarModel.name
@@ -127,7 +125,7 @@ class ConversationsListViewModel: ObservableObject {
 	
 	func updateChatRoom(address: String) {
 		CoreContext.shared.doOnCoreQueue { _ in
-			if let contactAvatarModel = self.contactsManager.avatarListModel.first(where: { $0.addresses.contains(address) }) {
+			if let contactAvatarModel = self.contactsManager.currentAvatarSnapshot().first(where: { $0.addresses.contains(address) }) {
 				self.conversationsList.forEach { conversationModel in
 					if conversationModel.participantsAddress.contains(contactAvatarModel.address) {
 						if conversationModel.isGroup && conversationModel.participantsAddress.count > 1 {
@@ -165,14 +163,12 @@ class ConversationsListViewModel: ObservableObject {
 							}
 						} else if !conversationModel.isGroup, let firstParticipantAddress = conversationModel.participantsAddress.first, firstParticipantAddress.contains(contactAvatarModel.address) {
 							if let index = self.conversationsList.firstIndex(where: { $0.chatRoom === conversationModel.chatRoom }) {
-								contactAvatarModel.load()
 								DispatchQueue.main.async {
 									conversationModel.avatarModel = contactAvatarModel
 									conversationModel.subject = contactAvatarModel.name
 									self.conversationsList[index].avatarModel = contactAvatarModel
 								}
 							} else {
-								contactAvatarModel.load()
 								DispatchQueue.main.async {
 									conversationModel.avatarModel = contactAvatarModel
 									conversationModel.subject = contactAvatarModel.name

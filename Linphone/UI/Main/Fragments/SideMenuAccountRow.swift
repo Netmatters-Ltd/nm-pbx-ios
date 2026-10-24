@@ -35,6 +35,7 @@ struct SideMenuAccountRow: View {
 	
 	var body: some View {
 		HStack {
+			if let photo = model.photoAvatarModel, !photo.isEmpty {
 			AsyncImage(url: model.imagePathAvatar) { image in
 				switch image {
 				case .empty:
@@ -58,6 +59,16 @@ struct SideMenuAccountRow: View {
 				}
 			}
 			.padding(.leading, 6)
+			} else {
+				// No picture, the avatar shows initials
+				Image(uiImage: contactsManager.textToImage(
+					firstName: model.usernaneAvatar,
+					lastName: "", useFullText: true))
+				.resizable()
+				.frame(width: avatarSize, height: avatarSize)
+				.clipShape(Circle())
+				.padding(.leading, 6)
+			}
 			
 			VStack {
 				Text(model.displayName)
