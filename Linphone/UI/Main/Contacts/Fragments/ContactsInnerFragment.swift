@@ -41,7 +41,7 @@ struct ContactsInnerFragment: View {
 		ZStack {
 			VStack(alignment: .leading) {
 				// The favourites of this page come from all of its contacts, not only the pages listed below. Split like
-				// the list, as the search may list every kind after a picker has been open.
+				// the list, as the search lists every kind while a picker is open over the page.
 				let favourites = magicSearch.favourites().filter { mode == .extensions ? $0.isInternal : !$0.isInternal }
 				if !favourites.isEmpty {
 					HStack(alignment: .center) {

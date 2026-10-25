@@ -232,6 +232,12 @@ class CorePreferences {
 	static var pageSize: Int {
 		return Config.get().getInt(section: "ui", key: "page_size", defaultValue: 50)
 	}
+
+	// Number of rows a contact picker lists, such as the one to start a call: every extension, then contacts up to this
+	// number for both, and a note that the others can be found by searching. 0 or less lists every contact.
+	static var pickerListLimit: Int {
+		return Config.get().getInt(section: "ui", key: "picker_list_limit", defaultValue: 200)
+	}
 	
 	/*
 	static var configPath: String {

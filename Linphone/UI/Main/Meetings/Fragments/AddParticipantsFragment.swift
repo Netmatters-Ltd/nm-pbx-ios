@@ -169,73 +169,23 @@ struct AddParticipantsFragment: View {
 				
 				ZStack {
 					ScrollView {
-						// Lazy, so the next page is asked for when the end of the list is scrolled to, not when it is drawn
-						LazyVStack(spacing: 8) {
-						ForEach(0..<contactsManager.viewAvatarListModel.count, id: \.self) { index in
-							HStack {
-								HStack {
-									if index == 0
-										|| contactsManager.viewAvatarListModel[index].name.lowercased().folding(
-											options: .diacriticInsensitive,
-											locale: .current
-										).first
-										!= contactsManager.viewAvatarListModel[index-1].name.lowercased().folding(
-											options: .diacriticInsensitive,
-											locale: .current
-										).first {
-										Text(
-											String(
-												(contactsManager.viewAvatarListModel[index].name.uppercased().folding(
-													options: .diacriticInsensitive,
-													locale: .current
-												).first)!))
-										.contact_text_style_500(styleSize: 20)
-										.frame(width: 18)
-										.padding(.leading, 5)
-										.padding(.trailing, 5)
-									} else {
-										Text("")
-											.contact_text_style_500(styleSize: 20)
-											.frame(width: 18)
-											.padding(.leading, 5)
-											.padding(.trailing, 5)
-									}
-									
-									Avatar(contactAvatarModel: contactsManager.viewAvatarListModel[index], avatarSize: 50)
-									
-									Text(contactsManager.viewAvatarListModel[index].name)
-										.default_text_style(styleSize: 16)
-										.frame(maxWidth: .infinity, alignment: .leading)
-										.foregroundStyle(Color.orangeMain500)
-									
-									if addParticipantsViewModel.participantsToAdd.contains(where: {
-										$0.address.asStringUriOnly() == contactsManager.viewAvatarListModel[index].address
-									}) {
-										Image("check")
-											.renderingMode(.template)
-											.resizable()
-											.foregroundStyle(Color.orangeMain500)
-											.frame(width: 25, height: 25)
-											.padding(.horizontal)
-									}
-								}
-							}
-							.background(.white)
-							.onTapGesture {
-								if let addr = try? Factory.Instance.createAddress(addr: contactsManager.viewAvatarListModel[index].address) {
-									addParticipantsViewModel.selectParticipant(addr: addr)
-								}
-							}
-							.buttonStyle(.borderless)
-							.listRowSeparator(.hidden)
-							.onAppear {
-								if index == contactsManager.viewAvatarListModel.count - 1 {
-									magicSearch.loadNextPage()
-								}
-							}
+						// The extensions, then the contacts, each under its own title
+						if !magicSearch.pickerExtensions.isEmpty {
+							PickerSectionTitle(title: "contacts_list_extensions_title")
+
+							participantRows(magicSearch.pickerExtensions)
 						}
+
+						if !magicSearch.pickerContacts.isEmpty {
+							PickerSectionTitle(title: "contacts_list_contacts_title")
+
+							participantRows(magicSearch.pickerContacts)
 						}
-						
+
+						if magicSearch.pickerContactsTruncated {
+							PickerTruncatedNote()
+						}
+
 						HStack(alignment: .center) {
 							Text("generic_address_picker_suggestions_list_title")
 								.default_text_style_800(styleSize: 16)
@@ -281,15 +231,83 @@ struct AddParticipantsFragment: View {
 		.navigationTitle("")
 		.navigationBarHidden(true)
 		.onAppear {
-			// Whatever tab was last open, the picker lists and searches every kind
-			magicSearch.showKinds(.all)
+			// Whatever tab was last open, the picker lists and searches every kind, until it goes
+			magicSearch.pickerAppeared()
 			if !magicSearch.currentFilter.isEmpty || (self.contactsManager.lastSearch.isEmpty && self.contactsManager.lastSearchSuggestions.isEmpty) {
 				magicSearch.currentFilter = ""
 				magicSearch.searchForContacts()
 			}
 		}
+		.onDisappear {
+			magicSearch.pickerDisappeared()
+		}
 	}
 	
+	// The rows of a section of the list, each with the first letter of its name when it differs from the row above.
+	// Lazy, so only the rows on screen are drawn.
+	func participantRows(_ models: [ContactAvatarModel]) -> some View {
+		LazyVStack(spacing: 8) {
+			ForEach(0..<models.count, id: \.self) { index in
+				HStack {
+					HStack {
+						if index == 0
+							|| models[index].name.lowercased().folding(
+								options: .diacriticInsensitive,
+								locale: .current
+							).first
+							!= models[index-1].name.lowercased().folding(
+								options: .diacriticInsensitive,
+								locale: .current
+							).first {
+							Text(
+								String(
+									(models[index].name.uppercased().folding(
+										options: .diacriticInsensitive,
+										locale: .current
+									).first) ?? "?"))
+							.contact_text_style_500(styleSize: 20)
+							.frame(width: 18)
+							.padding(.leading, 5)
+							.padding(.trailing, 5)
+						} else {
+							Text("")
+								.contact_text_style_500(styleSize: 20)
+								.frame(width: 18)
+								.padding(.leading, 5)
+								.padding(.trailing, 5)
+						}
+
+						Avatar(contactAvatarModel: models[index], avatarSize: 50)
+
+						Text(models[index].name)
+							.default_text_style(styleSize: 16)
+							.frame(maxWidth: .infinity, alignment: .leading)
+							.foregroundStyle(Color.orangeMain500)
+
+						if addParticipantsViewModel.participantsToAdd.contains(where: {
+							$0.address.asStringUriOnly() == models[index].address
+						}) {
+							Image("check")
+								.renderingMode(.template)
+								.resizable()
+								.foregroundStyle(Color.orangeMain500)
+								.frame(width: 25, height: 25)
+								.padding(.horizontal)
+						}
+					}
+				}
+				.background(.white)
+				.onTapGesture {
+					if let addr = try? Factory.Instance.createAddress(addr: models[index].address) {
+						addParticipantsViewModel.selectParticipant(addr: addr)
+					}
+				}
+				.buttonStyle(.borderless)
+				.listRowSeparator(.hidden)
+			}
+		}
+	}
+
 	var suggestionsList: some View {
 		ForEach(0..<contactsManager.lastSearchSuggestions.count, id: \.self) { index in
 			Button {

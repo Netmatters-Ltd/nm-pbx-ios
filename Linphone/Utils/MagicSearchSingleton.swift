@@ -48,9 +48,8 @@ final class MagicSearchSingleton: ObservableObject {
 		case all
 	}
 
-	// What the searches list. A search says it when it is made, see searchForContacts(kinds:), and until another one
-	// does the searches that do not say, such as the ones after a sync, list the same. Other kinds start again from
-	// the first page. Must only be used on the main thread.
+	// What the searches list: every kind while a picker is open, else what the screen lists. Other kinds start again
+	// from the first page. Only changed by updateKinds(). Must only be used on the main thread.
 	private(set) var kinds: Kinds = .all {
 		didSet {
 			if kinds != oldValue {
@@ -58,6 +57,22 @@ final class MagicSearchSingleton: ObservableObject {
 			}
 		}
 	}
+
+	// What the screen behind the pickers lists, see showKinds(_:). A search can say it when it is made, see
+	// searchForContacts(kinds:), and until another one does the searches that do not say, such as the ones after a
+	// sync, list the same. Must only be used on the main thread.
+	private var screenKinds: Kinds = .all
+
+	// How many pickers are open, a picker opened from another one included, see pickerAppeared(). Must only be used on
+	// the main thread.
+	private var openPickers = 0
+
+	// The lists of the pickers, while kinds is .all: every extension that matches the filter, then as many of the
+	// contacts that match as fit in CorePreferences.pickerListLimit with them. pickerContactsTruncated says whether
+	// some contacts that match were left out. See updateViewAvatarListModel(). Must only be used on the main thread.
+	@Published private(set) var pickerExtensions: [ContactAvatarModel] = []
+	@Published private(set) var pickerContacts: [ContactAvatarModel] = []
+	@Published private(set) var pickerContactsTruncated = false
 
 	// Delay after the last keystroke before a search starts. Must only be used on the main thread.
 	private let searchDebounceDelay: TimeInterval = 0.3
@@ -70,7 +85,8 @@ final class MagicSearchSingleton: ObservableObject {
 	func searchForContactsDebounced(kinds: Kinds? = nil) {
 		DispatchQueue.main.async {
 			if let kinds = kinds {
-				self.kinds = kinds
+				self.screenKinds = kinds
+				self.updateKinds()
 			}
 			self.searchDebounceWorkItem?.cancel()
 
@@ -90,7 +106,8 @@ final class MagicSearchSingleton: ObservableObject {
 	func searchForContacts(kinds: Kinds? = nil) {
 		DispatchQueue.main.async {
 			if let kinds = kinds {
-				self.kinds = kinds
+				self.screenKinds = kinds
+				self.updateKinds()
 			}
 			// A search is starting now, so one still waiting would only repeat it
 			self.searchDebounceWorkItem?.cancel()
@@ -109,18 +126,24 @@ final class MagicSearchSingleton: ObservableObject {
 	/// SIP address (the extension) of each model, and lists the matches in contactsManager.viewAvatarListModel,
 	/// each of them loaded while it is in that list. An empty filter matches every model.
 	///
-	/// What is listed depends on `kinds`: only the extensions, only the contacts, or both. Each kind listed is paged on
-	/// its own, in pages of CorePreferences.pageSize. Page 0 lists the first page. A page above 0 adds that page to
-	/// what is listed, which is the same as listing the first pages up to it, so the order is kept and nothing is
-	/// listed twice if the models have changed in the meantime. hasMore says whether there is a page after the last
-	/// one listed, see loadNextPage(). Other kinds than the last search listed, or another filter, start again from
-	/// page 0.
+	/// What is listed depends on `kinds`: only the extensions, only the contacts, or both. One kind is paged, in pages
+	/// of CorePreferences.pageSize. Page 0 lists the first page. A page above 0 adds that page to what is listed, which
+	/// is the same as listing the first pages up to it, so the order is kept and nothing is listed twice if the models
+	/// have changed in the meantime. hasMore says whether there is a page after the last one listed, see loadNextPage().
+	/// Other kinds than the last search listed, or another filter, start again from page 0.
+	///
+	/// Both kinds, as the pickers list them, are not paged, see updatePickerLists(text:digits:).
 	///
 	/// Must be called on the main thread.
 	func updateViewAvatarListModel(page: Int = 0) {
 		loadedPage = page
 
 		let (text, digits) = searchTerms()
+
+		if kinds == .all {
+			updatePickerLists(text: text, digits: digits)
+			return
+		}
 
 		let pageSize = CorePreferences.pageSize
 		let limit = pageSize > 0 ? (page + 1) * pageSize : Int.max
@@ -172,6 +195,42 @@ final class MagicSearchSingleton: ObservableObject {
 		isLoading = false
 	}
 
+	// Lists both kinds for the pickers, which show them as two sections: every extension that matches, as there are
+	// not many, then the contacts that match up to CorePreferences.pickerListLimit for both. There can be thousands of
+	// contacts, and the ones left out are found by searching. Not paged, as a page of one kind was merged by name into
+	// the rows of the other above what was on screen, so the list jumped and the new rows never seemed to come.
+	private func updatePickerLists(text: String, digits: String) {
+		var extensions: [ContactAvatarModel] = []
+		var contacts: [ContactAvatarModel] = []
+
+		for model in contactsManager.avatarListModel {
+			if !text.isEmpty && !model.matches(text: text, digits: digits) {
+				continue
+			}
+
+			if model.isInternal {
+				extensions.append(model)
+			} else {
+				contacts.append(model)
+			}
+		}
+
+		let limit = CorePreferences.pickerListLimit
+		let contactsShown = limit > 0 ? Array(contacts.prefix(max(0, limit - extensions.count))) : contacts
+
+		pickerExtensions = extensions
+		pickerContacts = contactsShown
+		pickerContactsTruncated = contactsShown.count < contacts.count
+
+		// The models in the lists follow their presence, and the ones that leave them stop after a while
+		let found = extensions + contactsShown
+		found.forEach { $0.keepLoaded() }
+		hasMore = false
+		contactsManager.viewAvatarListModel = found
+
+		isLoading = false
+	}
+
 	// The current filter as models are compared with it: the text normalised, and its digits if it looks like a phone
 	// number (ignoring spaces and punctuation), as phone numbers are only compared then
 	private func searchTerms() -> (text: String, digits: String) {
@@ -188,11 +247,33 @@ final class MagicSearchSingleton: ObservableObject {
 		return (kinds != .contacts, kinds != .extensions)
 	}
 
-	/// Lists other kinds of record now, from the contacts already made, for when the screen changes. Must be called on
-	/// the main thread.
+	/// Lists other kinds of record now, from the contacts already made, for when the screen changes. While a picker is
+	/// open it keeps listing every kind, and the screen's kinds are listed once it closes. Must be called on the main
+	/// thread.
 	func showKinds(_ kinds: Kinds) {
-		self.kinds = kinds
+		screenKinds = kinds
+		updateKinds()
 		updateViewAvatarListModel(page: loadedPage)
+	}
+
+	/// For a picker to call when it appears: whatever the screen behind lists, the picker lists every kind, see
+	/// updatePickerLists(text:digits:). Must be called on the main thread.
+	func pickerAppeared() {
+		openPickers += 1
+		updateKinds()
+		updateViewAvatarListModel(page: loadedPage)
+	}
+
+	/// For a picker to call when it goes. Once no picker is open, what the screen behind lists is listed again, so the
+	/// Extensions and Contacts pages are paged as before. Must be called on the main thread.
+	func pickerDisappeared() {
+		openPickers = max(0, openPickers - 1)
+		updateKinds()
+		updateViewAvatarListModel(page: loadedPage)
+	}
+
+	private func updateKinds() {
+		kinds = openPickers > 0 ? .all : screenKinds
 	}
 
 	/// The starred models of the kinds listed that match the current filter, taken from the whole of avatarListModel

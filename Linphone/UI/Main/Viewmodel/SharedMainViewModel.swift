@@ -76,7 +76,14 @@ class SharedMainViewModel: ObservableObject {
 		} else {
 			indexView = preferences.integer(forKey: indexViewKey)
 		}
-		
+
+		// The page restored lists its kinds from the start, as it is not opened through changeIndexView(). Later, as the
+		// search must be told on the main thread and not while this is being made.
+		let restoredIndexView = indexView
+		DispatchQueue.main.async {
+			self.showContactKinds(indexViewInt: restoredIndexView)
+		}
+
 		if preferences.object(forKey: welcomeViewKey) == nil {
 			preferences.set(welcomeViewDisplayed, forKey: welcomeViewKey)
 		} else {
@@ -153,7 +160,11 @@ class SharedMainViewModel: ObservableObject {
 		indexView = indexViewInt
 		preferences.set(indexView, forKey: indexViewKey)
 
-		// The Extensions page lists extensions, the Contacts page contacts, and any other screen both
+		showContactKinds(indexViewInt: indexViewInt)
+	}
+
+	// The Extensions page lists extensions, the Contacts page contacts, and any other screen both
+	private func showContactKinds(indexViewInt: Int) {
 		MagicSearchSingleton.shared.showKinds(indexViewInt == 0 ? .extensions : (indexViewInt == 1 ? .contacts : .all))
 	}
 	

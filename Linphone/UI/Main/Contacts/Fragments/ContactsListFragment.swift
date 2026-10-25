@@ -30,6 +30,8 @@ struct ContactsListFragment: View {
     var startCallFunc: (_ addr: Address) -> Void
 	// Called when the last row is shown, for the list to ask for its next page
 	var loadMore: (() -> Void)?
+	// Whether the list is a picker's, see ContactRow.isPicker
+	var isPicker = false
 
 	var body: some View {
 		ForEach(Array(displayedContacts.enumerated()), id: \.element.id) { index, contactAvatarModel in
@@ -38,7 +40,8 @@ struct ContactsListFragment: View {
 				allContacts: displayedContacts,
 				index: index,
 				showingSheet: $showingSheet,
-				startCallFunc: startCallFunc
+				startCallFunc: startCallFunc,
+				isPicker: isPicker
 			)
 			.onAppear {
 				if index == displayedContacts.count - 1 {
@@ -46,6 +49,78 @@ struct ContactsListFragment: View {
 				}
 			}
 		}
+	}
+}
+
+/// The contacts of a picker, such as the one to start a call: the extensions, then the contacts, each under its own
+/// title, and a note when not all contacts are listed, see MagicSearchSingleton.updatePickerLists(text:digits:). Goes
+/// in a ScrollView.
+struct PickerContactsSections: View {
+	@ObservedObject var magicSearch = MagicSearchSingleton.shared
+
+	var startCallFunc: (_ addr: Address) -> Void
+
+	var body: some View {
+		if !magicSearch.pickerExtensions.isEmpty {
+			PickerSectionTitle(title: "contacts_list_extensions_title")
+
+			// Lazy, so only the rows on screen are drawn
+			LazyVStack(spacing: 8) {
+				ContactsListFragment(showingSheet: .constant(false), displayedContacts: magicSearch.pickerExtensions, startCallFunc: startCallFunc, isPicker: true)
+			}
+			.padding(.horizontal, 16)
+		}
+
+		if !magicSearch.pickerContacts.isEmpty {
+			PickerSectionTitle(title: "contacts_list_contacts_title")
+
+			LazyVStack(spacing: 8) {
+				ContactsListFragment(showingSheet: .constant(false), displayedContacts: magicSearch.pickerContacts, startCallFunc: startCallFunc, isPicker: true)
+			}
+			.padding(.horizontal, 16)
+		}
+
+		if magicSearch.pickerContactsTruncated {
+			PickerTruncatedNote()
+		}
+	}
+}
+
+/// The title of a section of a picker
+struct PickerSectionTitle: View {
+	var title: LocalizedStringKey
+
+	var body: some View {
+		HStack(alignment: .center) {
+			Text(title)
+				.default_text_style_800(styleSize: 16)
+
+			Spacer()
+		}
+		.padding(.vertical, 10)
+		.padding(.horizontal, 16)
+	}
+}
+
+/// The note under the contacts of a picker when some were left out, which says to search for them, or to search more
+/// precisely when they were left out of a search
+struct PickerTruncatedNote: View {
+	@ObservedObject var magicSearch = MagicSearchSingleton.shared
+
+	var body: some View {
+		Group {
+			if magicSearch.currentFilter.isEmpty {
+				Text("contacts_list_truncated_message")
+			} else {
+				Text("contacts_list_search_truncated_message")
+			}
+		}
+		.default_text_style_300(styleSize: 14)
+		.foregroundStyle(Color.grayMain2c500)
+		.multilineTextAlignment(.center)
+		.frame(maxWidth: .infinity)
+		.padding(.vertical, 10)
+		.padding(.horizontal, 16)
 	}
 }
 
@@ -59,6 +134,15 @@ struct ContactRow: View {
 	@Binding var showingSheet: Bool
 
 	var startCallFunc: (_ addr: Address) -> Void
+
+	// Whether the row is in a picker, such as the one to start a call: a tap only hands the contact to startCallFunc, on
+	// a phone number if it has no SIP address, and does not open the contact's details or actions as on the Extensions
+	// and Contacts pages, which the picker can be open over
+	var isPicker = false
+
+	// The phone numbers to choose from, for a contact of a picker with no SIP address and several numbers
+	@State private var phoneNumbersToChoose: [(label: String, phoneNumber: String)] = []
+	@State private var isShowPhoneNumberChoice = false
 
 	var body: some View {
 		HStack {
@@ -121,7 +205,7 @@ struct ContactRow: View {
 		.listRowSeparator(.hidden)
 		.background(.white)
 		.onTapGesture {
-			if SharedMainViewModel.shared.indexView <= 1 {
+			if !isPicker && SharedMainViewModel.shared.indexView <= 1 {
 				withAnimation {
 					SharedMainViewModel.shared.displayedFriend = contactAvatarModel
 				}
@@ -130,12 +214,60 @@ struct ContactRow: View {
 			if contactAvatarModel.friend != nil
 				&& contactAvatarModel.friend!.address != nil {
 				startCallFunc(contactAvatarModel.friend!.address!)
+			} else if isPicker {
+				usePhoneNumber()
 			}
 		}
 		.onLongPressGesture(minimumDuration: 0.2) {
-			if SharedMainViewModel.shared.indexView <= 1 {
+			if !isPicker && SharedMainViewModel.shared.indexView <= 1 {
 				contactsListViewModel.selectedFriend = contactAvatarModel
 				showingSheet.toggle()
+			}
+		}
+		.confirmationDialog(Text(contactAvatarModel.name), isPresented: $isShowPhoneNumberChoice, titleVisibility: .visible) {
+			ForEach(phoneNumbersToChoose.indices, id: \.self) { index in
+				let number = phoneNumbersToChoose[index]
+				Button(number.label.isEmpty ? number.phoneNumber : "\(number.label): \(number.phoneNumber)") {
+					usePhoneNumber(number.phoneNumber)
+				}
+			}
+
+			Button("dialog_cancel", role: .cancel) {}
+		}
+	}
+
+	// For a contact of a picker with no SIP address, as CardDAV contacts often are: hands its phone number to
+	// startCallFunc if it has one, or lets the user choose one if it has several. The numbers are read on the core
+	// queue, as the contact details screen does.
+	private func usePhoneNumber() {
+		guard let friend = contactAvatarModel.friend else {
+			return
+		}
+
+		CoreContext.shared.doOnCoreQueue { _ in
+			let numbers = friend.phoneNumbersWithLabel.map { (label: $0.label ?? "", phoneNumber: $0.phoneNumber) }
+
+			DispatchQueue.main.async {
+				if numbers.count == 1 {
+					usePhoneNumber(numbers[0].phoneNumber)
+				} else if numbers.count > 1 {
+					phoneNumbersToChoose = numbers
+					isShowPhoneNumberChoice = true
+				}
+			}
+		}
+	}
+
+	// Hands the phone number to startCallFunc as an address, made as the contact details screen makes it
+	private func usePhoneNumber(_ phoneNumber: String) {
+		CoreContext.shared.doOnCoreQueue { core in
+			guard let address = core.interpretUrl(url: phoneNumber, applyInternationalPrefix: LinphoneUtils.applyInternationalPrefix(core: core)) else {
+				Log.error("[ContactRow] Unable to make an address from the phone number of \(contactAvatarModel.name)")
+				return
+			}
+
+			DispatchQueue.main.async {
+				startCallFunc(address)
 			}
 		}
 	}

@@ -199,7 +199,9 @@
 "contacts_list_empty" = "No contacts fetched yet";
 "contacts_list_fetching" = "Fetching contacts…";
 "extensions_list_fetching" = "Fetching extensions…";
-"contacts_list_truncated_message" = "Not all contacts are shown here. Use search to find any other contact.";
+"contacts_list_truncated_message" = "Not all contacts are shown here. Use search to find others.";
+"contacts_list_extensions_title" = "Extensions";
+"contacts_list_contacts_title" = "Contacts";
 "contacts_list_search_truncated_message" = "Only the first matches are shown. Type more of the name to narrow the results.";
 "extensions_list_empty" = "No contacts fetched yet";
 "contacts_list_favourites_title" = "Favourites";
