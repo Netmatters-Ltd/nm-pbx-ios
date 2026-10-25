@@ -462,7 +462,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			let consolidatedPresenceTmp = friend.consolidatedPresence
 			let presenceActivityTmp = presenceModel?.activity?.type
 			let presenceNoteTmp = presenceModel?.getNote(lang: nil)?.content ?? ""
-			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(loadAddress)' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp))")
+			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(self.loadAddress)' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp))")
 			
 			DispatchQueue.main.async {
 				self.presenceStatus = consolidatedPresenceTmp
