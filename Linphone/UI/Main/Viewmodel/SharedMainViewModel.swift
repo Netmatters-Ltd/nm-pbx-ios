@@ -55,7 +55,8 @@ class SharedMainViewModel: ObservableObject {
     @Published var missedCallsCount: Int = 0
 	@Published var cardDavFriendsListsCount: Int = 0
 	
-	@Published var disableVideoCall: Bool = false
+	// NMPBX does not support video calls, so this is always true, whatever the provisioning says
+	@Published var disableVideoCall: Bool = true
 	@Published var disableChatFeature: Bool = false
 	@Published var disableMeetingFeature: Bool = false
 	
@@ -238,12 +239,9 @@ class SharedMainViewModel: ObservableObject {
     }
 	
 	func updateDisableVideoCall() {
-		CoreContext.shared.doOnCoreQueue { core in
-			let disableVideoCallFeatureTmp = !core.videoEnabled
-			
-			DispatchQueue.main.async {
-				self.disableVideoCall = disableVideoCallFeatureTmp
-			}
+		// Video calls stay hidden even if the core has video enabled, as NMPBX does not support them
+		DispatchQueue.main.async {
+			self.disableVideoCall = true
 		}
 	}
 	
