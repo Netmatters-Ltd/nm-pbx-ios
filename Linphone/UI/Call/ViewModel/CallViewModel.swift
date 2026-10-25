@@ -334,19 +334,23 @@ class CallViewModel: ObservableObject {
 		}
 	}
 	
+	/// Lists the calls of the core with their avatar models. The list is made whole on the core queue and published in
+	/// one go, so two calls in quick succession, as when switching between calls, replace each other's list instead of
+	/// both adding to it.
 	func getCallsList() {
-		self.callsContactAvatarModel.removeAll()
-		self.calls.removeAll()
 		coreContext.doOnCoreQueue { core in
-			let callsTmp = core.calls
-			callsTmp.forEach { call in
+			// Each call is kept with its model, so the two lists stay the same length
+			var callsWithModels: [(call: Call, avatarModel: ContactAvatarModel?)] = []
+			core.calls.forEach { call in
+				// Called back straight away, as this is already on the core queue
 				ContactsManager.shared.avatarModel(address: call.callLog!.remoteAddress!) { avatarResult in
-					DispatchQueue.main.async {
-						print("getCallsListgetCallsList 00 \(callsTmp.count)")
-						self.callsContactAvatarModel.append(avatarResult)
-						self.calls.append(call)
-					}
+					callsWithModels.append((call: call, avatarModel: avatarResult))
 				}
+			}
+
+			DispatchQueue.main.async {
+				self.callsContactAvatarModel = callsWithModels.map { $0.avatarModel }
+				self.calls = callsWithModels.map { $0.call }
 			}
 		}
 	}
