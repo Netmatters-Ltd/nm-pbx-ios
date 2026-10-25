@@ -855,23 +855,16 @@ struct ContentView: View {
 											.roundedCorner(10, corners: [.bottomRight, .bottomLeft])
 										}
 										
-										if sharedMainViewModel.indexView == 0 {
+										// One container for the Extensions and Contacts tabs, so switching between them keeps its
+										// NavigationView. Making a new one made the status bar briefly lose its light clock.
+										if sharedMainViewModel.indexView <= 1 {
 											ContactsContainer(
 												contactsListViewModel: $contactsListViewModel,
 												isShowEditContactFragment: $isShowEditContactFragment,
 												isShowDeleteContactPopup: $isShowDeleteContactPopup,
 												text: $text,
 												orientation: orientation,
-												mode: .extensions
-											)
-										} else if sharedMainViewModel.indexView == 1 {
-											ContactsContainer(
-												contactsListViewModel: $contactsListViewModel,
-												isShowEditContactFragment: $isShowEditContactFragment,
-												isShowDeleteContactPopup: $isShowDeleteContactPopup,
-												text: $text,
-												orientation: orientation,
-												mode: .contacts
+												mode: sharedMainViewModel.indexView == 0 ? .extensions : .contacts
 											)
 										} else if sharedMainViewModel.indexView == 2 {
 											HistoryContainer(
