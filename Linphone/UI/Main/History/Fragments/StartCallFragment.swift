@@ -326,6 +326,8 @@ struct StartCallFragment: View {
 		.navigationTitle("")
 		.navigationBarHidden(true)
 		.onAppear {
+			// Whatever tab was last open, the picker lists and searches every kind
+			magicSearch.showKinds(.all)
 			if !magicSearch.currentFilter.isEmpty || (self.contactsManager.lastSearch.isEmpty && self.contactsManager.lastSearchSuggestions.isEmpty) {
 				magicSearch.currentFilter = ""
 				magicSearch.searchForContacts()

@@ -40,8 +40,9 @@ struct ContactsInnerFragment: View {
 	var body: some View {
 		ZStack {
 			VStack(alignment: .leading) {
-				// The favourites of this page come from all of its contacts, not only the pages listed below
-				let favourites = magicSearch.favourites()
+				// The favourites of this page come from all of its contacts, not only the pages listed below. Split like
+				// the list, as the search may list every kind after a picker has been open.
+				let favourites = magicSearch.favourites().filter { mode == .extensions ? $0.isInternal : !$0.isInternal }
 				if !favourites.isEmpty {
 					HStack(alignment: .center) {
 						Text("contacts_list_favourites_title")
