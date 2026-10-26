@@ -226,6 +226,18 @@ class CorePreferences {
 	static var maxAccountsCount: Int {
 		return Config.get().getInt(section: "ui", key: "max_account", defaultValue: 0)
 	}
+
+	// Number of items listed in a page of a paged list, such as the contacts and the extensions. The next page is
+	// listed when the end of the list is reached. 0 or less disables paging.
+	static var pageSize: Int {
+		return Config.get().getInt(section: "ui", key: "page_size", defaultValue: 50)
+	}
+
+	// Number of rows a contact picker lists, such as the one to start a call: every extension, then contacts up to this
+	// number for both, and a note that the others can be found by searching. 0 or less lists every contact.
+	static var pickerListLimit: Int {
+		return Config.get().getInt(section: "ui", key: "picker_list_limit", defaultValue: 200)
+	}
 	
 	/*
 	static var configPath: String {

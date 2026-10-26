@@ -39,7 +39,20 @@ class ContactsListViewModel: ObservableObject {
 	let linphoneAddressBookFriendList = "NMPBX address-book"
 	let tempRemoteAddressBookFriendList = "TempRemoteDirectoryContacts address-book"
 	
-	init() {}
+	// The lists shown by the Extensions and Contacts pages, split from ContactsManager.viewAvatarListModel,
+	// which the search has already filtered and limited
+	@Published var extensionContacts: [ContactAvatarModel] = []
+	@Published var contacts: [ContactAvatarModel] = []
+	
+	private var viewAvatarListCancellable: AnyCancellable?
+	
+	init() {
+		viewAvatarListCancellable = ContactsManager.shared.$viewAvatarListModel
+			.sink { [weak self] avatarModels in
+				self?.extensionContacts = avatarModels.filter { $0.isInternal }
+				self?.contacts = avatarModels.filter { !$0.isInternal }
+			}
+	}
 	
 	func createOneToOneChatRoomWith(remote: Address) {
 		CoreContext.shared.doOnCoreQueue { core in
@@ -221,14 +234,20 @@ class ContactsListViewModel: ObservableObject {
 						}
 					}
 				}
+				// The list is read before the friend is removed, as it has none after. Marked stale so the lists and the
+				// lookup do not keep the contact.
+				let listName = self.selectedFriendToDelete!.friend!.friendList?.displayName ?? ""
 				self.selectedFriendToDelete!.friend!.remove()
+				LookupService.shared.markStale(listName)
 			} else if SharedMainViewModel.shared.displayedFriend != nil {
 				DispatchQueue.main.async {
 					withAnimation {
 						SharedMainViewModel.shared.displayedFriend = nil
 					}
 				}
+				let listName = SharedMainViewModel.shared.displayedFriend!.friend!.friendList?.displayName ?? ""
 				SharedMainViewModel.shared.displayedFriend!.friend!.remove()
+				LookupService.shared.markStale(listName)
 			}
 			
 			MagicSearchSingleton.shared.searchForContacts()

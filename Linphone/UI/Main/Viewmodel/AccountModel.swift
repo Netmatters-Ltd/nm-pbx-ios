@@ -129,14 +129,11 @@ class AccountModel: ObservableObject {
 		let photoAvatarModelKey = usernaneAvatarTmp
 		
 		if !photoAvatarModelKey.isEmpty {
-			if preferences.object(forKey: photoAvatarModelKey) == nil {
-				self.saveImage(
-					image: ContactsManager.shared.textToImage(
-						firstName: usernaneAvatarTmp, lastName: "", useFullText: true),
-					name: usernaneAvatarTmp,
-					prefix: "-default")
-			} else {
-				photoAvatarModelTmp = preferences.string(forKey: photoAvatarModelKey)!
+			// No picture means the avatar shows initials. Initials used to be saved as a file named "-default",
+			// which is now ignored.
+			photoAvatarModelTmp = preferences.string(forKey: photoAvatarModelKey) ?? ""
+			if photoAvatarModelTmp.contains("-default") {
+				photoAvatarModelTmp = ""
 			}
 			
 			DispatchQueue.main.async { [self] in
@@ -290,28 +287,6 @@ class AccountModel: ObservableObject {
 			
 			if let authInfo = self.account.findAuthInfo() {
 				core.removeAuthInfo(info: authInfo)
-			}
-		}
-	}
-	
-	func saveImage(image: UIImage, name: String, prefix: String) {
-		guard let data = image.jpegData(compressionQuality: 1) ?? image.pngData() else {
-			return
-		}
-		
-		let photoAvatarModelKey = name
-		
-		ContactsManager.shared.awaitDataWrite(data: data, name: name, prefix: prefix) { result in
-			UserDefaults.standard.set(result, forKey: photoAvatarModelKey)
-			
-			self.photoAvatarModel = ""
-			self.imagePathAvatar = nil
-			NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
-			
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-				self.photoAvatarModel = result
-				self.imagePathAvatar = self.getImagePath()
-				NotificationCenter.default.post(name: NSNotification.Name("ImageChanged"), object: nil)
 			}
 		}
 	}

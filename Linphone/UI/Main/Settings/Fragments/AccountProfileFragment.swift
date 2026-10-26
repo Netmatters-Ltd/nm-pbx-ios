@@ -665,15 +665,8 @@ struct AccountProfileFragment: View {
 	}
 	
 	func saveImage() {
-		let accountModel = CoreContext.shared.accounts[accountProfileViewModel.accountModelIndex ?? 0]
-		let usernameTmp = CoreContext.shared.accounts[accountProfileViewModel.accountModelIndex ?? 0].usernaneAvatar
-		
-		accountProfileViewModel.saveImage(
-			image: selectedImage
-			?? ContactsManager.shared.textToImage(
-				firstName: accountModel.avatarModel!.name, lastName: ""),
-			name: usernameTmp,
-			prefix: ((selectedImage == nil) ? "-default" : ""))
+		// Without an image the picture is removed, and the avatar shows initials
+		accountProfileViewModel.saveImage(image: selectedImage)
 	}
 }
 // swiftlint:enable type_body_length

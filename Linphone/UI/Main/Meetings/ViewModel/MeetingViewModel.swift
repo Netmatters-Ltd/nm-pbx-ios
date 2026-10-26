@@ -354,7 +354,7 @@ class MeetingViewModel: ObservableObject {
 			if let myAddr = core.defaultAccount?.params?.identityAddress {
 				let isOrganizer = (organizer != nil) ? myAddr.weakEqual(address2: organizer!) : false
 				organizerFound = organizerFound || isOrganizer
-				ContactAvatarModel.getAvatarModelFromAddress(address: myAddr) { avatarResult in
+				ContactsManager.shared.avatarModel(address: myAddr) { avatarResult in
 					DispatchQueue.main.async {
 						self.myself = SelectedAddressModel(addr: myAddr, avModel: avatarResult, isOrg: isOrganizer)
 					}
@@ -365,7 +365,7 @@ class MeetingViewModel: ObservableObject {
 				if let addr = pInfo.address {
 					let isOrganizer = (organizer != nil) ? addr.weakEqual(address2: organizer!) : false
 					organizerFound = organizerFound || isOrganizer
-					ContactAvatarModel.getAvatarModelFromAddress(address: addr) { avatarResult in
+					ContactsManager.shared.avatarModel(address: addr) { avatarResult in
 						DispatchQueue.main.async {
 							self.participants.append(SelectedAddressModel(addr: addr, avModel: avatarResult, isOrg: isOrganizer))
 						}
@@ -375,7 +375,7 @@ class MeetingViewModel: ObservableObject {
 			
 			// if didn't find organizer, add him
 			if !organizerFound, let org = organizer {
-				ContactAvatarModel.getAvatarModelFromAddress(address: org) { avatarResult in
+				ContactsManager.shared.avatarModel(address: org) { avatarResult in
 					DispatchQueue.main.async {
 						self.participants.append(SelectedAddressModel(addr: org, avModel: avatarResult, isOrg: true))
 					}

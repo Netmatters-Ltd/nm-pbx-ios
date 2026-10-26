@@ -183,6 +183,8 @@
 		D7C500402D27F16C00DD53EC /* AccountSettingsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C5003F2D27F16900DD53EC /* AccountSettingsFragment.swift */; };
 		D7C500422D2BE98100DD53EC /* AccountSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */; };
 		D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */; };
+		D7CA4DA1000000000000002A /* LookupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000002B /* LookupService.swift */; };
+		D7CA4DA1000000000000003A /* ContactImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CA4DA1000000000000003B /* ContactImageStore.swift */; };
 		D7CEE0352B7A210300FD79B7 /* ConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */; };
 		D7CEE0382B7A214F00FD79B7 /* ConversationsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */; };
 		D7CEE03B2B7A234200FD79B7 /* ConversationsFragment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */; };
@@ -435,6 +437,8 @@
 		D7C5003F2D27F16900DD53EC /* AccountSettingsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsFragment.swift; sourceTree = "<group>"; };
 		D7C500412D2BE96E00DD53EC /* AccountSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsViewModel.swift; sourceTree = "<group>"; };
 		D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDavProvisioningManager.swift; sourceTree = "<group>"; };
+		D7CA4DA1000000000000002B /* LookupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupService.swift; sourceTree = "<group>"; };
+		D7CA4DA1000000000000003B /* ContactImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImageStore.swift; sourceTree = "<group>"; };
 		D7CEE0342B7A210300FD79B7 /* ConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsView.swift; sourceTree = "<group>"; };
 		D7CEE0372B7A214F00FD79B7 /* ConversationsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsListViewModel.swift; sourceTree = "<group>"; };
 		D7CEE03A2B7A234200FD79B7 /* ConversationsFragment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationsFragment.swift; sourceTree = "<group>"; };
@@ -931,6 +935,8 @@
 			children = (
 				D777DBB22AE12C5900565A99 /* ContactsManager.swift */,
 				D7CA4DA1000000000000001B /* CardDavProvisioningManager.swift */,
+				D7CA4DA1000000000000002B /* LookupService.swift */,
+				D7CA4DA1000000000000003B /* ContactImageStore.swift */,
 			);
 			path = Contacts;
 			sourceTree = "<group>";
@@ -1469,6 +1475,8 @@
 				D759CB662C3FBE1D00AC35E8 /* StartConversationViewModel.swift in Sources */,
 				D777DBB32AE12C5900565A99 /* ContactsManager.swift in Sources */,
 				D7CA4DA1000000000000001A /* CardDavProvisioningManager.swift in Sources */,
+				D7CA4DA1000000000000002A /* LookupService.swift in Sources */,
+				D7CA4DA1000000000000003A /* ContactImageStore.swift in Sources */,
 				D720E6AD2BAD822000DDFD87 /* ParticipantModel.swift in Sources */,
 				D796F2002B0BB61A0041115F /* ToastViewModel.swift in Sources */,
 				D7C3650A2AF001C300FE6142 /* EditContactFragment.swift in Sources */,
@@ -1673,7 +1681,7 @@
 				CODE_SIGN_ENTITLEMENTS = msgNotificationService/msgNotificationService.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -1692,7 +1700,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.msgnotification";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1715,7 +1723,7 @@
 				CODE_SIGN_ENTITLEMENTS = msgNotificationService/msgNotificationService.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -1731,7 +1739,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.msgnotification";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1874,7 +1882,7 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 25;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
@@ -1905,9 +1913,9 @@
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = NO;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = NO;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleLightContent;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
@@ -1915,7 +1923,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 6.1.5;
+				MARKETING_VERSION = 6.3.0;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1942,7 +1950,7 @@
 				CODE_SIGN_ENTITLEMENTS = Linphone/Linphone.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 25;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Linphone/Preview Content\"";
 				DEVELOPMENT_TEAM = WCG94F5H22;
@@ -1969,9 +1977,9 @@
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = NO;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = NO;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleLightContent;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
@@ -1979,7 +1987,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 6.1.5;
+				MARKETING_VERSION = 6.3.0;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2004,7 +2012,7 @@
 				CODE_SIGN_ENTITLEMENTS = linphoneExtension/linphoneExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -2019,7 +2027,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.linphoneext";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -2038,7 +2046,7 @@
 				CODE_SIGN_ENTITLEMENTS = linphoneExtension/linphoneExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -2053,7 +2061,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.linphoneext";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -2073,7 +2081,7 @@
 				CODE_SIGN_ENTITLEMENTS = intentsExtension/intentsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -2088,7 +2096,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.intentsExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -2110,7 +2118,7 @@
 				CODE_SIGN_ENTITLEMENTS = intentsExtension/intentsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = WCG94F5H22;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -2125,7 +2133,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 6.1.0;
+				MARKETING_VERSION = 6.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.netmatters.nm-pbx.intentsExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

@@ -131,13 +131,6 @@ struct ConversationInfoFragment: View {
 													}
 												}
 												.padding(.top, 5)
-											} else if !avatarModel.lastPresenceInfo.isEmpty {
-												Text(avatarModel.lastPresenceInfo)
-													.foregroundStyle(Color.grayMain2c400)
-													.multilineTextAlignment(.center)
-													.default_text_style_300(styleSize: 12)
-													.frame(maxWidth: .infinity)
-													.padding(.top, 5)
 											} else {
 												Text("")
 													.frame(height: 20)
@@ -312,6 +305,7 @@ struct ConversationInfoFragment: View {
 															Avatar(contactAvatarModel: participantConversationModel, avatarSize: 50)
 														} else {
 															let avatarSize = 50.0
+															if let photo = accountModel.photoAvatarModel, !photo.isEmpty {
 															AsyncImage(url: CoreContext.shared.accounts[accountProfileViewModel.accountModelIndex!].imagePathAvatar) { image in
 																switch image {
 																case .empty:
@@ -333,6 +327,15 @@ struct ConversationInfoFragment: View {
 																@unknown default:
 																	EmptyView()
 																}
+															}
+															} else {
+																// No picture, the avatar shows initials
+																Image(uiImage: contactsManager.textToImage(
+																	firstName: accountModel.avatarModel?.name ?? "",
+																	lastName: ""))
+																.resizable()
+																.frame(width: avatarSize, height: avatarSize)
+																.clipShape(Circle())
 															}
 														}
 														

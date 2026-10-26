@@ -41,20 +41,18 @@ struct EditContactView: UIViewControllerRepresentable {
 				)
 				
 				let imageThumbnail = UIImage(data: contact!.thumbnailImageData ?? Data())
-				ContactsManager.shared.saveImage(
-					image: imageThumbnail
-					?? ContactsManager.shared.textToImage(
-						firstName: cnc.givenName.isEmpty
-						&& cnc.familyName.isEmpty
-						&& cnc.phoneNumbers.first?.value.stringValue != nil
-						? cnc.phoneNumbers.first!.value.stringValue
-						: cnc.givenName, lastName: cnc.familyName),
+				ContactsManager.shared.updateFriend(
 					name: cnc.givenName + cnc.familyName,
-					prefix: ((imageThumbnail == nil) ? "-default" : ""),
 					contact: newContact,
 					linphoneFriend: "Native address-book",
-					existingFriend: ContactsManager.shared.getFriendWithContact(contact: newContact)) {
-						MagicSearchSingleton.shared.searchForContacts()
+					existingFriend: ContactsManager.shared.getFriendWithContact(contact: newContact)) { friend in
+						if let friend = friend, let imageThumbnail = imageThumbnail {
+							ContactsManager.shared.saveImage(image: imageThumbnail, friend: friend) {
+								MagicSearchSingleton.shared.searchForContacts()
+							}
+						} else {
+							MagicSearchSingleton.shared.searchForContacts()
+						}
 					}
 			}
 			viewController.dismiss(animated: true, completion: {})

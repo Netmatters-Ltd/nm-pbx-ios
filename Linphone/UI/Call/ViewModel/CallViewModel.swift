@@ -103,14 +103,37 @@ class CallViewModel: ObservableObject {
 			self.resetCallView()
 		}
 	}
-	
+
+	// Follows the calls of the core, so the view moves to the call that has become the current one, such as a second
+	// call started while another was ongoing, which puts the other on hold. Nothing else resets the view then for a
+	// one-to-one call, so it would go on showing the call on hold, and offer a blind transfer instead of an attended
+	// one. Added the first time the view is reset, as the core is running by then. Must be called on the core queue.
+	private func addCoreDelegateIfNeeded(core: Core) {
+		guard mCoreDelegate == nil else {
+			return
+		}
+
+		mCoreDelegate = CoreDelegateStub(onCallStateChanged: { (core: Core, _: Call, _: Call.State, _: String) in
+			// The SDK gives the same Swift object for a call every time, so a different object is a different call
+			if let currentCall = core.currentCall, currentCall !== self.currentCall {
+				// Reset outside the callback, as it reads the calls again
+				DispatchQueue.main.async {
+					self.resetCallView()
+				}
+			}
+		})
+		core.addDelegate(delegate: mCoreDelegate!)
+	}
+
 	func resetCallView() {
 		DispatchQueue.main.async {
 			self.displayName = ""
 			self.avatarModel = nil
 		}
-		
+
 		coreContext.doOnCoreQueue { core in
+			self.addCoreDelegateIfNeeded(core: core)
+
             if (core.currentCall != nil && core.currentCall!.remoteAddress != nil) || (core.calls.first != nil && core.calls.first!.state == .Paused) {
                 let currentCallTmp = core.currentCall ?? core.calls.first
                 
@@ -194,7 +217,7 @@ class CallViewModel: ObservableObject {
 						self.displayName = displayNameTmp
 					}
 					
-					ContactAvatarModel.getAvatarModelFromAddress(address: self.currentCall!.remoteAddress!) { avatarResult in
+					ContactsManager.shared.avatarModel(address: self.currentCall!.remoteAddress!) { avatarResult in
 						DispatchQueue.main.async {
 							self.avatarModel = avatarResult
 						}
@@ -311,19 +334,23 @@ class CallViewModel: ObservableObject {
 		}
 	}
 	
+	/// Lists the calls of the core with their avatar models. The list is made whole on the core queue and published in
+	/// one go, so two calls in quick succession, as when switching between calls, replace each other's list instead of
+	/// both adding to it.
 	func getCallsList() {
-		self.callsContactAvatarModel.removeAll()
-		self.calls.removeAll()
 		coreContext.doOnCoreQueue { core in
-			let callsTmp = core.calls
-			callsTmp.forEach { call in
-				ContactAvatarModel.getAvatarModelFromAddress(address: call.callLog!.remoteAddress!) { avatarResult in
-					DispatchQueue.main.async {
-						print("getCallsListgetCallsList 00 \(callsTmp.count)")
-						self.callsContactAvatarModel.append(avatarResult)
-						self.calls.append(call)
-					}
+			// Each call is kept with its model, so the two lists stay the same length
+			var callsWithModels: [(call: Call, avatarModel: ContactAvatarModel?)] = []
+			core.calls.forEach { call in
+				// Called back straight away, as this is already on the core queue
+				ContactsManager.shared.avatarModel(address: call.callLog!.remoteAddress!) { avatarResult in
+					callsWithModels.append((call: call, avatarModel: avatarResult))
 				}
+			}
+
+			DispatchQueue.main.async {
+				self.callsContactAvatarModel = callsWithModels.map { $0.avatarModel }
+				self.calls = callsWithModels.map { $0.call }
 			}
 		}
 	}

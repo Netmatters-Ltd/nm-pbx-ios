@@ -30,7 +30,10 @@ struct ContactsView: View {
 
 	var body: some View {
 		NavigationView {
+			// A new page for each mode, so its list and sheets start afresh on a tab switch, as when each tab had its own
+			// NavigationView
 			ContactsFragment(isShowDeletePopup: $isShowDeletePopup, text: $text, mode: mode)
+				.id(mode)
 		}
 		.navigationViewStyle(.stack)
 	}

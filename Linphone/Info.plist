@@ -144,5 +144,7 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<false/>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>

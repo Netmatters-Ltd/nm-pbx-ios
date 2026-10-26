@@ -552,6 +552,7 @@ struct ContentView: View {
                                                     let finalUrl = imagePath.appendingQueryItem("v", value: UUID().uuidString)
 
                                                     ZStack(alignment: .bottomTrailing) {
+                                                        if let photo = account.photoAvatarModel, !photo.isEmpty {
                                                         AsyncImage(url: finalUrl)
                                                             { image in
                                                                 switch image {
@@ -595,6 +596,16 @@ struct ContentView: View {
                                                             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImageChanged"))) { _ in
                                                                 imageTmp = nil
                                                             }
+                                                        } else {
+                                                            // No picture, the avatar shows initials
+                                                            Image(uiImage: contactsManager.textToImage(firstName: account.avatarModel?.name ?? "", lastName: ""))
+                                                                .resizable()
+                                                                .frame(width: avatarSize, height: avatarSize)
+                                                                .clipShape(Circle())
+                                                                .onTapGesture {
+                                                                    showPresencePicker = true
+                                                                }
+                                                        }
 
                                                         if presenceViewModel.currentPresence != .offline {
                                                             Circle()
@@ -770,7 +781,7 @@ struct ContentView: View {
 													.onChange(of: text) { newValue in
 														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
-															magicSearch.searchForContacts()
+															magicSearch.searchForContactsDebounced()
 														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															if text.isEmpty {
 																historyListVM.resetFilterCallLogs()
@@ -812,7 +823,7 @@ struct ContentView: View {
 													.onChange(of: text) { newValue in
 														if sharedMainViewModel.indexView <= 1 {
 															magicSearch.currentFilter = newValue
-															magicSearch.searchForContacts()
+															magicSearch.searchForContactsDebounced()
 														} else if let historyListVM = historyListViewModel, sharedMainViewModel.indexView == 2 {
 															historyListVM.filterCallLogs(filter: text)
 														} else if let conversationsListVM = conversationsListViewModel, sharedMainViewModel.indexView == 3 {
@@ -844,23 +855,16 @@ struct ContentView: View {
 											.roundedCorner(10, corners: [.bottomRight, .bottomLeft])
 										}
 										
-										if sharedMainViewModel.indexView == 0 {
+										// One container for the Extensions and Contacts tabs, so switching between them keeps its
+										// NavigationView. Making a new one made the status bar briefly lose its light clock.
+										if sharedMainViewModel.indexView <= 1 {
 											ContactsContainer(
 												contactsListViewModel: $contactsListViewModel,
 												isShowEditContactFragment: $isShowEditContactFragment,
 												isShowDeleteContactPopup: $isShowDeleteContactPopup,
 												text: $text,
 												orientation: orientation,
-												mode: .extensions
-											)
-										} else if sharedMainViewModel.indexView == 1 {
-											ContactsContainer(
-												contactsListViewModel: $contactsListViewModel,
-												isShowEditContactFragment: $isShowEditContactFragment,
-												isShowDeleteContactPopup: $isShowDeleteContactPopup,
-												text: $text,
-												orientation: orientation,
-												mode: .contacts
+												mode: sharedMainViewModel.indexView == 0 ? .extensions : .contacts
 											)
 										} else if sharedMainViewModel.indexView == 2 {
 											HistoryContainer(

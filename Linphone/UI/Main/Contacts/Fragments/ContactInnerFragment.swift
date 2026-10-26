@@ -108,12 +108,6 @@ struct ContactInnerFragment: View {
 													.frame(maxWidth: .infinity)
 													.padding(.top, 2)
 											}
-										} else if !contactAvatarModel.lastPresenceInfo.isEmpty {
-											Text(contactAvatarModel.lastPresenceInfo)
-												.foregroundStyle(Color.grayMain2c400)
-												.multilineTextAlignment(.center)
-												.default_text_style_300(styleSize: 12)
-												.frame(maxWidth: .infinity)
 										}
 									}
 								}

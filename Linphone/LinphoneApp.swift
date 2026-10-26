@@ -139,7 +139,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 		if let coreContext = coreContext {
 			coreContext.doOnCoreQueue(synchronous: true) { core in
 				Log.info("applicationWillTerminate - Stopping linphone core")
-				MagicSearchSingleton.shared.destroyMagicSearch()
+				ContactsManager.shared.destroyMagicSearch()
 				if core.globalState != GlobalState.Off {
 					core.stop()
 				} else {

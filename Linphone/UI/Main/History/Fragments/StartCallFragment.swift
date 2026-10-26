@@ -129,7 +129,7 @@ struct StartCallFragment: View {
 							.padding(.horizontal, 30)
 							.onChange(of: startCallViewModel.searchField) { newValue in
 								magicSearch.currentFilter = newValue
-								magicSearch.searchForContacts()
+								magicSearch.searchForContactsDebounced()
 							}
 							.simultaneousGesture(TapGesture().onEnded {
 								showingDialer = false
@@ -237,18 +237,8 @@ struct StartCallFragment: View {
 					
 					ZStack {
 						ScrollView {
-							if !ContactsManager.shared.lastSearch.isEmpty {
-								HStack(alignment: .center) {
-									Text("contacts_list_all_contacts_title")
-										.default_text_style_800(styleSize: 16)
-									
-									Spacer()
-								}
-								.padding(.vertical, 10)
-								.padding(.horizontal, 16)
-							}
-							
-							ContactsListFragment(showingSheet: .constant(false), displayedContacts: contactsManager.avatarListModel, startCallFunc: { addr in
+							// The extensions, then the contacts, each under its own title
+							PickerContactsSections(startCallFunc: { addr in
 								if callViewModel.isTransferInsteadCall {
 									showingDialer = false
 									
@@ -291,8 +281,7 @@ struct StartCallFragment: View {
 									}
 								}
 							})
-							.padding(.horizontal, 16)
-							
+
 							if !contactsManager.lastSearchSuggestions.isEmpty {
 								HStack(alignment: .center) {
 									Text("generic_address_picker_suggestions_list_title")
@@ -321,10 +310,15 @@ struct StartCallFragment: View {
 		.navigationTitle("")
 		.navigationBarHidden(true)
 		.onAppear {
+			// Whatever tab was last open, the picker lists and searches every kind, until it goes
+			magicSearch.pickerAppeared()
 			if !magicSearch.currentFilter.isEmpty || (self.contactsManager.lastSearch.isEmpty && self.contactsManager.lastSearchSuggestions.isEmpty) {
 				magicSearch.currentFilter = ""
 				magicSearch.searchForContacts()
 			}
+		}
+		.onDisappear {
+			magicSearch.pickerDisappeared()
 		}
 	}
 	

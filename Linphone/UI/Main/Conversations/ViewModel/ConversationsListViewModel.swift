@@ -66,7 +66,7 @@ class ConversationsListViewModel: ObservableObject {
 	func updateChatRoomsList() {
 		CoreContext.shared.doOnCoreQueue { _ in
 			if !self.conversationsList.isEmpty {
-				self.contactsManager.avatarListModel.forEach { contactAvatarModel in
+				self.contactsManager.currentAvatarSnapshot().forEach { contactAvatarModel in
 					self.conversationsList.forEach { conversationModel in
 						if conversationModel.participantsAddress.contains(contactAvatarModel.address) {
 							if conversationModel.isGroup && conversationModel.participantsAddress.count > 1 {
@@ -125,7 +125,7 @@ class ConversationsListViewModel: ObservableObject {
 	
 	func updateChatRoom(address: String) {
 		CoreContext.shared.doOnCoreQueue { _ in
-			if let contactAvatarModel = self.contactsManager.avatarListModel.first(where: { $0.addresses.contains(address) }) {
+			if let contactAvatarModel = self.contactsManager.currentAvatarSnapshot().first(where: { $0.addresses.contains(address) }) {
 				self.conversationsList.forEach { conversationModel in
 					if conversationModel.participantsAddress.contains(contactAvatarModel.address) {
 						if conversationModel.isGroup && conversationModel.participantsAddress.count > 1 {

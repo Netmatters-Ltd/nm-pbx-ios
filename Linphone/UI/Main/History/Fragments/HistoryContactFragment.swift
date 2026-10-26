@@ -342,7 +342,7 @@ struct HistoryContactFragment: View {
 							.background(Color.gray100)
 							
 							VStack(spacing: 0) {
-								let callLogsFilter = historyListViewModel.callLogs.filter({ $0.address == historyModel.address })
+								let callLogsFilter = historyListViewModel.callLogsTmp.filter({ $0.address == historyModel.address })
 								
 								ForEach(0..<callLogsFilter.count, id: \.self) { index in
 									HStack {
@@ -435,14 +435,6 @@ struct AvatarPresenceView: View {
 				}
 			}
 			.padding(.top, 5)
-		} else if !avatarModel.lastPresenceInfo.isEmpty {
-			Text(avatarModel.lastPresenceInfo)
-				.foregroundStyle(Color.grayMain2c400)
-				.multilineTextAlignment(.center)
-				.default_text_style_300(styleSize: 12)
-				.frame(maxWidth: .infinity)
-				.frame(height: 20)
-				.padding(.top, 5)
 		} else {
 			Text("").frame(height: 20)
 		}

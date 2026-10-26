@@ -35,14 +35,21 @@ class HistoryModel: ObservableObject, Identifiable {
 	@Published var isConf: Bool
 	@Published var addressLinphone: Address
 	@Published var address: String
-	@Published var addressName: String
+	@Published var addressName: String {
+		didSet {
+			searchName = ContactAvatarModel.normalisedForSearch(addressName)
+		}
+	}
+	// The name as the filter of the list compares it, lowercase and without accents, kept up to date as the name
+	// changes so a search does not have to prepare every name again. Only used on the main thread.
+	private(set) var searchName = ""
 	@Published var isOutgoing: Bool
 	@Published var status: Call.Status
 	@Published var startDate: time_t
 	@Published var duration: Int
 	@Published var isFriend: Bool = false
 	@Published var avatarModel: ContactAvatarModel?
-	
+
 	init(callLog: CallLog) {
 		self.callLog = callLog
 		self.callLogId = ""
@@ -120,32 +127,14 @@ class HistoryModel: ObservableObject, Identifiable {
 			}
 			return
 		}
-		
-		let addressFriendTmp = ContactsManager.shared.getFriendWithAddress(address: address)
-		if let addressFriendTmp = addressFriendTmp {
-			let addressNameTmp = self.addressName
-			
-			let avatarModelTmp = ContactsManager.shared.avatarListModel.first(where: {
-				guard let friend = $0.friend else { return false }
-				return friend.name == addressFriendTmp.name &&
-					   friend.address?.asStringUriOnly() == addressFriendTmp.address?.asStringUriOnly()
-			}) ?? ContactAvatarModel(
-				friend: nil,
-				name: self.addressName,
-				address: self.address,
-				withPresence: false
-			)
-			
-			let addressFriendNameTmp = addressFriendTmp.name ?? addressNameTmp
-			
+
+		ContactsManager.shared.avatarModel(address: address) { avatarModel in
 			DispatchQueue.main.async {
-				self.isFriend = true
-				self.addressName = addressFriendNameTmp
-				self.avatarModel = avatarModelTmp
-			}
-		} else {
-			DispatchQueue.main.async {
-				self.avatarModel = ContactAvatarModel(friend: nil, name: self.addressName, address: self.address, withPresence: false)
+				self.isFriend = avatarModel.friend != nil
+				if avatarModel.friend != nil {
+					self.addressName = avatarModel.name
+				}
+				self.avatarModel = avatarModel
 			}
 		}
 	}

@@ -45,7 +45,7 @@ class AddParticipantsViewModel: ObservableObject {
 			participantsToAdd.remove(at: idx)
 		} else {
 			Log.info("[\(AddParticipantsViewModel.TAG)] Adding participant \(addr.asStringUriOnly()) to selection")
-			ContactAvatarModel.getAvatarModelFromAddress(address: addr) { avatarResult in
+			ContactsManager.shared.avatarModel(address: addr) { avatarResult in
 				DispatchQueue.main.async {
 					self.participantsToAdd.append(SelectedAddressModel(addr: addr, avModel: avatarResult))
 				}

@@ -97,7 +97,7 @@ class ConversationModel: ObservableObject, Identifiable {
 		
 		let avatarModelTmp: ContactAvatarModel
 		if let addressFriend = addressFriend, !self.isGroup {
-			if let existingAvatarModel = ContactsManager.shared.avatarListModel.first(where: {
+			if let existingAvatarModel = ContactsManager.shared.currentAvatarSnapshot().first(where: {
 				$0.friend?.name == addressFriend.name &&
 				$0.friend?.address?.asStringUriOnly() == addressFriend.address?.asStringUriOnly()
 			}) {
@@ -379,7 +379,7 @@ class ConversationModel: ObservableObject, Identifiable {
 		coreContext.doOnCoreQueue { _ in
 			if !self.isGroup {
 				if self.chatRoom.participants.first != nil && self.chatRoom.participants.first!.address != nil {
-					ContactAvatarModel.getAvatarModelFromAddress(address: self.chatRoom.participants.first!.address!) { avatarResult in
+					ContactsManager.shared.avatarModel(address: self.chatRoom.participants.first!.address!) { avatarResult in
 						let avatarModelTmp = avatarResult
 						let subjectTmp = avatarModelTmp.name
 						
