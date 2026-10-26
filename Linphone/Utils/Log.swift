@@ -32,7 +32,12 @@ class Log: LoggingServiceDelegate {
 	
 	static let instance = Log()
 		
-	var debugEnabled = true // Todo : bind to app parameters
+	#if DEBUG
+	var debugEnabled = true
+	#else
+	var debugEnabled = false
+	#endif
+
 	var service = LoggingService.Instance
 
 	private init() {

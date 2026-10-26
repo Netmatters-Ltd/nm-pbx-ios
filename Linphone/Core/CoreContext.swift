@@ -121,7 +121,8 @@ class CoreContext: ObservableObject {
 		monitor.start(queue: coreQueue)
 		
 		coreQueue.async {
-			LoggingService.Instance.logLevel = LogLevel.Debug
+			// The level follows Log.debugEnabled, which a fixed Debug level here would override
+			Log.instance.setMask()
 			Factory.Instance.logCollectionPath = Factory.Instance.getDataDir(context: UnsafeMutablePointer<Int8>(mutating: (Config.appGroupName as NSString).utf8String))
 			Factory.Instance.enableLogCollection(state: LogCollectionState.Disabled)
 			
