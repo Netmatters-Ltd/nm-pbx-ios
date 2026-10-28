@@ -860,6 +860,7 @@ struct ContentView: View {
 										if sharedMainViewModel.indexView <= 1 {
 											ContactsContainer(
 												contactsListViewModel: $contactsListViewModel,
+												isShowStartCallFragment: $isShowStartCallFragment,
 												isShowEditContactFragment: $isShowEditContactFragment,
 												isShowDeleteContactPopup: $isShowDeleteContactPopup,
 												text: $text,
@@ -1694,6 +1695,7 @@ struct ContentView: View {
 
 struct ContactsContainer: View {
 	@Binding var contactsListViewModel: ContactsListViewModel?
+	@Binding var isShowStartCallFragment: Bool
 	@Binding var isShowEditContactFragment: Bool
 	@Binding var isShowDeleteContactPopup: Bool
 	@Binding var text: String
@@ -1704,6 +1706,7 @@ struct ContactsContainer: View {
 		Group {
 			if let contactsListVM = contactsListViewModel {
 				ContactsView(
+					isShowStartCallFragment: $isShowStartCallFragment,
 					isShowEditContactFragment: $isShowEditContactFragment,
 					isShowDeletePopup: $isShowDeleteContactPopup,
 					text: $text,
