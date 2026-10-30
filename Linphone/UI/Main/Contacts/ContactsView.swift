@@ -23,6 +23,7 @@ struct ContactsView: View {
 
 	@EnvironmentObject var contactsListViewModel: ContactsListViewModel
 
+	@Binding var isShowStartCallFragment: Bool
 	@Binding var isShowEditContactFragment: Bool
 	@Binding var isShowDeletePopup: Bool
 	@Binding var text: String
@@ -30,10 +31,27 @@ struct ContactsView: View {
 
 	var body: some View {
 		NavigationView {
-			// A new page for each mode, so its list and sheets start afresh on a tab switch, as when each tab had its own
-			// NavigationView
-			ContactsFragment(isShowDeletePopup: $isShowDeletePopup, text: $text, mode: mode)
-				.id(mode)
+			ZStack(alignment: .bottomTrailing) {
+				// A new page for each mode, so its list and sheets start afresh on a tab switch, as when each tab had its own
+				// NavigationView
+				ContactsFragment(isShowDeletePopup: $isShowDeletePopup, text: $text, mode: mode)
+					.id(mode)
+
+				Button {
+					withAnimation {
+						isShowStartCallFragment.toggle()
+					}
+				} label: {
+					Image("phone-plus")
+						.renderingMode(.template)
+						.foregroundStyle(.white)
+						.padding()
+						.background(Color.orangeMain500)
+						.clipShape(Circle())
+						.shadow(color: .black.opacity(0.2), radius: 4)
+				}
+				.padding()
+			}
 		}
 		.navigationViewStyle(.stack)
 	}
@@ -41,6 +59,7 @@ struct ContactsView: View {
 
 #Preview {
 	ContactsView(
+		isShowStartCallFragment: .constant(false),
 		isShowEditContactFragment: .constant(false),
 		isShowDeletePopup: .constant(false),
 		text: .constant(""),
