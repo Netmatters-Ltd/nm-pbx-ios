@@ -40,7 +40,9 @@ struct ContactInnerActionsFragment: View {
 	var actionEditButton: () -> Void
 	
 	var body: some View {
-		if !CorePreferences.hideSipAddresses || (CorePreferences.hideSipAddresses && !contactAvatarModel.phoneNumbersWithLabel.isEmpty) {
+		// The SIP addresses are always listed, shown as their number, whatever hide_sip_addresses says: as on Android,
+		// which has no such setting, so an extension's number is shown. The other screens still follow the setting.
+		if !contactAvatarModel.addresses.isEmpty || !contactAvatarModel.phoneNumbersWithLabel.isEmpty {
 			HStack(alignment: .center) {
 				Text("contact_details_numbers_and_addresses_title")
 					.default_text_style_800(styleSize: 15)
@@ -67,56 +69,54 @@ struct ContactInnerActionsFragment: View {
 			
 			if informationIsOpen {
 				VStack(spacing: 0) {
-					if !CorePreferences.hideSipAddresses {
-						ForEach(0..<contactAvatarModel.addresses.count, id: \.self) { index in
+					ForEach(0..<contactAvatarModel.addresses.count, id: \.self) { index in
+						HStack {
 							HStack {
-								HStack {
-									VStack {
-										Text(String(localized: "sip_address") + ":")
-											.default_text_style_700(styleSize: 14)
-											.frame(maxWidth: .infinity, alignment: .leading)
-										Text(contactAvatarModel.addresses[index].sipUsername)
-											.default_text_style(styleSize: 14)
-											.frame(maxWidth: .infinity, alignment: .leading)
-											.lineLimit(1)
-											.fixedSize(horizontal: false, vertical: true)
-									}
-									
-									Spacer()
-									
-									Image("phone")
-										.renderingMode(.template)
-										.resizable()
-										.foregroundStyle(Color.grayMain2c600)
-										.frame(width: 25, height: 25)
-										.padding(.all, 10)
-								}
-								.padding(.vertical, 15)
-								.padding(.horizontal, 20)
-							}
-							.background(.white)
-							.onTapGesture {
-								CoreContext.shared.doOnCoreQueue { core in
-									do {
-										let address = try Factory.Instance.createAddress(addr: contactAvatarModel.addresses[index])
-										telecomManager.doCallOrJoinConf(address: address)
-									} catch {
-										Log.error("[ContactInnerActionsFragment] unable to create address for a new outgoing call : \(contactAvatarModel.addresses[index]) \(error) ")
-									}
-								}
-							}
-							.onLongPressGesture(minimumDuration: 0.2) {
-								contactsListViewModel.stringToCopy = contactAvatarModel.addresses[index]
-								showingSheet.toggle()
-							}
-							
-							if !contactAvatarModel.phoneNumbersWithLabel.isEmpty
-								|| index < contactAvatarModel.addresses.count - 1 {
 								VStack {
-									Divider()
+									Text(String(localized: "sip_address") + ":")
+										.default_text_style_700(styleSize: 14)
+										.frame(maxWidth: .infinity, alignment: .leading)
+									Text(contactAvatarModel.addresses[index].sipUsername)
+										.default_text_style(styleSize: 14)
+										.frame(maxWidth: .infinity, alignment: .leading)
+										.lineLimit(1)
+										.fixedSize(horizontal: false, vertical: true)
 								}
-								.padding(.horizontal)
+								
+								Spacer()
+								
+								Image("phone")
+									.renderingMode(.template)
+									.resizable()
+									.foregroundStyle(Color.grayMain2c600)
+									.frame(width: 25, height: 25)
+									.padding(.all, 10)
 							}
+							.padding(.vertical, 15)
+							.padding(.horizontal, 20)
+						}
+						.background(.white)
+						.onTapGesture {
+							CoreContext.shared.doOnCoreQueue { core in
+								do {
+									let address = try Factory.Instance.createAddress(addr: contactAvatarModel.addresses[index])
+									telecomManager.doCallOrJoinConf(address: address)
+								} catch {
+									Log.error("[ContactInnerActionsFragment] unable to create address for a new outgoing call : \(contactAvatarModel.addresses[index]) \(error) ")
+								}
+							}
+						}
+						.onLongPressGesture(minimumDuration: 0.2) {
+							contactsListViewModel.stringToCopy = contactAvatarModel.addresses[index]
+							showingSheet.toggle()
+						}
+						
+						if !contactAvatarModel.phoneNumbersWithLabel.isEmpty
+							|| index < contactAvatarModel.addresses.count - 1 {
+							VStack {
+								Divider()
+							}
+							.padding(.horizontal)
 						}
 					}
 					
