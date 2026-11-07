@@ -17,6 +17,10 @@ enum UserPresence: String, CaseIterable {
 		return self != .offline && self != .onCall
 	}
 
+	// The statuses the user can choose, in the order the picker lists them: the two that still take incoming calls
+	// first, then Away and Do Not Disturb, which the phone server treats as unavailable
+	static let selectable: [UserPresence] = [.online, .busy, .away, .doNotDisturb]
+
 	var label: String {
 		switch self {
 		case .online: return "Available"

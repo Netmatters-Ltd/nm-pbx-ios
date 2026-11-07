@@ -43,7 +43,7 @@ struct PresencePickerView: View {
 				.padding(.top, 16)
 				.padding(.bottom, 8)
 
-			ForEach(UserPresence.allCases.filter { $0.isUserSelectable }, id: \.self) { presence in
+			ForEach(UserPresence.selectable, id: \.self) { presence in
 				Button {
 					presenceVM.setPresence(presence, note: draftNote)
 					dismiss()
