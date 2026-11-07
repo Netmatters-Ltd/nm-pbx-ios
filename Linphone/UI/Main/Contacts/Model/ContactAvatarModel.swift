@@ -84,8 +84,14 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	@Published var presenceStatus: ConsolidatedPresence = .Offline
 	@Published var presenceActivity: PresenceActivity.Kind? = nil
 	@Published var presenceNote: String = ""
+	// The status taken from the extension's shared status tuple (see SharedStatus.colleaguePresence), which is shown
+	// instead of the one made from the consolidated presence and activity. nil where there is no shared status.
+	@Published var sharedPresence: UserPresence? = nil
 
 	var presenceUserStatus: UserPresence {
+		if let sharedPresence = sharedPresence {
+			return sharedPresence
+		}
 		switch presenceStatus {
 		case .Online:
 			// Person-level activity (e.g. <p2:busy/>) can arrive with the same or newer
@@ -429,6 +435,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 		var presenceStatusTmp: ConsolidatedPresence = .Offline
 		var presenceActivityTmp: PresenceActivity.Kind? = nil
 		var presenceNoteTmp = ""
+		var sharedPresenceTmp: UserPresence? = nil
 
 		if let friend = friend, presenceWanted == true {
 
@@ -438,6 +445,10 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			presenceStatusTmp = friend.consolidatedPresence
 			presenceActivityTmp = presenceModel?.activity?.type
 			presenceNoteTmp = presenceModel?.getNote(lang: nil)?.content ?? ""
+			if let shared = SharedStatus.colleaguePresence(model: presenceModel) {
+				sharedPresenceTmp = shared.presence
+				presenceNoteTmp = shared.note
+			}
 
 			if let delegate = self.friendDelegate {
 				friend.removeDelegate(delegate: delegate)
@@ -451,6 +462,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			self.presenceStatus = presenceStatusTmp
 			self.presenceActivity = presenceActivityTmp
 			self.presenceNote = presenceNoteTmp
+			self.sharedPresence = sharedPresenceTmp
 		}
 	}
 
@@ -461,13 +473,15 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			let presenceModel = friend.presenceModel
 			let consolidatedPresenceTmp = friend.consolidatedPresence
 			let presenceActivityTmp = presenceModel?.activity?.type
-			let presenceNoteTmp = presenceModel?.getNote(lang: nil)?.content ?? ""
-			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(self.loadAddress)' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp))")
-			
+			let shared = SharedStatus.colleaguePresence(model: presenceModel)
+			let presenceNoteTmp = shared?.note ?? presenceModel?.getNote(lang: nil)?.content ?? ""
+			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(self.loadAddress)' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp)) shared=\(shared?.presence.rawValue ?? "none")")
+
 			DispatchQueue.main.async {
 				self.presenceStatus = consolidatedPresenceTmp
 				self.presenceActivity = presenceActivityTmp
 				self.presenceNote = presenceNoteTmp
+				self.sharedPresence = shared?.presence
 			}
 		})
 
@@ -480,6 +494,7 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 		if let delegate = friendDelegate {
 			DispatchQueue.main.async {
 				self.presenceStatus = .Offline
+				self.sharedPresence = nil
 			}
 			if let friendTmp = friend {
 				friendTmp.removeDelegate(delegate: delegate)

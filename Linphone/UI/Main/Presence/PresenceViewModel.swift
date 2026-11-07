@@ -2,6 +2,16 @@ import Foundation
 import SwiftUI
 import linphonesw
 
+// The user's own status and message.
+//
+// Every publication says what the user chose and when, in its tuple id (see SharedStatus):
+// nmpbx-c.<status>.<chosen>.<device>. Where the customer is switched on for shared status, the phone server keeps one
+// shared status per extension and publishes it as an nmpbx-s. tuple; this app watches its own extension and follows
+// that tuple, so a status chosen on another app, the Portal or by a feature code shows here too. Where there is no
+// nmpbx-s. tuple the app keeps the status saved on this device, as before.
+//
+// The app only ever publishes a status the user chose on this device, or the shared status it is following, with the
+// time it was chosen. It never changes the status by itself.
 class PresenceViewModel: ObservableObject {
 	static let shared = PresenceViewModel()
 
@@ -11,285 +21,321 @@ class PresenceViewModel: ObservableObject {
 	private let configSection = "app"
 	private let configKeyStatus = "presence_status"
 	private let configKeyNote = "presence_note"
+	// Unix time in seconds the saved status was chosen. 0 (and missing, on a new installation or one upgraded from a
+	// version without it) means no choice yet, which never wins on the server.
+	private let configKeyChosen = "presence_chosen"
+	// Device token used only if the core has no +sip.instance to take it from
+	private let configKeyDeviceFallback = "presence_device"
 
-	// Delegate and guard for the subscribe-to-self sync on registration
-	private var selfFriend: Friend?
-	private var selfFriendDelegate: FriendDelegate?
-	private var didSyncFromServer = false
+	// The hidden friend list holding the account's own extension, so its presence is watched whether or not it is in
+	// the contacts. Not stored in the database, and of a kind and name the contacts lists ignore.
+	static let ownPresenceFriendListName = "NMPBX own presence"
 
-	// Called on startup — warms the UI state and pre-sets core.presenceModel from saved
-	// config so that when publishEnabled triggers the SDK's auto-publish on registration,
-	// it sends the correct saved status rather than the SDK default (Online).
+	// A status chosen on this device that the server's shared status may not show yet. Core queue only.
+	private struct PendingChoice {
+		let saved: SavedStatus
+		let madeAt: Date
+	}
+
+	private struct SavedStatus: Equatable {
+		var presence: UserPresence
+		var note: String
+		var chosen: Int
+	}
+
+	// Core queue only
+	private var pendingChoice: PendingChoice?
+	private var ownFriendList: FriendList?
+	private var ownFriend: Friend?
+	private var ownFriendDelegate: FriendDelegate?
+	private var pendingChoiceRecheck: DispatchWorkItem?
+
+	// MARK: - Called by the app
+
+	// Called on startup: shows the saved status and sets it as the core's presence model, so the PUBLISH the SDK
+	// sends on registration carries the saved choice with its original time.
 	func loadSavedPresence() {
 		CoreContext.shared.doOnCoreQueue { core in
-			let savedStatus = core.config?.getString(section: self.configSection, key: self.configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
-			let savedNote = core.config?.getString(section: self.configSection, key: self.configKeyNote, defaultString: "") ?? ""
-			let presence = UserPresence(rawValue: savedStatus) ?? .online
-			Log.info("[PRESENCE-DEBUG] loadSavedPresence: status=\(savedStatus) note='\(savedNote)' publish_presence=\(core.config?.getBool(section: self.configSection, key: "publish_presence", defaultValue: true) == true)")
-			DispatchQueue.main.async {
-				self.currentPresence = presence
-				self.customStatusNote = savedNote
-			}
-			self.publish(presence: presence, note: savedNote, core: core)
+			let saved = self.savedStatus(core: core)
+			Log.info("[PRESENCE] loadSavedPresence: status=\(saved.presence.rawValue) chosen=\(saved.chosen) note='\(saved.note)'")
+			self.showOnMain(saved)
+			self.publish(saved, core: core)
 		}
 	}
 
+	// Called from the UI (main thread) when the user picks a status or edits the message. A change of status or of
+	// message is a new choice, with the time it was made. Picking what is already shown is not a choice.
 	func setPresence(_ presence: UserPresence, note: String) {
-		// Update UI state immediately (called from main thread via UI)
+		let note = SharedStatus.sanitisedNote(note)
 		currentPresence = presence
 		customStatusNote = note
-		CoreContext.shared.doOnCoreQueue { core in
-			core.config?.setString(section: self.configSection, key: self.configKeyStatus, value: presence.rawValue)
-			core.config?.setString(section: self.configSection, key: self.configKeyNote, value: note)
-			self.publish(presence: presence, note: note, core: core)
-		}
-	}
 
-	// Called after registration. Subscribes to our own presence so that a status set
-	// on another device (e.g. the desktop) is picked up automatically. Falls back to
-	// local config if no NOTIFY arrives within 2 seconds.
-	func restoreOrGoOnline() {
-		didSyncFromServer = false
 		CoreContext.shared.doOnCoreQueue { core in
-			guard let ownAddress = core.defaultAccount?.params?.identityAddress else {
-				Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: no identity address on default account, falling back to local config")
-				self.publishLocalConfig(core: core)
+			let previous = self.savedStatus(core: core)
+			if previous.presence == presence && previous.note == note {
 				return
 			}
 
-			let savedStatus = core.config?.getString(section: self.configSection, key: self.configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
-			Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address=\(ownAddress.asStringUriOnly()) publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true) savedLocalStatus=\(savedStatus) currentPresence=\(self.currentPresence.rawValue)")
-
-			// Remove any leftover delegate from a previous registration cycle
-			if let prevDelegate = self.selfFriendDelegate, let prevFriend = self.selfFriend {
-				Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: removing leftover self-friend delegate from previous cycle")
-				prevFriend.removeDelegate(delegate: prevDelegate)
-			}
-
-			if let selfFriend = core.findFriend(address: ownAddress) {
-				Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: own address found in contacts (\(selfFriend.name ?? "no name")), attaching self-presence delegate")
-				// Our own extension is in the contact directory — subscribe to it
-				// to receive whatever was last published by any device.
-				let delegate = FriendDelegateStub(onPresenceReceived: { [weak self] (friend: Friend) in
-					// Log EVERY NOTIFY that fires — before the guard — so we can see
-					// whether duplicates are arriving after didSyncFromServer is set.
-					let alreadySynced = self?.didSyncFromServer ?? true
-					Log.info("[PRESENCE-DEBUG] restoreOrGoOnline: self-presence NOTIFY received (alreadySynced=\(alreadySynced)) consolidated=\(friend.consolidatedPresence) activity=\(String(describing: friend.presenceModel?.activity?.type)) nbServices=\(friend.presenceModel?.nbServices ?? 0) nbPersons=\(friend.presenceModel?.nbPersons ?? 0)")
-					guard let self = self, !alreadySynced else { return }
-					self.didSyncFromServer = true
-					// Remove delegate immediately so subsequent own-presence updates
-					// (from other contacts' views of us) don't re-trigger this path.
-					if let d = self.selfFriendDelegate {
-						friend.removeDelegate(delegate: d)
-						self.selfFriendDelegate = nil
-					}
-					self.applyServerPresence(from: friend, core: core)
-				})
-				self.selfFriend = selfFriend
-				self.selfFriendDelegate = delegate
-				selfFriend.addDelegate(delegate: delegate)
-			} else {
-				// Own address not in contacts — fall back immediately.
-				Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: own address NOT found in contacts, falling back to local config immediately")
-				self.publishLocalConfig(core: core)
-				return
-			}
-
-			// Fallback: if no NOTIFY arrives within 2 seconds, publish local config.
-			DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-				CoreContext.shared.doOnCoreQueue { core in
-					guard !self.didSyncFromServer else { return }
-					Log.warn("[PRESENCE-DEBUG] restoreOrGoOnline: no self-presence NOTIFY within 2s, falling back to local config")
-					self.didSyncFromServer = true
-					self.publishLocalConfig(core: core)
-				}
-			}
+			// Strictly newer than the previous choice, so two choices in the same second are told apart by the server
+			let now = Int(Date().timeIntervalSince1970)
+			let choice = SavedStatus(presence: presence, note: note, chosen: max(now, previous.chosen + 1))
+			Log.info("[PRESENCE] setPresence: new choice status=\(presence.rawValue) chosen=\(choice.chosen) note='\(note)'")
+			self.pendingChoice = PendingChoice(saved: choice, madeAt: Date())
+			self.save(choice, core: core)
+			self.publish(choice, core: core)
 		}
 	}
 
-	// MARK: - Private
+	// Called each time the default account registers (start-up, returning to the foreground, refresh, network
+	// change): publishes the saved choice with its original time, and makes sure the own extension is watched. If the
+	// server holds a newer shared status it ignores this publication, and the next NOTIFY brings the status to follow.
+	func onAccountRegistered() {
+		CoreContext.shared.doOnCoreQueue { core in
+			let saved = self.savedStatus(core: core)
+			Log.info("[PRESENCE] onAccountRegistered: republishing saved status=\(saved.presence.rawValue) chosen=\(saved.chosen)")
+			// A choice not taken up yet may not have reached the server (made while the network was down, for
+			// instance): its window starts again now that it is sent, so the older shared status that may come first
+			// does not replace it
+			if let pending = self.pendingChoice, pending.saved == saved {
+				self.pendingChoice = PendingChoice(saved: saved, madeAt: Date())
+			}
+			self.publish(saved, core: core)
+			self.watchOwnExtension(core: core)
+		}
+	}
 
-	// Reads the server's current presence for our own identity and publishes the same
-	// status so the aggregated state seen by other extensions is unchanged.
-	private func applyServerPresence(from friend: Friend, core: Core) {
-		// Log full PIDF structure so we can see exactly what the server sent back.
-		if let model = friend.presenceModel {
-			let nbSvc = model.nbServices
-			let nbPer = model.nbPersons
-			Log.info("[PRESENCE-DEBUG] applyServerPresence: model timestamp=\(model.timestamp) nbServices=\(nbSvc) nbPersons=\(nbPer)")
-			for i in 0..<nbSvc {
-				if let svc = model.getNthService(index: UInt(i)) {
-					Log.info("[PRESENCE-DEBUG] applyServerPresence: service[\(i)] id=\(svc.id ?? "?") basicStatus=\(svc.basicStatus)")
-				}
-			}
-			for i in 0..<nbPer {
-				if let per = model.getNthPerson(index: UInt(i)) {
-					let acts = (0..<per.nbActivities).compactMap { per.getNthActivity(index: UInt($0))?.type }
-					Log.info("[PRESENCE-DEBUG] applyServerPresence: person[\(i)] id=\(per.id ?? "?") activities=\(acts)")
-				}
-			}
-			if nbSvc == 0 && nbPer == 0 {
-				Log.warn("[PRESENCE-DEBUG] applyServerPresence: presence model has no services or persons")
-			}
+	// MARK: - Following the shared status
+
+	// Subscribes to the account's own extension through a hidden friend list, and keeps it subscribed for as long as
+	// the account is there. Done again on each registration, which only changes something if the account changed.
+	private func watchOwnExtension(core: Core) {
+		guard let identity = core.defaultAccount?.params?.identityAddress?.clone() else {
+			Log.warn("[PRESENCE] watchOwnExtension: no identity address on the default account")
+			return
+		}
+		identity.clean()
+		let ownUri = identity.asStringUriOnly()
+
+		let friendList: FriendList
+		if let existing = ownFriendList ?? core.getFriendListByName(name: Self.ownPresenceFriendListName) {
+			friendList = existing
 		} else {
-			Log.warn("[PRESENCE-DEBUG] applyServerPresence: presenceModel is nil")
+			guard let created = try? core.createFriendList() else {
+				Log.error("[PRESENCE] watchOwnExtension: could not create the own presence friend list")
+				return
+			}
+			created.displayName = Self.ownPresenceFriendListName
+			created.databaseStorageEnabled = false
+			core.addFriendList(list: created)
+			friendList = created
+			Log.info("[PRESENCE] watchOwnExtension: created the own presence friend list")
+		}
+		ownFriendList = friendList
+
+		// The presence server only answers subscriptions through its resource list server
+		let rlsUri = core.config?.getString(section: "carddav_provision", key: "rls_uri", defaultString: "") ?? ""
+		if !rlsUri.isEmpty && friendList.rlsUri != rlsUri {
+			friendList.rlsUri = rlsUri
 		}
 
-		// Check consolidatedPresence first: basic=closed produces no activity, so
-		// activity?.type is nil and UserPresence.from(nil) would wrongly return .online.
-		// consolidatedPresence == .Offline catches both basic=closed and permanent-absence.
-		guard friend.consolidatedPresence != .Offline else {
-			Log.info("[PRESENCE-DEBUG] applyServerPresence: server reports consolidated=Offline, falling back to local config")
-			publishLocalConfig(core: core)
+		if ownFriend?.address?.asStringUriOnly() == ownUri, friendList.findFriendByUri(uri: ownUri) != nil {
+			// Already watching this account
+			if !friendList.subscriptionsEnabled {
+				friendList.subscriptionsEnabled = true
+			}
 			return
 		}
 
-		let activityKind = friend.presenceModel?.activity?.type
-		var presence = UserPresence.from(
-			activityKind: activityKind,
-			description: activityKind == .Other ? UserPresence.dndDescription : nil
-		)
-		// Mirror the ContactAvatarModel fix: the existing Offline guard above already
-		// handles basic=closed → nil activity.  Do the same for the Busy consolidated
-		// state: when the SDK returns .Busy but couldn't parse a specific RPID activity
-		// (e.g. conflicting multi-tuple PIDF), UserPresence.from(nil) would wrongly
-		// return .online — keep it as .busy instead.
-		if presence == .online && friend.consolidatedPresence == .Busy {
-			presence = .busy
+		// A different account, or the first time: watch the account's extension instead of whatever was before
+		if let friend = ownFriend, let delegate = ownFriendDelegate {
+			friend.removeDelegate(delegate: delegate)
 		}
-
-		let savedLocalStatus = core.config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
-
-		if presence == .online {
-			// The server returned plain Available: basic=open with no <dm:person> element
-			// and therefore no RPID activity.  This is identical to what the server reports
-			// during the window AFTER we re-register but BEFORE our own PUBLISH(busy/away/dnd)
-			// has been processed — the server only has the SDK's automatic pidfonline:online
-			// registration tuple, not our user-set status.
-			//
-			// We cannot distinguish "server received no explicit activity yet (race)" from
-			// "user explicitly set Available on another device" from PIDF alone, so we
-			// prefer the locally-saved status when it is more specific than Available.
-			// Trade-off: an explicit Available set on the desktop will not auto-propagate
-			// to mobile via this path, but that is far less disruptive than the current
-			// behaviour where every app-switch reverts Busy/Away/DND to Available.
-			let savedPresence = UserPresence(rawValue: savedLocalStatus) ?? .online
-			if savedPresence != .online && savedPresence != .offline {
-				Log.warn("[PRESENCE-DEBUG] applyServerPresence: server shows plain Available but local has '\(savedPresence.rawValue)' — using local to avoid re-register race")
-				publishLocalConfig(core: core)
-				return
-			}
-		}
-
-		if presence.rawValue != savedLocalStatus {
-			Log.info("[PRESENCE-DEBUG] applyServerPresence: server status '\(presence.rawValue)' differs from local saved '\(savedLocalStatus)' — server wins")
-		}
-
-		if presence != .offline {
-			// Server has an active published status — mirror it.
-			// For plain "available" presence (no RPID activity), getNote() looks at the
-			// RPID person-level note and may return nil even when a note was published via
-			// addNote(), because that places the note at the PIDF document/tuple level
-			// instead. Fall back to the saved config note to avoid silently erasing it.
-			let serverNote = friend.presenceModel?.getNote(lang: nil)?.content ?? ""
-			let savedNote = core.config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
-			let note = serverNote.isEmpty ? savedNote : serverNote
-
-			Log.info("[PRESENCE-DEBUG] applyServerPresence: mirroring server status=\(presence.rawValue) note='\(note)'")
-			core.config?.setString(section: configSection, key: configKeyStatus, value: presence.rawValue)
-			core.config?.setString(section: configSection, key: configKeyNote, value: note)
-			DispatchQueue.main.async {
-				self.currentPresence = presence
-				self.customStatusNote = note
-			}
-			publish(presence: presence, note: note, core: core)
-		} else {
-			// No active PUBLISH on the server (all devices offline) — use local config.
-			Log.info("[PRESENCE-DEBUG] applyServerPresence: server presence resolved to offline, falling back to local config")
-			publishLocalConfig(core: core)
-		}
-	}
-
-	private func publishLocalConfig(core: Core) {
-		let savedStatus = core.config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
-		let savedNote = core.config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
-		let presence = UserPresence(rawValue: savedStatus) ?? .online
-		Log.info("[PRESENCE-DEBUG] publishLocalConfig: status=\(savedStatus) note='\(savedNote)'")
-		DispatchQueue.main.async {
-			self.currentPresence = presence
-			self.customStatusNote = savedNote
-		}
-		publish(presence: presence, note: savedNote, core: core)
-	}
-
-	private func publish(presence: UserPresence, note: String, core: Core) {
-		guard core.config?.getBool(section: configSection, key: "publish_presence", defaultValue: true) == true else {
-			Log.warn("[PRESENCE-DEBUG] publish: skipped — publish_presence is disabled in config")
-			return
-		}
-		Log.info("[PRESENCE-DEBUG] publish: status=\(presence.rawValue) note='\(note)' publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true)")
+		ownFriendDelegate = nil
+		ownFriend = nil
+		friendList.friends.forEach { _ = friendList.removeFriend(linphoneFriend: $0) }
+		pendingChoice = nil
 
 		do {
-			let model: PresenceModel
-			if presence == .offline {
-				// basic=closed is the RFC 3863 way to say "not available for calls".
-				// permanent-absence (the RPID activity we used before) means "permanently
-				// gone from the system" — wrong semantics — and combining it with
-				// basic=open is self-contradictory. No note: offline means invisible.
-				model = try core.createPresenceModel()
-				try model.setBasicstatus(newValue: .Closed)
-			} else if let kind = presence.activityKind {
-				if !note.isEmpty {
-					model = try core.createPresenceModelWithActivityAndNote(
-						acttype: kind,
-						description: presence == .doNotDisturb ? UserPresence.dndDescription : nil,
-						note: note,
-						lang: Locale.current.languageCode
-					)
-				} else {
-					model = try core.createPresenceModelWithActivity(
-						acttype: kind,
-						description: presence == .doNotDisturb ? UserPresence.dndDescription : nil
-					)
-				}
+			let friend = try core.createFriend()
+			try friend.setAddress(newValue: identity)
+			try friend.setSubscribesenabled(newValue: true)
+			try friend.setIncsubscribepolicy(newValue: .SPDeny)
+
+			let delegate = FriendDelegateStub(onPresenceReceived: { [weak self] (friend: Friend) in
+				self?.onOwnPresenceReceived(model: friend.presenceModel, core: core)
+			})
+			friend.addDelegate(delegate: delegate)
+			_ = friendList.addFriend(linphoneFriend: friend)
+
+			ownFriend = friend
+			ownFriendDelegate = delegate
+			friendList.subscriptionsEnabled = true
+			core.friendListSubscriptionEnabled = true
+			friendList.updateSubscriptions()
+			Log.info("[PRESENCE] watchOwnExtension: watching \(ownUri) (rls=\(friendList.rlsUri ?? "none"))")
+		} catch {
+			Log.error("[PRESENCE] watchOwnExtension: could not watch \(ownUri): \(error)")
+		}
+	}
+
+	// A NOTIFY for the own extension. Must be called on the core queue.
+	private func onOwnPresenceReceived(model: PresenceModel?, core: Core) {
+		guard let shared = SharedStatus.shared(in: model) else {
+			// Not switched on (or no shared status yet): the status saved on this device stays as it is
+			Log.info("[PRESENCE] own presence received: no shared status tuple, keeping the saved status")
+			return
+		}
+
+		let saved = savedStatus(core: core)
+		let sharedStatus = SavedStatus(presence: shared.presence, note: shared.note, chosen: shared.chosen)
+
+		if let pending = pendingChoice {
+			let age = Date().timeIntervalSince(pending.madeAt)
+			if sharedStatus == pending.saved {
+				// The server has taken up the choice made here
+				pendingChoice = nil
+			} else if age < SharedStatus.pendingChoiceWindow && shared.chosen <= pending.saved.chosen {
+				// The server has not taken up the choice made here yet, and holds nothing newer: keep showing it, and
+				// look again once the window is over in case no other NOTIFY comes
+				Log.info("[PRESENCE] own presence received: shared status=\(shared.presence.rawValue) chosen=\(shared.chosen) does not show the choice made \(Int(age))s ago yet, keeping it")
+				scheduleRecheck(after: SharedStatus.pendingChoiceWindow - age, core: core)
+				return
 			} else {
-				// "Available": no RPID busy/away activity.
-				// createPresenceModel() alone creates an empty model (no service tuple), so
-				// subscribers see consolidatedPresence == .Offline — hence no green circle.
-				// For notes, addNote() writes at the PIDF document level; getNote() on the
-				// subscriber reads from the RPID person level, so the note is invisible.
-				// createPresenceModelWithActivityAndNote(.Unknown) fixes both: it creates
-				// an open service tuple (consolidatedPresence → .Online) and stores the
-				// note at the person level where getNote() finds it. Without a note,
-				// setBasicstatus(.Open) forces an open tuple onto the empty model.
-				if !note.isEmpty {
-					// createPresenceModelWithActivityAndNote puts the note at the tuple
-					// level (inside <tuple>) where getNote() finds it on the subscriber.
-					// addNote() alone puts it at document level which getNote() misses.
-					// We then clear the activity so no <rpid:unknown/> is published —
-					// the .Unknown activity makes consolidatedPresence == .Busy on the
-					// subscriber, and "Available" should have no RPID activity at all.
-					model = try core.createPresenceModelWithActivityAndNote(
-						acttype: .Unknown,
-						description: nil,
-						note: note,
-						lang: Locale.current.languageCode
-					)
-					try model.clearActivities()
-				} else {
-					model = try core.createPresenceModel()
-					try model.setBasicstatus(newValue: .Open)
-				}
+				pendingChoice = nil
+			}
+		}
+
+		if sharedStatus == saved {
+			// Already showing and publishing it, as this NOTIFY may be our own publication coming back
+			showOnMain(saved)
+			return
+		}
+
+		// Follow the shared status, whatever this device's saved time says: the server decides what is newest.
+		// Republished with the shared time, so the server sees it as nothing new.
+		Log.info("[PRESENCE] own presence received: following shared status=\(shared.presence.rawValue) chosen=\(shared.chosen) source=\(shared.origin) note='\(shared.note)' (saved was \(saved.presence.rawValue) chosen=\(saved.chosen))")
+		save(sharedStatus, core: core)
+		showOnMain(sharedStatus)
+		publish(sharedStatus, core: core)
+	}
+
+	private func scheduleRecheck(after delay: TimeInterval, core: Core) {
+		pendingChoiceRecheck?.cancel()
+		let work = DispatchWorkItem { [weak self] in
+			CoreContext.shared.doOnCoreQueue { core in
+				guard let self = self, let pending = self.pendingChoice,
+					  Date().timeIntervalSince(pending.madeAt) >= SharedStatus.pendingChoiceWindow else { return }
+				Log.info("[PRESENCE] pending choice window over, following the server")
+				self.pendingChoice = nil
+				self.onOwnPresenceReceived(model: self.ownFriend?.presenceModel, core: core)
+			}
+		}
+		pendingChoiceRecheck = work
+		DispatchQueue.main.asyncAfter(deadline: .now() + max(delay, 0) + 0.5, execute: work)
+	}
+
+	// MARK: - Saved status
+
+	private func savedStatus(core: Core) -> SavedStatus {
+		let config = core.config
+		let raw = config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
+		var presence = UserPresence(rawValue: raw) ?? .online
+		if presence == .offline {
+			// There is no Offline status to choose
+			presence = .online
+		}
+		let note = config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
+		// Kept as a string: the config's integers are 32 bits
+		let chosen = Int(config?.getString(section: configSection, key: configKeyChosen, defaultString: "0") ?? "0") ?? 0
+		return SavedStatus(presence: presence, note: note, chosen: max(chosen, 0))
+	}
+
+	private func save(_ status: SavedStatus, core: Core) {
+		core.config?.setString(section: configSection, key: configKeyStatus, value: status.presence.rawValue)
+		core.config?.setString(section: configSection, key: configKeyNote, value: status.note)
+		core.config?.setString(section: configSection, key: configKeyChosen, value: String(status.chosen))
+	}
+
+	private func showOnMain(_ status: SavedStatus) {
+		DispatchQueue.main.async {
+			if self.currentPresence != status.presence {
+				self.currentPresence = status.presence
+			}
+			if self.customStatusNote != status.note {
+				self.customStatusNote = status.note
+			}
+		}
+	}
+
+	// MARK: - Publishing
+
+	// This installation's token in the tuple id: the account's +sip.instance UUID with only letters, digits and
+	// hyphens kept, so the Portal can match a status to the device that registered. It differs for every
+	// installation, which it must, as two publications with the same tuple id hide each other.
+	private func deviceToken(core: Core) -> String {
+		let instance = core.config?.getString(section: "misc", key: "uuid", defaultString: "") ?? ""
+		let token = Self.tokenCharacters(instance.replacingOccurrences(of: "urn:uuid:", with: ""))
+		if !token.isEmpty && instance != "0" {
+			return token
+		}
+
+		// The core has no +sip.instance (it can be turned off with uuid=0): use one made for this installation
+		let saved = Self.tokenCharacters(core.config?.getString(section: configSection, key: configKeyDeviceFallback, defaultString: "") ?? "")
+		if !saved.isEmpty {
+			return saved
+		}
+		let generated = UUID().uuidString.lowercased()
+		core.config?.setString(section: configSection, key: configKeyDeviceFallback, value: generated)
+		Log.warn("[PRESENCE] no +sip.instance in the config, generated device token \(generated)")
+		return generated
+	}
+
+	private static func tokenCharacters(_ value: String) -> String {
+		let allowed = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-")
+		var scalars = String.UnicodeScalarView()
+		for scalar in value.unicodeScalars where allowed.contains(scalar) {
+			scalars.append(scalar)
+		}
+		return String(String(scalars).prefix(64))
+	}
+
+	// Sets the core's presence model to the given choice. The model always has a service carrying the choice tuple id
+	// (the SDK makes a random id only for a model with no service, or one whose service has no id), the message in
+	// that tuple's note, and the RPID activity as before (none for Available), which older readers and the DND
+	// rules depend on. Must be called on the core queue.
+	private func publish(_ status: SavedStatus, core: Core) {
+		guard core.config?.getBool(section: configSection, key: "publish_presence", defaultValue: true) == true else {
+			Log.warn("[PRESENCE] publish: skipped, publish_presence is disabled in the config")
+			return
+		}
+
+		let tupleId = SharedStatus.choiceTupleId(presence: status.presence, chosen: status.chosen, device: deviceToken(core: core))
+		do {
+			let model = try core.createPresenceModel()
+
+			// Empty contact: the SDK writes the account's identity, as before
+			let service = try core.createPresenceService(id: tupleId, basicStatus: .Open, contact: "")
+			if !status.note.isEmpty {
+				let note = try core.createPresenceNote(content: status.note, lang: Locale.current.languageCode)
+				try service.addNote(note: note)
+			}
+			try model.addService(service: service)
+
+			if let kind = status.presence.activityKind {
+				let activity = try core.createPresenceActivity(
+					acttype: kind,
+					description: status.presence == .doNotDisturb ? UserPresence.dndDescription : nil
+				)
+				try model.addActivity(activity: activity)
 			}
 
 			core.presenceModel = model
-			Log.info("[PRESENCE-DEBUG] publish: presenceModel set (basicStatus=\(model.basicStatus) activity=\(String(describing: model.activity?.type)))")
+			Log.info("[PRESENCE] publish: tuple=\(tupleId) note='\(status.note)' activity=\(String(describing: status.presence.activityKind)) publishEnabled=\(core.defaultAccount?.params?.publishEnabled == true)")
 
-			// Receiving others' presence is independent of what we publish — keep
-			// subscriptions active regardless of our own published status.
+			// Receiving others' presence is independent of what we publish
 			core.friendListSubscriptionEnabled = true
 		} catch {
-			Log.error("[PRESENCE-DEBUG] publish: failed to create presence model: \(error)")
+			Log.error("[PRESENCE] publish: failed to create the presence model for \(tupleId): \(error)")
 		}
 	}
 }

@@ -368,7 +368,7 @@ class CoreContext: ObservableObject {
 					DispatchQueue.main.async {
 						NotificationCenter.default.post(name: NSNotification.Name("CoreStarted"), object: nil)
 					}
-					Log.info("[PRESENCE-DEBUG] Registration .Ok for \(account.params?.identityAddress?.asStringUriOnly() ?? "unknown") — triggering fetchContacts + restoreOrGoOnline")
+					Log.info("[PRESENCE-DEBUG] Registration .Ok for \(account.params?.identityAddress?.asStringUriOnly() ?? "unknown") — triggering fetchContacts + presence republish")
 					ContactsManager.shared.fetchContacts()
 
 					if let defaultAccountParams = self.mCore.defaultAccount?.params, defaultAccountParams.publishEnabled == false {
@@ -381,7 +381,7 @@ class CoreContext: ObservableObject {
 						Log.info("[PRESENCE-DEBUG] publishEnabled already true after registration")
 					}
 
-					PresenceViewModel.shared.restoreOrGoOnline()
+					PresenceViewModel.shared.onAccountRegistered()
 				case .Cleared:
 					Log.info("[CoreContext][onAccountRegistrationStateChanged] Account \(account.displayName()) registration was cleared.")
 				case .Failed:
@@ -501,12 +501,6 @@ class CoreContext: ObservableObject {
 		}
 	}
 	
-	func updatePresence(core: Core, presence: ConsolidatedPresence) {
-		if core.config!.getBool(section: "app", key: "publish_presence", defaultValue: true) {
-			core.consolidatedPresence = presence
-		}
-	}
-
 	func loadSavedPresence() {
 		PresenceViewModel.shared.loadSavedPresence()
 	}
