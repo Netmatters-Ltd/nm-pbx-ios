@@ -37,6 +37,9 @@ struct StartCallFragment: View {
 	
 	@FocusState var isSearchFieldFocused: Bool
 	@State private var delayedColor = Color.white
+	// Whether the dial pad has been opened by itself yet, so it is only done once each time the screen is shown and
+	// stays closed once the user closes it. The screen is made again each time it is shown, which resets it.
+	@State private var dialpadAutoShown = false
 	
 	var resetCallView: () -> Void
 	
@@ -315,6 +318,16 @@ struct StartCallFragment: View {
 			if !magicSearch.currentFilter.isEmpty || (self.contactsManager.lastSearch.isEmpty && self.contactsManager.lastSearchSuggestions.isEmpty) {
 				magicSearch.currentFilter = ""
 				magicSearch.searchForContacts()
+			}
+
+			if !dialpadAutoShown && CorePreferences.automaticallyShowDialpad {
+				dialpadAutoShown = true
+				// After the screen's transition in, as a sheet asked for while it is still moving may not show
+				DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+					if isShowStartCallFragment && !showingDialer {
+						showingDialer = true
+					}
+				}
 			}
 		}
 		.onDisappear {

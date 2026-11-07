@@ -23,7 +23,16 @@ struct PresencePickerView: View {
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNoteFieldFocused: Bool
 
-	private let maxNoteLength = 80
+	// The message as it is being typed. Kept apart from the view model's, which follows the shared status, so a
+	// status arriving from elsewhere does not overwrite what is being typed. Published when a status is picked, on
+	// Done, on clearing it and when the picker closes. Until it is edited it follows the view model's message, so
+	// closing the picker never republishes a message that has since been replaced elsewhere.
+	@State private var draftNote: String = ""
+	// The view model's message the draft was last in step with
+	@State private var baseNote: String = ""
+	@State private var draftLoaded = false
+
+	private let maxNoteLength = SharedStatus.maxNoteLength
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 0) {
@@ -34,9 +43,9 @@ struct PresencePickerView: View {
 				.padding(.top, 16)
 				.padding(.bottom, 8)
 
-			ForEach(UserPresence.allCases.filter { $0 != .offline }, id: \.self) { presence in
+			ForEach(UserPresence.selectable, id: \.self) { presence in
 				Button {
-					presenceVM.setPresence(presence, note: presenceVM.customStatusNote)
+					presenceVM.setPresence(presence, note: draftNote)
 					dismiss()
 				} label: {
 					HStack(spacing: 12) {
@@ -75,7 +84,7 @@ struct PresencePickerView: View {
 
 				ZStack(alignment: .topLeading) {
 					// Placeholder text
-					if presenceVM.customStatusNote.isEmpty {
+					if draftNote.isEmpty {
 						Text("What's your status?")
 							.font(Font.custom("Poppins-Regular", size: 14))
 							.foregroundStyle(Color.grayMain2c400)
@@ -84,15 +93,18 @@ struct PresencePickerView: View {
 							.allowsHitTesting(false)
 					}
 
-					TextEditor(text: $presenceVM.customStatusNote)
+					TextEditor(text: $draftNote)
 						.font(Font.custom("Poppins-Regular", size: 14))
 						.foregroundStyle(Color.grayMain2c700)
 						.clearTextEditorBackground()
 						.focused($isNoteFieldFocused)
 						.frame(minHeight: 88)
-						.onChange(of: presenceVM.customStatusNote) { newValue in
-							if newValue.count > maxNoteLength {
-								presenceVM.customStatusNote = String(newValue.prefix(maxNoteLength))
+						.onChange(of: draftNote) { newValue in
+							// One line of at most maxNoteLength characters, counted as the server counts them
+							let limited = SharedStatus.limitedNote(
+								newValue.components(separatedBy: .newlines).joined(separator: " "))
+							if limited != newValue {
+								draftNote = limited
 							}
 						}
 						// TextEditor has no onSubmit; dismiss on Return via toolbar
@@ -101,19 +113,20 @@ struct PresencePickerView: View {
 								Spacer()
 								Button("Done") {
 									isNoteFieldFocused = false
-									presenceVM.setPresence(presenceVM.currentPresence, note: presenceVM.customStatusNote)
+									presenceVM.setPresence(presenceVM.currentPresence, note: draftNote)
 									dismiss()
 								}
 							}
 						}
 
 					// Clear button in top-right corner
-					if !presenceVM.customStatusNote.isEmpty {
+					if !draftNote.isEmpty {
 						VStack {
 							HStack {
 								Spacer()
 								Button {
-									presenceVM.customStatusNote = ""
+									draftNote = ""
+									baseNote = ""
 									presenceVM.setPresence(presenceVM.currentPresence, note: "")
 								} label: {
 									Image(systemName: "xmark.circle.fill")
@@ -131,7 +144,7 @@ struct PresencePickerView: View {
 				.padding(.horizontal, 16)
 
 				// Character count
-				Text("\(presenceVM.customStatusNote.count)/\(maxNoteLength)")
+				Text("\(draftNote.unicodeScalars.count)/\(maxNoteLength)")
 					.font(Font.custom("Poppins-Regular", size: 11))
 					.foregroundStyle(Color.grayMain2c400)
 					.frame(maxWidth: .infinity, alignment: .trailing)
@@ -141,8 +154,23 @@ struct PresencePickerView: View {
 			Spacer(minLength: 16)
 		}
 		.frame(maxWidth: .infinity)
+		.onAppear {
+			if !draftLoaded {
+				draftLoaded = true
+				draftNote = presenceVM.customStatusNote
+				baseNote = presenceVM.customStatusNote
+			}
+		}
+		.onChange(of: presenceVM.customStatusNote) { newValue in
+			// A message from elsewhere (the shared status) replaces the draft only if it has not been edited
+			if draftNote == baseNote {
+				draftNote = newValue
+			}
+			baseNote = newValue
+		}
 		.onDisappear {
-			presenceVM.setPresence(presenceVM.currentPresence, note: presenceVM.customStatusNote)
+			// Only a changed status or message is a new choice, see setPresence
+			presenceVM.setPresence(presenceVM.currentPresence, note: draftNote)
 		}
 	}
 }
