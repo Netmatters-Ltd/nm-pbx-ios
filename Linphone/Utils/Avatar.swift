@@ -48,6 +48,17 @@ struct Avatar: View {
 			}
 	}
 
+	// The ring round the avatar while the extension is on a call, under the presence badge. No other status has a
+	// ring. As on Android, its width is in proportion to the avatar: 5/120 of it, or 3/120 for the large avatars.
+	@ViewBuilder
+	private var onCallRing: some View {
+		if !hidePresence && contactAvatarModel.presenceUserStatus == .onCall {
+			Circle()
+				.strokeBorder(Color.yellowOnCall, lineWidth: avatarSize * (avatarSize >= 100 ? 3 : 5) / 120)
+				.frame(width: avatarSize, height: avatarSize)
+		}
+	}
+
 	@ViewBuilder
 	private var content: some View {
 		if !contactAvatarModel.photo.isEmpty {
@@ -66,6 +77,7 @@ struct Avatar: View {
 							.aspectRatio(contentMode: .fill)
 							.frame(width: avatarSize, height: avatarSize)
 							.clipShape(Circle())
+						onCallRing
 						HStack {
 							Spacer()
 							VStack {
@@ -101,7 +113,9 @@ struct Avatar: View {
 				.resizable()
 				.frame(width: avatarSize, height: avatarSize)
 				.clipShape(Circle())
-				
+
+				onCallRing
+
 				HStack {
 					Spacer()
 					VStack {

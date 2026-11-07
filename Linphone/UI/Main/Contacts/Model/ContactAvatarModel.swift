@@ -84,8 +84,8 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 	@Published var presenceStatus: ConsolidatedPresence = .Offline
 	@Published var presenceActivity: PresenceActivity.Kind? = nil
 	@Published var presenceNote: String = ""
-	// The status taken from the extension's shared status tuple (see SharedStatus.colleaguePresence), which is shown
-	// instead of the one made from the consolidated presence and activity. nil where there is no shared status.
+	// The status shown instead of the one made from the consolidated presence and activity: On a call, or the
+	// extension's shared status (see UserPresence.displayOverride). nil where there is neither.
 	@Published var sharedPresence: UserPresence? = nil
 
 	var presenceUserStatus: UserPresence {
@@ -443,9 +443,9 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 			let presenceModel = friend.presenceModel
 
 			presenceStatusTmp = friend.consolidatedPresence
-			presenceActivityTmp = presenceModel?.activity?.type
+			presenceActivityTmp = UserPresence.userActivity(model: presenceModel)?.type
 			presenceNoteTmp = presenceModel?.getNote(lang: nil)?.content ?? ""
-			if let shared = SharedStatus.colleaguePresence(model: presenceModel) {
+			if let shared = UserPresence.displayOverride(model: presenceModel) {
 				sharedPresenceTmp = shared.presence
 				presenceNoteTmp = shared.note
 			}
@@ -472,8 +472,8 @@ class ContactAvatarModel: ObservableObject, Identifiable {
 		friendDelegate = FriendDelegateStub(onPresenceReceived: { (friend: Friend) in
 			let presenceModel = friend.presenceModel
 			let consolidatedPresenceTmp = friend.consolidatedPresence
-			let presenceActivityTmp = presenceModel?.activity?.type
-			let shared = SharedStatus.colleaguePresence(model: presenceModel)
+			let presenceActivityTmp = UserPresence.userActivity(model: presenceModel)?.type
+			let shared = UserPresence.displayOverride(model: presenceModel)
 			let presenceNoteTmp = shared?.note ?? presenceModel?.getNote(lang: nil)?.content ?? ""
 			Log.info("[PRESENCE-DEBUG] ContactAvatarModel.onPresenceReceived: '\(self.loadAddress)' consolidated=\(consolidatedPresenceTmp) activity=\(String(describing: presenceActivityTmp)) shared=\(shared?.presence.rawValue ?? "none")")
 

@@ -69,6 +69,8 @@ extension Color {
 	static let orangeWarning600 = Color(hex: "#DBB820")
 	
 	static let orangeAway = Color(hex: "#FFA645")
+	// On a call presence status, as on Android
+	static let yellowOnCall = Color(hex: "#F0BE00")
 	
 	init(hex: String) {
 		let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

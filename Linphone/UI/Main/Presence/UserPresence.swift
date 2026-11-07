@@ -7,6 +7,15 @@ enum UserPresence: String, CaseIterable {
 	case busy
 	case doNotDisturb
 	case offline
+	// Shown only, never chosen, saved or published. The server's call-state bridge adds an <rpid:on-the-phone/>
+	// activity while an extension is on a call, and Flexisip merges it with the user's own publication. Publishing it
+	// would fight the bridge and only ever reflect this device's own calls.
+	case onCall
+
+	// Whether the user can choose this status for themselves, and so save and publish it
+	var isUserSelectable: Bool {
+		return self != .offline && self != .onCall
+	}
 
 	var label: String {
 		switch self {
@@ -15,6 +24,7 @@ enum UserPresence: String, CaseIterable {
 		case .busy: return "Busy"
 		case .doNotDisturb: return "Do Not Disturb"
 		case .offline: return "Offline"
+		case .onCall: return "On a call"
 		}
 	}
 
@@ -25,6 +35,7 @@ enum UserPresence: String, CaseIterable {
 		case .busy: return .blueInfo500
 		case .doNotDisturb: return .redDanger500
 		case .offline: return .grayMain2c400
+		case .onCall: return .yellowOnCall
 		}
 	}
 
@@ -36,6 +47,7 @@ enum UserPresence: String, CaseIterable {
 		case .busy: return .Busy
 		case .doNotDisturb: return .Other
 		case .offline: return .PermanentAbsence
+		case .onCall: return nil // Never published, see the case
 		}
 	}
 
@@ -51,6 +63,36 @@ enum UserPresence: String, CaseIterable {
 		case .PermanentAbsence: return .offline
 		default: return .online
 		}
+	}
+
+	// Whether the extension is on a call: any activity is the call-state bridge's on-the-phone, with an open basic
+	// status (the bridge's tuple is always open). Every activity is checked, as Flexisip pools them in no stable order.
+	// The consolidated presence of a call is Busy, which cannot tell a call from a chosen Busy.
+	static func isOnCall(model: PresenceModel?) -> Bool {
+		guard let model = model, model.basicStatus == .Open else { return false }
+		return (0..<model.nbActivities).contains { model.getNthActivity(index: UInt($0))?.type == .OnThePhone }
+	}
+
+	// The user's own activity in a merged presence document: the first that is not the call-state bridge's
+	// on-the-phone, which would otherwise read as Available whenever it came first
+	static func userActivity(model: PresenceModel?) -> PresenceActivity? {
+		guard let model = model else { return nil }
+		for i in 0..<model.nbActivities {
+			if let activity = model.getNthActivity(index: UInt(i)), activity.type != .OnThePhone {
+				return activity
+			}
+		}
+		return nil
+	}
+
+	// What an extension's presence shows instead of the status made from its consolidated presence and activity, or
+	// nil to show that. Being on a call comes first, then the shared status, as on Android.
+	static func displayOverride(model: PresenceModel?) -> (presence: UserPresence, note: String)? {
+		let shared = SharedStatus.colleaguePresence(model: model)
+		if isOnCall(model: model) {
+			return (.onCall, shared?.note ?? model?.getNote(lang: nil)?.content ?? "")
+		}
+		return shared
 	}
 }
 
@@ -76,7 +118,6 @@ struct SharedStatusTuple: Equatable {
 enum SharedStatus {
 	static let choicePrefix = "nmpbx-c."
 	static let sharedPrefix = "nmpbx-s."
-	static let callStatePrefix = "nmpbx-callstate"
 
 	// The longest custom message the Portal, the server and the apps accept
 	static let maxNoteLength = 80
@@ -126,9 +167,9 @@ enum SharedStatus {
 	}
 
 	// What a colleague's presence shows when their document carries a shared status, or nil to show it as before.
-	// The status and message are the shared ones. A shared Available is only shown as available while something of
-	// theirs is connected (the server's own tuple is closed for Available), and being on a call still shows as it
-	// did before (busy) when the shared status would otherwise be Available.
+	// The status and message are the shared ones. A shared Available is only shown as available while something else
+	// of theirs is open (the server's own tuple is closed for Available). Being on a call is dealt with ahead of this,
+	// see UserPresence.displayOverride(model:).
 	static func colleaguePresence(model: PresenceModel?) -> (presence: UserPresence, note: String)? {
 		guard let model = model, let shared = shared(in: model) else { return nil }
 		if shared.presence != .online {
@@ -136,25 +177,11 @@ enum SharedStatus {
 		}
 
 		var connected = false
-		var onThePhone = false
 		for i in 0..<model.nbServices {
 			guard let service = model.getNthService(index: UInt(i)), service.basicStatus == .Open else { continue }
-			let id = service.id ?? ""
-			if id.hasPrefix(callStatePrefix) {
-				onThePhone = true
-			} else if !id.hasPrefix(sharedPrefix) {
+			if !(service.id ?? "").hasPrefix(sharedPrefix) {
 				connected = true
 			}
-		}
-		for i in 0..<model.nbPersons {
-			guard let person = model.getNthPerson(index: UInt(i)) else { continue }
-			for j in 0..<person.nbActivities where person.getNthActivity(index: UInt(j))?.type == .OnThePhone {
-				onThePhone = true
-			}
-		}
-
-		if onThePhone {
-			return (.busy, shared.note)
 		}
 		return (connected ? .online : .offline, shared.note)
 	}
@@ -183,10 +210,11 @@ enum SharedStatus {
 }
 
 extension UserPresence {
-	// The status as the shared status tuple ids name it. There is no Offline status to choose, so it is Available.
+	// The status as the shared status tuple ids name it. Offline and On a call cannot be chosen, so they are
+	// Available (neither is ever published).
 	var sharedToken: String {
 		switch self {
-		case .online, .offline: return "available"
+		case .online, .offline, .onCall: return "available"
 		case .away: return "away"
 		case .busy: return "busy"
 		case .doNotDisturb: return "dnd"

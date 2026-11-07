@@ -66,6 +66,10 @@ class PresenceViewModel: ObservableObject {
 	// Called from the UI (main thread) when the user picks a status or edits the message. A change of status or of
 	// message is a new choice, with the time it was made. Picking what is already shown is not a choice.
 	func setPresence(_ presence: UserPresence, note: String) {
+		guard presence.isUserSelectable else {
+			Log.warn("[PRESENCE] setPresence: \(presence.rawValue) cannot be chosen, ignored")
+			return
+		}
 		let note = SharedStatus.sanitisedNote(note)
 		currentPresence = presence
 		customStatusNote = note
@@ -240,8 +244,8 @@ class PresenceViewModel: ObservableObject {
 		let config = core.config
 		let raw = config?.getString(section: configSection, key: configKeyStatus, defaultString: UserPresence.online.rawValue) ?? UserPresence.online.rawValue
 		var presence = UserPresence(rawValue: raw) ?? .online
-		if presence == .offline {
-			// There is no Offline status to choose
+		if !presence.isUserSelectable {
+			// There is no Offline status to choose, and On a call is only ever shown
 			presence = .online
 		}
 		let note = config?.getString(section: configSection, key: configKeyNote, defaultString: "") ?? ""
