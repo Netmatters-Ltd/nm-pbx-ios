@@ -309,6 +309,17 @@ class CorePreferences {
 		}
 	}
 	
+	// Whether the dial pad opens by itself when the New call screen does. The same key as on Android, and on by
+	// default as there. It has no switch in the settings, but can be turned off by provisioning.
+	static var automaticallyShowDialpad: Bool {
+		get {
+			return Config.get().getBool(section: "ui", key: "automatically_show_dialpad", defaultValue: true)
+		}
+		set {
+			Config.get().setBool(section: "ui", key: "automatically_show_dialpad", value: newValue)
+		}
+	}
+
 	static var hideSipAddresses: Bool {
 		get {
 			return Config.get().getBool(section: "ui", key: "hide_sip_addresses", defaultValue: false)
